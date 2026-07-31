@@ -1,0 +1,28 @@
+# Binaries & build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build output directories
+bin/
+dist/
+tmp/
+
+# Coverage
+coverage.out
+coverage/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
