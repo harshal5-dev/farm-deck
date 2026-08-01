@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { IconArrowLeft, IconSeedling, IconCheck } from "@tabler/icons-react";
-import { FarmScene } from "@/components/effects";
+import { FarmScene, Reveal } from "@/components/effects";
 import Logo from "@/components/layout/Logo";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 /**
  * AuthLayout — split-screen for login/register. Left: branded art panel with
@@ -18,6 +19,11 @@ const features = [
 export default function AuthLayout({ children }) {
   return (
     <div className="relative flex min-h-svh bg-background">
+      {/* Floating theme toggle — top right, above everything. */}
+      <div className="fixed right-4 top-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Left brand/art panel (desktop only) */}
       <div className="relative hidden w-1/2 overflow-hidden lg:block">
         <div className="absolute inset-0 bg-linear-to-br from-leaf/20 via-sage/10 to-transparent" />
@@ -27,33 +33,41 @@ export default function AuthLayout({ children }) {
         <div className="pattern-contour absolute inset-0 opacity-30" />
 
         <div className="relative flex h-full flex-col justify-between p-10">
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <Logo variant="full" withSubtitle={false} />
+          <Link to="/" className="inline-flex items-center gap-2.5 transition-transform duration-200 hover:scale-[1.02] active:scale-95">
+            <Logo variant="full" withSubtitle={false} animate />
           </Link>
 
           <div className="max-w-md">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf backdrop-blur-sm">
-              <IconSeedling className="size-3.5" strokeWidth={2} />
-              Smart farming, simplified
-            </span>
-            <h2 className="mt-4 font-heading text-4xl leading-tight font-bold tracking-tight">
-              Grow more with less effort. 🌾
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              HydroZen is a modern multi-tenant platform for hydroponics and
-              soil farming — track every field, crop, and harvest in one place.
-            </p>
+            <Reveal delay={0} duration={500}>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf backdrop-blur-sm">
+                <IconSeedling className="size-3.5" strokeWidth={2} />
+                Smart farming, simplified
+              </span>
+            </Reveal>
+            <Reveal delay={90} duration={500}>
+              <h2 className="mt-4 font-heading text-4xl leading-tight font-bold tracking-tight">
+                Grow more with less effort. 🌾
+              </h2>
+            </Reveal>
+            <Reveal delay={170} duration={500}>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Farmdeck is a modern multi-tenant platform for modern farming —
+                track every field, crop, and harvest in one place.
+              </p>
+            </Reveal>
 
-            <ul className="mt-6 space-y-2.5">
-              {features.map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-sm">
-                  <span className="flex size-5 items-center justify-center rounded-full bg-leaf/15 text-leaf">
-                    <IconCheck className="size-3" strokeWidth={2.5} />
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <Reveal delay={250} duration={500}>
+              <ul className="mt-6 space-y-2.5">
+                {features.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-leaf/15 text-leaf">
+                      <IconCheck className="size-3" strokeWidth={2.5} />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
           </div>
 
           <p className="text-xs text-muted-foreground/60">
@@ -77,6 +91,7 @@ export default function AuthLayout({ children }) {
             <Logo
               variant="full"
               withSubtitle={false}
+              animate
               className="[&_span]:text-sm"
             />
           </Link>

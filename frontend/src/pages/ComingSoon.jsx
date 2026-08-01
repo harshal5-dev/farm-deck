@@ -64,7 +64,7 @@ export default function ComingSoon({
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground/70">
-            🌱 Part of HydroZen v1.0
+            🌱 Part of Farmdeck v1.0
           </p>
         </div>
       </div>
