@@ -3,15 +3,20 @@ package app
 import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/auth"
+	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 )
 
 type Services struct {
+	Auth auth.AuthService
 }
 
 type Handlers struct {
+	Auth auth.AuthHandler
 }
 
 type Repositories struct {
+	User repository.UserRepo
 }
 
 type Container struct {
@@ -28,11 +33,17 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		Store:  store,
 	}
 
-	container.Repositories = Repositories{}
+	container.Repositories = Repositories{
+		User: repository.NewUserRepo(store),
+	}
 
-	container.Services = Services{}
+	container.Services = Services{
+		Auth: auth.NewAuthService(container.Repositories.User),
+	}
 
-	container.Handlers = Handlers{}
+	container.Handlers = Handlers{
+		Auth: auth.NewAuthHandler(container.Services.Auth),
+	}
 
 	return container
 }

@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const checkTenantExistsBySubdomain = `-- name: CheckTenantExistsBySubdomain :one
+SELECT EXISTS (SELECT 1 FROM tenants WHERE subdomain = $1)
+`
+
+func (q *Queries) CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTenantExistsBySubdomain, subdomain)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createTenant = `-- name: CreateTenant :one
 INSERT INTO tenants (name, subdomain) VALUES ($1, $2) RETURNING id, name, subdomain, created_at, updated_at
 `

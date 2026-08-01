@@ -9,7 +9,10 @@ import (
 )
 
 type Querier interface {
+	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
+	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

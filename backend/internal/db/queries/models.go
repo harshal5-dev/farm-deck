@@ -34,7 +34,7 @@ type Tenant struct {
 type User struct {
 	ID           uuid.UUID
 	TenantID     uuid.UUID
-	Email        string
+	EmailID      string
 	PasswordHash string
 	FullName     string
 	Role         string

@@ -11,7 +11,7 @@ CREATE TABLE tenants (
 CREATE TABLE users (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    email         VARCHAR(255) UNIQUE NOT NULL,
+    email_id         VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,                 -- sentinel "<no-login>" while status='pending'
     full_name     VARCHAR(255) NOT NULL,
     role          VARCHAR(20) NOT NULL DEFAULT 'grower',
@@ -22,7 +22,7 @@ CREATE TABLE users (
     CONSTRAINT users_status_chk CHECK (status IN ('pending','active','disabled'))
 );
 CREATE INDEX idx_users_tenant ON users(tenant_id);
-CREATE INDEX idx_users_email_lower ON users(LOWER(email));
+CREATE INDEX idx_users_email_id_lower ON users(LOWER(email_id));
 CREATE INDEX idx_users_tenant_status ON users(tenant_id, status);
 
 CREATE TABLE user_invitations (
