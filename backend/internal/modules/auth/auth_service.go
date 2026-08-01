@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
@@ -17,14 +18,16 @@ type AuthService interface {
 }
 
 type AuthServiceImpl struct {
-	userRepo repository.UserRepo
-	cfg      config.Config
+	userRepo     repository.UserRepo
+	cfg          config.Config
+	emailService email.EmailService
 }
 
-func NewAuthService(userRepo repository.UserRepo, cfg config.Config) AuthService {
+func NewAuthService(userRepo repository.UserRepo, cfg config.Config, emailService email.EmailService) AuthService {
 	return &AuthServiceImpl{
-		userRepo: userRepo,
-		cfg:      cfg,
+		userRepo:     userRepo,
+		cfg:          cfg,
+		emailService: emailService,
 	}
 }
 
@@ -35,7 +38,15 @@ func (s *AuthServiceImpl) RegisterUser(ctx context.Context, req RegisterUserRequ
 	}
 	req.Password = hashedPassword
 	_, err = s.userRepo.RegisterUser(ctx, toRegisterUserTxParams(req))
-	return err
+	if err != nil {
+		return err
+	}
+
+	err = s.emailService.SendWelcomeEmail(req.EmailID, req.FullName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *AuthServiceImpl) LoginUser(ctx context.Context, req LoginRequest) (LoginResponse, error) {

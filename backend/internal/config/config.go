@@ -18,6 +18,7 @@ type Config struct {
 	CookieSecure   bool `env:"COOKIE_SECURE" envDefault:"true"`
 	CookieHttpOnly bool `env:"COOKIE_HTTP_ONLY" envDefault:"true"`
 	CookieTokenAge int  `env:"COOKIE_TOKEN_AGE" envDefault:"15"`
+	SMTPPort       int  `env:"SMTP_PORT" envDefault:"587"`
 
 	ServerAddress      string `env:"SERVER_ADDRESS" envDefault:":8083"`
 	DatabaseURL        string `env:"DATABASE_URL,required"`
@@ -29,6 +30,16 @@ type Config struct {
 
 	CookieDomain    string `env:"COOKIE_DOMAIN" envDefault:"localhost"`
 	CookieTokenName string `env:"COOKIE_TOKEN_NAME" envDefault:"access_token"`
+
+	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
+
+	// Mail configuration (SMTP).
+	MailFromAddress string `env:"MAIL_FROM_ADDRESS,required"`
+
+	// SMTP
+	SMTPHost     string `env:"SMTP_HOST" envDefault:"smtp.gmail.com"`
+	SMTPUsername string `env:"SMTP_USERNAME,required"`
+	SMTPPassword string `env:"SMTP_PASSWORD,required"`
 
 	AccessTokenDuration  time.Duration `env:"ACCESS_TOKEN_DURATION,required"`
 	RefreshTokenDuration time.Duration `env:"REFRESH_TOKEN_DURATION,required"`

@@ -1,0 +1,16 @@
+Welcome to Farmdeck, {{.Name}}!
+
+We're so glad you're here. Farmdeck brings your fields, crops,
+harvests, pH, and EC into one calm, modern dashboard — so you
+can grow more with less effort.
+
+Open Farmdeck: {{appURL .AppURL}}
+
+Happy farming,
+The Farmdeck team
+
+—
+Farmdeck · {{appURL .AppURL}}
+Smart farming, beautifully managed.
+
+You're receiving this email because you created a Farmdeck account.

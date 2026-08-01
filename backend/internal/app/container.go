@@ -4,11 +4,14 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/auth"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/mailer"
 )
 
 type Services struct {
-	Auth auth.AuthService
+	Auth  auth.AuthService
+	Email email.EmailService
 }
 
 type Handlers struct {
@@ -25,6 +28,7 @@ type Container struct {
 	Services     Services
 	Handlers     Handlers
 	Repositories Repositories
+	Mailer       *mailer.AsyncMailer
 }
 
 func NewContainer(cfg config.Config, store db.Store) *Container {
@@ -37,8 +41,21 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		User: repository.NewUserRepo(store),
 	}
 
+	container.Mailer = mailer.NewAsyncMailer(
+		mailer.NewSMTPMailer(
+			cfg.SMTPHost,
+			cfg.SMTPPort,
+			cfg.SMTPUsername,
+			cfg.SMTPPassword,
+			cfg.MailFromAddress,
+		),
+	)
+
+	emailService := email.NewEmailService(cfg, container.Mailer)
+
 	container.Services = Services{
-		Auth: auth.NewAuthService(container.Repositories.User, cfg),
+		Auth:  auth.NewAuthService(container.Repositories.User, cfg, emailService),
+		Email: emailService,
 	}
 
 	container.Handlers = Handlers{
