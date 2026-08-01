@@ -7,3 +7,9 @@ INSERT INTO users (
 
 -- name: CheckUserExistsByEmailID :one
 SELECT EXISTS (SELECT 1 FROM users WHERE email_id = $1);
+
+-- name: GetUserByEmailID :one
+SELECT * FROM users WHERE email_id = $1;
+
+-- name: GetUserByID :one
+SELECT * FROM users WHERE id = $1;

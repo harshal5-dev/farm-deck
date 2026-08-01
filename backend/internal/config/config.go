@@ -5,6 +5,7 @@ import (
 	"maps"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -14,10 +15,23 @@ const (
 )
 
 type Config struct {
+	CookieSecure   bool `env:"COOKIE_SECURE" envDefault:"true"`
+	CookieHttpOnly bool `env:"COOKIE_HTTP_ONLY" envDefault:"true"`
+	CookieTokenAge int  `env:"COOKIE_TOKEN_AGE" envDefault:"15"`
+
 	ServerAddress      string `env:"SERVER_ADDRESS" envDefault:":8083"`
 	DatabaseURL        string `env:"DATABASE_URL,required"`
 	LogLevel           string `env:"LOG_LEVEL" envDefault:"info"`
 	CORSAllowedOrigins string `env:"CORS_ALLOWED_ORIGINS,required"`
+
+	JWTSecret string `env:"JWT_SECRET,required"`
+	JWTIssuer string `env:"JWT_ISSUER,required"`
+
+	CookieDomain    string `env:"COOKIE_DOMAIN" envDefault:"localhost"`
+	CookieTokenName string `env:"COOKIE_TOKEN_NAME" envDefault:"access_token"`
+
+	AccessTokenDuration  time.Duration `env:"ACCESS_TOKEN_DURATION,required"`
+	RefreshTokenDuration time.Duration `env:"REFRESH_TOKEN_DURATION,required"`
 }
 
 func Load() (Config, error) {

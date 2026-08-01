@@ -10,4 +10,6 @@ const (
 	UserRoleManager = "manager"
 	UserRoleGrower  = "grower"
 	UserRoleViewer  = "viewer"
+
+	SlugDomain = "farmdeck.app"
 )

@@ -6,6 +6,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
@@ -13,6 +15,8 @@ type Querier interface {
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetUserByEmailID(ctx context.Context, emailID string) (User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -62,3 +62,45 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	)
 	return i, err
 }
+
+const getUserByEmailID = `-- name: GetUserByEmailID :one
+SELECT id, tenant_id, email_id, password_hash, full_name, role, status, created_at, updated_at FROM users WHERE email_id = $1
+`
+
+func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmailID, emailID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.EmailID,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, tenant_id, email_id, password_hash, full_name, role, status, created_at, updated_at FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.EmailID,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.Role,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

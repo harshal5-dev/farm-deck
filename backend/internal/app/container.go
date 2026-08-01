@@ -38,11 +38,11 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 	}
 
 	container.Services = Services{
-		Auth: auth.NewAuthService(container.Repositories.User),
+		Auth: auth.NewAuthService(container.Repositories.User, cfg),
 	}
 
 	container.Handlers = Handlers{
-		Auth: auth.NewAuthHandler(container.Services.Auth),
+		Auth: auth.NewAuthHandler(container.Services.Auth, cfg),
 	}
 
 	return container

@@ -3,12 +3,15 @@ package repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
 type UserRepo interface {
 	RegisterUser(context.Context, domain.RegisterUserTxParams) (db.RegisterUserTxResult, error)
+	GetUserByEmailID(context.Context, string) (db.User, error)
+	GetUserByID(context.Context, uuid.UUID) (db.User, error)
 }
 
 type userRepo struct {
@@ -23,6 +26,22 @@ func (r *userRepo) RegisterUser(ctx context.Context, arg domain.RegisterUserTxPa
 	result, err := r.store.RegisterUserTx(ctx, arg)
 	if err != nil {
 		return db.RegisterUserTxResult{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.User, error) {
+	result, err := r.store.GetUserByEmailID(ctx, emailID)
+	if err != nil {
+		return db.User{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error) {
+	result, err := r.store.GetUserByID(ctx, id)
+	if err != nil {
+		return db.User{}, err
 	}
 	return result, nil
 }

@@ -6,6 +6,11 @@ import (
 )
 
 func Register(public, protected *gin.RouterGroup, h auth.AuthHandler) {
-	g := public.Group("/auth")
-	g.POST("/register", h.RegisterUser)
+	publicRoutes := public.Group("/auth")
+
+	protectedRoutes := protected.Group("/auth")
+	protectedRoutes.GET("/profile", h.GetCurrentProfile)
+
+	publicRoutes.POST("/register", h.Register)
+	publicRoutes.POST("/login", h.Login)
 }
