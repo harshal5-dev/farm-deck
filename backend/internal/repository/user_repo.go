@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
@@ -33,6 +35,9 @@ func (r *userRepo) RegisterUser(ctx context.Context, arg domain.RegisterUserTxPa
 func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.User, error) {
 	result, err := r.store.GetUserByEmailID(ctx, emailID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.User{}, domain.ErrUserNotFound
+		}
 		return db.User{}, err
 	}
 	return result, nil
@@ -41,6 +46,9 @@ func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.Use
 func (r *userRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error) {
 	result, err := r.store.GetUserByID(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.User{}, domain.ErrUserNotFound
+		}
 		return db.User{}, err
 	}
 	return result, nil

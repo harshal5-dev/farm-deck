@@ -7,15 +7,15 @@ import (
 )
 
 type RegisterUserRequest struct {
-	FullName   string `json:"fullName"`
-	EmailID    string `json:"emailId"`
-	Password   string `json:"password"`
-	TenantName string `json:"tenantName"`
+	FullName   string `json:"fullName" binding:"required,min=2,max=100"`
+	EmailID    string `json:"emailId" binding:"required,email,max=255"`
+	Password   string `json:"password" binding:"required,min=8,max=15"`
+	TenantName string `json:"tenantName" binding:"required,min=2,max=100"`
 }
 
 type LoginRequest struct {
-	EmailID  string `json:"emailId"`
-	Password string `json:"password"`
+	EmailID  string `json:"emailId" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 }
 
 type LoginResponse struct {

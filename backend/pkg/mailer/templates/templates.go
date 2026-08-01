@@ -19,8 +19,6 @@ var logoPNG []byte
 const logoContentID = "farmdeck-logo"
 
 var parsedHTML = htmlTemplate.Must(htmlTemplate.New("").Funcs(htmlTemplate.FuncMap{
-	// appURL returns a non-empty URL, falling back to the canonical domain when
-	// AppURL is unset (defensive: keeps the CTA link valid even if misconfigured).
 	"appURL": func(u string) string {
 		if u == "" {
 			return "https://farmdeck.app"
@@ -37,10 +35,6 @@ var parsedText = textTemplate.Must(textTemplate.New("").Funcs(textTemplate.FuncM
 	},
 }).ParseFS(files, "welcome.txt"))
 
-// Welcome holds the data rendered into the welcome email.
-// Only the recipient's name is personalized; everything else is static brand copy.
-// AppURL is the frontend base URL used for the call-to-action button (e.g. the
-// value of the APP_URL config field).
 type Welcome struct {
 	Name   string
 	AppURL string

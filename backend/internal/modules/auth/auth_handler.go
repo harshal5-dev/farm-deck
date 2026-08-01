@@ -4,7 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/ctxutil"
+	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/response"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/validate"
 )
 
 type AuthHandler interface {
@@ -24,50 +27,42 @@ func NewAuthHandler(authService AuthService, cfg config.Config) AuthHandler {
 
 func (h *AuthHandlerImpl) Register(ctx *gin.Context) {
 	var req RegisterUserRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
+	if !validate.Bind(ctx, &req) {
 		return
 	}
 	if err := h.authService.RegisterUser(ctx, req); err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		httperr.HandleError(ctx, err)
 		return
 	}
-	ctx.JSON(200, gin.H{"message": "user registered successfully"})
+	response.OK(ctx, gin.H{"message": "user registered successfully"})
 }
 
 func (h *AuthHandlerImpl) Login(ctx *gin.Context) {
 	var req LoginRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
+	if !validate.Bind(ctx, &req) {
 		return
 	}
 	loginRes, err := h.authService.LoginUser(ctx, req)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		httperr.HandleError(ctx, err)
 		return
 	}
-	cookieCfg := cookie.CookieConfig{
-		CookieSecure:    h.cfg.CookieSecure,
-		CookieHttpOnly:  h.cfg.CookieHttpOnly,
-		CookieTokenAge:  h.cfg.CookieTokenAge,
-		CookieDomain:    h.cfg.CookieDomain,
-		CookieTokenName: h.cfg.CookieTokenName,
-	}
+	cookieCfg := toCookieConfig(h.cfg)
 	cookie.SetAuthCookie(ctx, loginRes.Token, cookieCfg)
-	ctx.JSON(200, loginRes)
+	response.OK(ctx, loginRes)
 }
 
 func (h *AuthHandlerImpl) GetCurrentProfile(ctx *gin.Context) {
 	userID, err := ctxutil.GetUserID(ctx)
 	if err != nil {
-		ctx.JSON(401, gin.H{"error": "Unauthorized: " + err.Error()})
+		response.Unauthorized(ctx, "authentication required")
 		return
 	}
 
 	user, err := h.authService.GetMyProfile(ctx, userID)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+		httperr.HandleError(ctx, err)
 		return
 	}
-	ctx.JSON(200, user)
+	response.OK(ctx, user)
 }

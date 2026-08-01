@@ -2,9 +2,13 @@ package auth
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
@@ -32,30 +36,37 @@ func NewAuthService(userRepo repository.UserRepo, cfg config.Config, emailServic
 }
 
 func (s *AuthServiceImpl) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
+	req.EmailID = normalizeEmail(req.EmailID)
+
 	hashedPassword, err := password.HashPassword(req.Password)
 	if err != nil {
-		return err
+		return fmt.Errorf("register user: %w", err)
 	}
 	req.Password = hashedPassword
 	_, err = s.userRepo.RegisterUser(ctx, toRegisterUserTxParams(req))
 	if err != nil {
-		return err
+		return fmt.Errorf("register user: %w", err)
 	}
 
 	err = s.emailService.SendWelcomeEmail(req.EmailID, req.FullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("register user: %w", err)
 	}
 	return nil
 }
 
 func (s *AuthServiceImpl) LoginUser(ctx context.Context, req LoginRequest) (LoginResponse, error) {
-	user, err := s.userRepo.GetUserByEmailID(ctx, req.EmailID)
+	user, err := s.userRepo.GetUserByEmailID(ctx, normalizeEmail(req.EmailID))
 	if err != nil {
-		return LoginResponse{}, err
+		// Do not reveal whether the email exists — always report
+		// invalid credentials unless it is an unexpected error.
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return LoginResponse{}, domain.ErrInvalidCredentials
+		}
+		return LoginResponse{}, fmt.Errorf("login user: %w", err)
 	}
 	if err := password.VerifyPassword(user.PasswordHash, req.Password); err != nil {
-		return LoginResponse{}, err
+		return LoginResponse{}, domain.ErrInvalidCredentials
 	}
 	userDetails := jwt.UserDetails{UserId: user.ID, TenantId: user.TenantID}
 	jwtCfg := jwt.JwtConfig{
@@ -65,7 +76,7 @@ func (s *AuthServiceImpl) LoginUser(ctx context.Context, req LoginRequest) (Logi
 	}
 	token, err := jwt.GenerateToken(userDetails, jwtCfg)
 	if err != nil {
-		return LoginResponse{}, err
+		return LoginResponse{}, fmt.Errorf("login user: %w", err)
 	}
 	return LoginResponse{Token: token}, nil
 }
@@ -73,7 +84,11 @@ func (s *AuthServiceImpl) LoginUser(ctx context.Context, req LoginRequest) (Logi
 func (s *AuthServiceImpl) GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error) {
 	user, err := s.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
-		return UserProfileResponse{}, err
+		return UserProfileResponse{}, fmt.Errorf("get profile: %w", err)
 	}
 	return toUserProfileResponse(user), nil
+}
+
+func normalizeEmail(emailID string) string {
+	return strings.ToLower(strings.TrimSpace(emailID))
 }

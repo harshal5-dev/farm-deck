@@ -10,4 +10,7 @@ var (
 	// ---- user errors ---------
 	ErrUserExists   = errors.New("user already exists")
 	ErrUserNotFound = errors.New("user not found")
+
+	// ---- auth errors ---------
+	ErrInvalidCredentials = errors.New("invalid email or password")
 )
