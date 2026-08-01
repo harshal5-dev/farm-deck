@@ -1,0 +1,55 @@
+import {
+  IconArrowsExchange,
+  IconBuildingWarehouse,
+  IconSun,
+  IconBuilding,
+  IconStack2,
+} from "@tabler/icons-react";
+
+export const typeMeta = {
+  outdoor: {
+    icon: IconSun,
+    color: "amber",
+    gradient: "from-amber-500/20 via-amber-400/10 to-transparent",
+    bg: "bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-500/20",
+    glow: "shadow-amber-500/10",
+  },
+  greenhouse: {
+    icon: IconBuildingWarehouse,
+    color: "emerald",
+    gradient: "from-emerald-500/20 via-emerald-400/10 to-transparent",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-500/20",
+    glow: "shadow-emerald-500/10",
+  },
+  mixed: {
+    icon: IconArrowsExchange,
+    color: "violet",
+    gradient: "from-violet-500/20 via-violet-400/10 to-transparent",
+    bg: "bg-violet-500/10",
+    text: "text-violet-600 dark:text-violet-400",
+    border: "border-violet-500/20",
+    glow: "shadow-violet-500/10",
+  },
+  indoor: {
+    icon: IconBuilding,
+    color: "sky",
+    gradient: "from-sky-500/20 via-sky-400/10 to-transparent",
+    bg: "bg-sky-500/10",
+    text: "text-sky-600 dark:text-sky-400",
+    border: "border-sky-500/20",
+    glow: "shadow-sky-500/10",
+  },
+  vertical: {
+    icon: IconStack2,
+    color: "indigo",
+    gradient: "from-indigo-500/25 via-indigo-400/10 to-transparent",
+    bg: "bg-indigo-500/10",
+    text: "text-indigo-600 dark:text-indigo-400",
+    border: "border-indigo-500/20",
+    glow: "shadow-indigo-500/10",
+  },
+};
