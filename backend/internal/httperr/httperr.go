@@ -13,7 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/response"
+	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 )
 
 // HandleError writes the HTTP response for err. Handlers should call it and

@@ -1,3 +1,24 @@
+// Package main is the entrypoint for the farm-deck API server.
+//
+// @title           Farm Deck API
+// @version         1.0
+// @description     Farm management multi-tenant API.
+// @description     All responses follow a standard envelope (see Schemas).
+// @termsOfService  https://farmdeck.app/terms
+//
+// @contact.name    Farm Deck Support
+// @contact.email   support@farmdeck.app
+//
+// @license.name    Proprietary
+//
+// @host            localhost:8083
+// @BasePath        /api/v1
+// @schemes         http https
+//
+// @securityDefinitions.apikey  CookieAuth
+// @in                          cookie
+// @name                        access_token
+// @description                 JWT set by POST /auth/login.
 package main
 
 import (
@@ -7,6 +28,7 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/db"
 	httptransport "github.com/harshal5-dev/farm-deck/backend/internal/transport/http"
+	_ "github.com/harshal5-dev/farm-deck/backend/docs"
 )
 
 func main() {
@@ -27,5 +49,4 @@ func main() {
 	if err := server.Start(); err != nil {
 		log.Fatal("server not started:", err)
 	}
-
 }

@@ -33,6 +33,10 @@ type Config struct {
 
 	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
 
+	// SwaggerEnabled controls whether the OpenAPI/Swagger UI is served
+	// at /swagger/*any. Disable in production with SWAGGER_ENABLED=false.
+	SwaggerEnabled bool `env:"SWAGGER_ENABLED" envDefault:"true"`
+
 	// Mail configuration (SMTP).
 	MailFromAddress string `env:"MAIL_FROM_ADDRESS,required"`
 

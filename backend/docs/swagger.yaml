@@ -1,0 +1,220 @@
+basePath: /api/v1
+definitions:
+  APIError:
+    properties:
+      error:
+        $ref: '#/definitions/ErrorDetail'
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  ErrorDetail:
+    properties:
+      code:
+        type: string
+      details: {}
+      message:
+        type: string
+    type: object
+  HealthResponse:
+    properties:
+      service:
+        example: workspace-hub-server
+        type: string
+      status:
+        example: ok
+        type: string
+    type: object
+  LoginRequest:
+    properties:
+      emailId:
+        type: string
+      password:
+        type: string
+    required:
+    - emailId
+    - password
+    type: object
+  LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  RegisterResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  RegisterUserRequest:
+    properties:
+      emailId:
+        maxLength: 255
+        type: string
+      fullName:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        maxLength: 72
+        minLength: 8
+        type: string
+      tenantName:
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - emailId
+    - fullName
+    - password
+    - tenantName
+    type: object
+  UserProfileResponse:
+    properties:
+      createdAt:
+        type: string
+      emailId:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      tenantId:
+        type: string
+    type: object
+host: localhost:8083
+info:
+  contact:
+    email: support@farmdeck.app
+    name: Farm Deck Support
+  description: |-
+    Farm management multi-tenant API.
+    All responses follow a standard envelope (see Schemas).
+  license:
+    name: Proprietary
+  termsOfService: https://farmdeck.app/terms
+  title: Farm Deck API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates the user with email and password, sets the auth cookie,
+        and returns a JWT.
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: login successful
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: invalid email or password
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      summary: Log in
+      tags:
+      - auth
+  /auth/profile:
+    get:
+      description: Returns the profile of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user profile
+          schema:
+            $ref: '#/definitions/UserProfileResponse'
+        "401":
+          description: authentication required or invalid token
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Get current user profile
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new tenant and the first owner user, then sends a welcome
+        email.
+      parameters:
+      - description: Registration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user registered successfully
+          schema:
+            $ref: '#/definitions/RegisterResponse'
+        "400":
+          description: validation error or bad request
+          schema:
+            $ref: '#/definitions/APIError'
+        "409":
+          description: user or tenant already exists
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      summary: Register a new user and tenant
+      tags:
+      - auth
+  /health:
+    get:
+      description: Returns the service status. Does not require authentication.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: service is healthy
+          schema:
+            $ref: '#/definitions/HealthResponse'
+      summary: Liveness check
+      tags:
+      - health
+schemes:
+- http
+- https
+securityDefinitions:
+  CookieAuth:
+    description: JWT set by POST /auth/login.
+    in: cookie
+    name: access_token
+    type: apiKey
+swagger: "2.0"

@@ -2,11 +2,18 @@ package httptransport
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/harshal5-dev/farm-deck/backend/internal/middlewares"
 	authhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/auth/http"
 )
 
 func (server *Server) setupRoutes(router *gin.Engine) {
+	if server.config.SwaggerEnabled {
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+
 	api := router.Group("/api/v1")
 	public := api.Group("")
 	protected := api.Group("")
@@ -15,5 +22,4 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 
 	api.GET("/health", server.healthCheck)
 	authhttp.Register(public, protected, server.container.Handlers.Auth)
-
 }

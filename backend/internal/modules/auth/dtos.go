@@ -9,7 +9,7 @@ import (
 type RegisterUserRequest struct {
 	FullName   string `json:"fullName" binding:"required,min=2,max=100"`
 	EmailID    string `json:"emailId" binding:"required,email,max=255"`
-	Password   string `json:"password" binding:"required,min=8,max=15"`
+	Password   string `json:"password" binding:"required,min=8,max=72"`
 	TenantName string `json:"tenantName" binding:"required,min=2,max=100"`
 }
 
@@ -20,6 +20,10 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
+}
+
+type RegisterResponse struct {
+	Message string `json:"message"`
 }
 
 type UserProfileResponse struct {
