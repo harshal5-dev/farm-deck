@@ -36,6 +36,10 @@ func HandleError(ctx *gin.Context, err error) {
 	case errors.Is(err, domain.ErrInvalidCredentials):
 		response.Unauthorized(ctx, domain.ErrInvalidCredentials.Error())
 
+	case errors.Is(err, domain.ErrRefreshTokenInvalid),
+		errors.Is(err, domain.ErrRefreshTokenExpired):
+		response.Unauthorized(ctx, "session expired, please log in again")
+
 	default:
 		log.Printf("internal error: %s %s: %v", ctx.Request.Method, ctx.Request.URL.Path, err)
 		response.InternalError(ctx, "something went wrong, please try again later")

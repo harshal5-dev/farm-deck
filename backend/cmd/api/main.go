@@ -4,10 +4,9 @@
 // @version         1.0
 // @description     Farm management multi-tenant API.
 // @description     All responses follow a standard envelope (see Schemas).
-// @termsOfService  https://farmdeck.app/terms
 //
 // @contact.name    Farm Deck Support
-// @contact.email   support@farmdeck.app
+// @contact.email   harshalganbote55@gmail.com
 //
 // @license.name    Proprietary
 //
@@ -24,11 +23,11 @@ package main
 import (
 	"log"
 
+	_ "github.com/harshal5-dev/farm-deck/backend/docs"
 	"github.com/harshal5-dev/farm-deck/backend/internal/app"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/db"
 	httptransport "github.com/harshal5-dev/farm-deck/backend/internal/transport/http"
-	_ "github.com/harshal5-dev/farm-deck/backend/docs"
 )
 
 func main() {

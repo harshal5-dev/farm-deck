@@ -27,10 +27,10 @@ func toUserProfileResponse(user db.User) UserProfileResponse {
 
 func toCookieConfig(cfg config.Config) cookie.CookieConfig {
 	return cookie.CookieConfig{
-		CookieSecure:    cfg.CookieSecure,
-		CookieHttpOnly:  cfg.CookieHttpOnly,
-		CookieTokenAge:  cfg.CookieTokenAge,
-		CookieDomain:    cfg.CookieDomain,
-		CookieTokenName: cfg.CookieTokenName,
+		CookieSecure:           cfg.CookieSecure,
+		CookieHttpOnly:         cfg.CookieHttpOnly,
+		CookieDomain:           cfg.CookieDomain,
+		CookieTokenName:        cfg.CookieTokenName,
+		CookieRefreshTokenName: cfg.CookieRefreshTokenName,
 	}
 }

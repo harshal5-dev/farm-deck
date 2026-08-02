@@ -13,4 +13,8 @@ var (
 
 	// ---- auth errors ---------
 	ErrInvalidCredentials = errors.New("invalid email or password")
+
+	// ---- refresh token errors ---------
+	ErrRefreshTokenInvalid = errors.New("refresh token is invalid")
+	ErrRefreshTokenExpired = errors.New("refresh token has expired")
 )

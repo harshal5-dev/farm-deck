@@ -17,7 +17,6 @@ const (
 type Config struct {
 	CookieSecure   bool `env:"COOKIE_SECURE" envDefault:"true"`
 	CookieHttpOnly bool `env:"COOKIE_HTTP_ONLY" envDefault:"true"`
-	CookieTokenAge int  `env:"COOKIE_TOKEN_AGE" envDefault:"15"`
 	SMTPPort       int  `env:"SMTP_PORT" envDefault:"587"`
 
 	ServerAddress      string `env:"SERVER_ADDRESS" envDefault:":8083"`
@@ -28,8 +27,9 @@ type Config struct {
 	JWTSecret string `env:"JWT_SECRET,required"`
 	JWTIssuer string `env:"JWT_ISSUER,required"`
 
-	CookieDomain    string `env:"COOKIE_DOMAIN" envDefault:"localhost"`
-	CookieTokenName string `env:"COOKIE_TOKEN_NAME" envDefault:"access_token"`
+	CookieDomain           string `env:"COOKIE_DOMAIN" envDefault:"localhost"`
+	CookieTokenName        string `env:"COOKIE_TOKEN_NAME" envDefault:"access_token"`
+	CookieRefreshTokenName string `env:"COOKIE_REFRESH_TOKEN_NAME" envDefault:"refresh_token"`
 
 	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
 

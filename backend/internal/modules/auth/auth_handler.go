@@ -5,8 +5,8 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/ctxutil"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/validate"
 )
 
@@ -14,6 +14,8 @@ type AuthHandler interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	GetCurrentProfile(ctx *gin.Context)
+	Refresh(ctx *gin.Context)
+	Logout(ctx *gin.Context)
 }
 
 type AuthHandlerImpl struct {
@@ -23,6 +25,35 @@ type AuthHandlerImpl struct {
 
 func NewAuthHandler(authService AuthService, cfg config.Config) AuthHandler {
 	return &AuthHandlerImpl{authService: authService, cfg: cfg}
+}
+
+func (h *AuthHandlerImpl) cookieCfg() cookie.CookieConfig {
+	return cookie.CookieConfig{
+		CookieSecure:           h.cfg.CookieSecure,
+		CookieHttpOnly:         h.cfg.CookieHttpOnly,
+		CookieDomain:           h.cfg.CookieDomain,
+		CookieTokenName:        h.cfg.CookieTokenName,
+		CookieRefreshTokenName: h.cfg.CookieRefreshTokenName,
+	}
+}
+
+func (h *AuthHandlerImpl) sessionMeta(ctx *gin.Context) SessionMeta {
+	return SessionMeta{
+		UserAgent: ctx.GetHeader("User-Agent"),
+		IP:        ctx.ClientIP(),
+	}
+}
+
+func (h *AuthHandlerImpl) setTokenCookies(ctx *gin.Context, pair TokenPair) {
+	cfg := h.cookieCfg()
+	cookie.SetAuthCookie(ctx, pair.AccessToken, h.cfg.AccessTokenDuration, cfg)
+	cookie.SetRefreshCookie(ctx, pair.RefreshToken, h.cfg.RefreshTokenDuration, cfg)
+}
+
+func (h *AuthHandlerImpl) clearTokenCookies(ctx *gin.Context) {
+	cfg := h.cookieCfg()
+	cookie.ClearAuthCookie(ctx, cfg)
+	cookie.ClearRefreshCookie(ctx, cfg)
 }
 
 // Register godoc
@@ -51,7 +82,6 @@ func (h *AuthHandlerImpl) Register(ctx *gin.Context) {
 
 // Login godoc
 // @Summary      Log in
-// @Description  Authenticates the user with email and password, sets the auth cookie, and returns a JWT.
 // @Tags         auth
 // @Accept       json
 // @Produce      json
@@ -66,20 +96,55 @@ func (h *AuthHandlerImpl) Login(ctx *gin.Context) {
 	if !validate.Bind(ctx, &req) {
 		return
 	}
-	loginRes, err := h.authService.LoginUser(ctx, req)
+	pair, err := h.authService.LoginUser(ctx, req, h.sessionMeta(ctx))
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
 	}
-	cookieCfg := cookie.CookieConfig{
-		CookieSecure:    h.cfg.CookieSecure,
-		CookieHttpOnly:  h.cfg.CookieHttpOnly,
-		CookieTokenAge:  h.cfg.CookieTokenAge,
-		CookieDomain:    h.cfg.CookieDomain,
-		CookieTokenName: h.cfg.CookieTokenName,
+	h.setTokenCookies(ctx, pair)
+	response.OK(ctx, LoginResponse{AccessToken: pair.AccessToken})
+}
+
+// Refresh godoc
+// @Summary      Refresh access token
+// @Description  Uses the httpOnly refresh_token cookie to issue a new access token (and rotates the refresh token).
+// @Tags         auth
+// @Produce      json
+// @Success      200 {object} LoginResponse "tokens refreshed"
+// @Failure      401 {object} response.APIError "refresh token missing, invalid, or expired"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/refresh [post]
+func (h *AuthHandlerImpl) Refresh(ctx *gin.Context) {
+	raw, err := ctx.Cookie(h.cfg.CookieRefreshTokenName)
+	if err != nil || raw == "" {
+		response.Unauthorized(ctx, "refresh token missing")
+		return
 	}
-	cookie.SetAuthCookie(ctx, loginRes.Token, cookieCfg)
-	response.OK(ctx, loginRes)
+	pair, err := h.authService.RefreshTokens(ctx, raw, h.sessionMeta(ctx))
+	if err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	h.setTokenCookies(ctx, pair)
+	response.OK(ctx, LoginResponse{AccessToken: pair.AccessToken})
+}
+
+// Logout godoc
+// @Summary      Log out
+// @Description  Revokes the current refresh token and clears auth cookies.
+// @Tags         auth
+// @Produce      json
+// @Success      200 {object} RegisterResponse "logged out"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/logout [post]
+func (h *AuthHandlerImpl) Logout(ctx *gin.Context) {
+	raw, _ := ctx.Cookie(h.cfg.CookieRefreshTokenName)
+	if err := h.authService.Logout(ctx, raw); err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	h.clearTokenCookies(ctx)
+	response.OK(ctx, RegisterResponse{Message: "logged out"})
 }
 
 // GetCurrentProfile godoc

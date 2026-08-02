@@ -5,11 +5,9 @@
 package queries
 
 import (
-	"net/netip"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type RefreshToken struct {
@@ -17,9 +15,9 @@ type RefreshToken struct {
 	UserID    uuid.UUID
 	TokenHash string
 	ExpiresAt time.Time
-	RevokedAt pgtype.Timestamptz
+	RevokedAt *time.Time
 	UserAgent *string
-	Ip        *netip.Addr
+	Ip        *string
 	CreatedAt time.Time
 }
 
@@ -49,8 +47,8 @@ type UserInvitation struct {
 	TenantID   uuid.UUID
 	TokenHash  string
 	ExpiresAt  time.Time
-	AcceptedAt pgtype.Timestamptz
-	RevokedAt  pgtype.Timestamptz
+	AcceptedAt *time.Time
+	RevokedAt  *time.Time
 	CreatedBy  uuid.UUID
 	CreatedAt  time.Time
 }

@@ -46,8 +46,8 @@ CREATE TABLE refresh_tokens (
     token_hash   CHAR(64) NOT NULL,          -- sha256 hex (64 chars)
     expires_at   TIMESTAMPTZ NOT NULL,
     revoked_at   TIMESTAMPTZ,
-    user_agent   TEXT,
-    ip           INET,
+    user_agent   VARCHAR(555),
+    ip           VARCHAR(45),
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX uq_refresh_token_hash ON refresh_tokens(token_hash);

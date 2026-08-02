@@ -19,7 +19,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	AccessToken string `json:"accessToken"`
 }
 
 type RegisterResponse struct {
@@ -33,4 +33,14 @@ type UserProfileResponse struct {
 	ID        uuid.UUID `json:"id"`
 	TenantID  uuid.UUID `json:"tenantId"`
 	CreatedAt time.Time `json:"createdAt"`
+}
+
+type SessionMeta struct {
+	UserAgent string
+	IP        string
+}
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
 }

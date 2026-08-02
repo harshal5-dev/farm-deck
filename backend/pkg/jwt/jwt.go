@@ -31,7 +31,7 @@ func GenerateToken(user UserDetails, jwtCfg JwtConfig) (string, error) {
 		UserId:   user.UserId,
 		TenantId: user.TenantId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtCfg.AccessTokenDuration * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtCfg.AccessTokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    jwtCfg.Issuer,
 		},

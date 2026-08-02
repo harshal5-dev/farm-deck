@@ -13,10 +13,13 @@ import (
 type Querier interface {
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
+	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetUserByEmailID(ctx context.Context, emailID string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
 }
 
 var _ Querier = (*Queries)(nil)
