@@ -19,7 +19,7 @@ createRoot(document.getElementById("root")).render(
             <App />
           </TooltipProvider>
         </ErrorBoundary>
-        <Toaster />
+        <Toaster richColors />
       </AuthProvider>
     </ThemeProvider>
   </Provider>

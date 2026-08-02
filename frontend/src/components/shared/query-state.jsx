@@ -35,7 +35,7 @@ export default function QueryState({
 }) {
   const { refetch } = query;
   const location = useLocation();
-  const { logout } = useAuth();
+  const { clearAuth } = useAuth();
   const [retrying, setRetrying] = useState(false);
 
   const handleRetry = useCallback(async () => {
@@ -64,7 +64,7 @@ export default function QueryState({
     if (norm?.isAuthError) {
       // Defer to avoid setState-during-render warnings.
       setTimeout(() => {
-        logout();
+        clearAuth();
         window.location.assign(`/login?from=${encodeURIComponent(location.pathname)}`);
       }, 0);
     }

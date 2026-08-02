@@ -3,9 +3,13 @@ import {
   IconLogout,
   IconChevronRight,
   IconMenu2,
+  IconLoader2,
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth, DEMO_USER } from "@/auth";
+import { toast } from "sonner";
+import { useAuth } from "@/auth";
+import { useLogoutMutation, clearCredentials } from "@/features/auth";
+import { useDispatch } from "react-redux";
 import {
   Popover,
   PopoverTrigger,
@@ -13,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import FarmerAvatar from "@/components/effects/FarmerAvatar";
+import { Avatar as ChosenAvatar, DEFAULT_AVATAR_ID } from "@/components/avatars/avatars";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 /** Format a role like "owner" → "Owner". */
@@ -21,14 +26,45 @@ function displayRole(role) {
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-function UserMenu() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const currentUser = user || DEMO_USER;
+/** Renders the user's chosen avatar if they have one, else the default
+ *  FarmerAvatar illustration. */
+function HeaderAvatar({ id, className }) {
+  if (id) {
+    return <ChosenAvatar id={id} className={className} />;
+  }
+  return (
+    <div
+      className={
+        "overflow-hidden rounded-full ring-2 ring-background " + (className || "")
+      }
+    >
+      <FarmerAvatar className="size-full" />
+    </div>
+  );
+}
 
-  const handleSignOut = () => {
-    logout();
+function UserMenu() {
+  const { user, clearAuth } = useAuth();
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const currentUser = user || {};
+  const avatarId = currentUser.avatarId || DEFAULT_AVATAR_ID;
+
+  const handleSignOut = async () => {
+    // Clear local state immediately so the route guard flips right away;
+    // the backend call is fire-and-forget for the UI.
+    dispatch(clearCredentials());
     navigate("/login", { replace: true });
+    try {
+      await logout().unwrap();
+    } catch {
+      // Logout failed server-side; cookies are already cleared locally and
+      // the user is on /login. A toast is the only feedback worth giving.
+      toast.error("Couldn't reach the server", {
+        description: "You've been signed out locally.",
+      });
+    }
   };
 
   return (
@@ -42,9 +78,10 @@ function UserMenu() {
         }
       >
         <div className="relative size-10 shrink-0">
-          <div className="size-full overflow-hidden rounded-full shadow-sm ring-2 ring-background transition-shadow group-hover:shadow-md group-hover:shadow-leaf/20 group-hover:ring-leaf/40">
-            <FarmerAvatar className="size-full" />
-          </div>
+          <HeaderAvatar
+            id={avatarId}
+            className="size-full shadow-sm transition-shadow group-hover:shadow-md group-hover:shadow-leaf/20"
+          />
           {/* online status dot */}
           <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-leaf ring-2 ring-background" />
         </div>
@@ -57,9 +94,7 @@ function UserMenu() {
         {/* User identity header */}
         <div className="relative flex items-center gap-3 overflow-hidden bg-linear-to-br from-leaf/15 via-sage/5 to-transparent px-4 py-3.5">
           <div className="relative size-12 shrink-0">
-            <div className="size-full overflow-hidden rounded-full ring-2 ring-background">
-              <FarmerAvatar className="size-full" />
-            </div>
+            <HeaderAvatar id={avatarId} className="size-full" />
             <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-leaf ring-2 ring-background" />
           </div>
           <div className="min-w-0 flex-1">
@@ -101,10 +136,15 @@ function UserMenu() {
         <div className="p-1.5">
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[15px] font-medium text-red-500/80 transition-colors hover:bg-red-500/10 hover:text-red-500"
+            disabled={isLoggingOut}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[15px] font-medium text-red-500/80 transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-60"
           >
-            <IconLogout className="size-4.5" strokeWidth={2} />
-            Sign out
+            {isLoggingOut ? (
+              <IconLoader2 className="size-4.5 animate-spin" strokeWidth={2} />
+            ) : (
+              <IconLogout className="size-4.5" strokeWidth={2} />
+            )}
+            {isLoggingOut ? "Signing out…" : "Sign out"}
           </button>
         </div>
       </PopoverContent>
@@ -125,7 +165,7 @@ function Greeting() {
     emoji = "☀️";
   }
 
-  const fullName = user?.fullName || DEMO_USER.fullName;
+  const fullName = user?.fullName || "";
   const firstName = (fullName || "there").split(" ")[0];
 
   return (

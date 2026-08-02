@@ -7,6 +7,7 @@ import ProtectedRoute, {
 // Public
 import Landing from "@/pages/Landing";
 import Login from "@/pages/auth/Login";
+import ProfilePreview from "@/pages/_ProfilePreview"; // TEMP preview route
 
 // Protected (app)
 import Dashboard from "@/pages/Dashboard";
@@ -18,7 +19,6 @@ import FieldFormPage from "@/pages/FieldFormPage";
 import Crops from "@/pages/Crops";
 import Harvest from "@/pages/Harvest";
 import Profile from "@/pages/Profile";
-import Tenant from "@/pages/Tenant";
 import FarmType from "../features/resources/farm-type/FarmType";
 import SystemTypes from "../pages/SystemTypes";
 import CropCategories from "../pages/CropCategories";
@@ -30,6 +30,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
+        <Route path="/__profile" element={<ProfilePreview />} /> {/* TEMP */}
         <Route
           path="/login"
           element={
@@ -66,7 +67,6 @@ function App() {
             <Route path="crops" element={<Crops />} />
             <Route path="harvest" element={<Harvest />} />
             <Route path="profile" element={<Profile />} />
-            <Route path="tenant" element={<Tenant />} />
           </Route>
         </Route>
 

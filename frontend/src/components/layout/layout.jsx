@@ -15,7 +15,6 @@ import {
   IconBuildingWarehouse,
   IconDroplet,
   IconUserCircle,
-  IconBuilding,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -65,7 +64,6 @@ const navGroups = [
     label: "Account",
     items: [
       { label: "Profile", href: "/app/profile", icon: IconUserCircle },
-      { label: "Company", href: "/app/tenant", icon: IconBuilding },
     ],
   },
 ];
