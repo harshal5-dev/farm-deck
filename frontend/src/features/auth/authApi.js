@@ -58,6 +58,16 @@ export const authApi = createApi({
       transformResponse: (response) => response?.data,
       invalidatesTags: ["Profile"],
     }),
+
+    updateTenant: builder.mutation({
+      query: (patch) => ({
+        url: "/auth/tenant",
+        method: "PATCH",
+        body: patch,
+      }),
+      transformResponse: (response) => response?.data,
+      invalidatesTags: ["Profile"],
+    }),
   }),
 });
 
@@ -68,4 +78,5 @@ export const {
   useGetProfileQuery,
   useLazyGetProfileQuery,
   useUpdateProfileMutation,
+  useUpdateTenantMutation,
 } = authApi;

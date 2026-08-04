@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,30 +10,28 @@ import {
   IconLoader2,
   IconCheck,
   IconLock,
-  IconSparkles,
   IconBuildingWarehouse,
   IconFingerprint,
-  IconWorld,
-  IconUserStar,
   IconCopy,
   IconCalendar,
   IconCrown,
   IconCamera,
   IconChevronDown,
   IconLeaf,
+  IconNote,
+  IconBuilding,
 } from "@tabler/icons-react";
 import { useAuth } from "@/auth";
-import { useUpdateProfileMutation } from "@/features/auth";
+import {
+  useUpdateProfileMutation,
+  useUpdateTenantMutation,
+} from "@/features/auth";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardAction,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipTrigger,
@@ -284,11 +282,17 @@ export default function Profile() {
   const u = user || {};
   const savedAvatarId = u.profilePicture || DEFAULT_AVATAR_ID;
 
-  const [editingCompany, setEditingCompany] = useState(false);
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
+  const [updateTenant, { isLoading: isSavingTenant }] =
+    useUpdateTenantMutation();
 
   const memberSince = useMemo(() => formatDate(u.createdAt), [u.createdAt]);
   const isOwner = (u.role || "").toLowerCase() === "owner";
+
+  const tenantName = u.tenantDetails?.name || u.tenantName || "";
+  const tenantDescription = u.tenantDetails?.description || "";
+  const tenantInitial =
+    (tenantName || "F").trim().charAt(0).toUpperCase() || "F";
 
   /* ---- profile form (fullName + avatarId) ---- */
   const form = useForm({
@@ -344,19 +348,58 @@ export default function Profile() {
       avatarId: savedAvatarId,
     });
 
-  /* ---- company form (tenant name, local-only) ---- */
-  const [companyName, setCompanyName] = useState(u.tenantName || "");
+  /* ---- tenant form (name + description) ---- */
+  const tenantForm = useForm({
+    defaultValues: {
+      name: tenantName,
+      description: tenantDescription,
+    },
+  });
+
+  // Re-sync tenant form when the loaded user changes.
+  const lastTenantIdRef = useRef(u.tenantDetails?.id);
   useEffect(() => {
-    setCompanyName(u.tenantName || "");
-  }, [u.tenantName]);
-  const onCompanySave = async () => {
-    await new Promise((r) => setTimeout(r, 600));
-    updateUser({ tenantName: companyName });
-    setEditingCompany(false);
-    toast.success("Company updated", {
-      description: "Your company name has been saved.",
-    });
+    if (lastTenantIdRef.current !== u.tenantDetails?.id) {
+      lastTenantIdRef.current = u.tenantDetails?.id;
+      tenantForm.reset({
+        name: tenantName,
+        description: tenantDescription,
+      });
+    }
+  }, [u.tenantDetails?.id, tenantName, tenantDescription, tenantForm]);
+
+  const watchedName = tenantForm.watch("name");
+  const watchedDescription = tenantForm.watch("description");
+  const tenantIsDirty =
+    (watchedName ?? "") !== tenantName ||
+    (watchedDescription ?? "") !== tenantDescription;
+
+  const onTenantSubmit = async (values) => {
+    try {
+      const payload = {
+        name: values.name?.trim(),
+        description: values.description?.trim() || null,
+      };
+      const updated = await updateTenant(payload).unwrap();
+      // Merge the response into the cached user (preserves the rest of the
+      // profile — getProfile will be re-fetched via the "Profile" tag too).
+      const nextTenant = updated?.tenantDetails ?? {
+        ...u.tenantDetails,
+        ...payload,
+      };
+      updateUser({ tenantDetails: nextTenant, tenantName: nextTenant.name });
+      toast.success("Company updated", {
+        description: "Your company details have been saved.",
+      });
+    } catch (err) {
+      toast.error("Could not save company", {
+        description: err?.data?.error?.message || "Please try again.",
+      });
+    }
   };
+
+  const onTenantReset = () =>
+    tenantForm.reset({ name: tenantName, description: tenantDescription });
 
   return (
     <TooltipProvider delay={200}>
@@ -702,155 +745,193 @@ export default function Profile() {
 
             {/* §2 — Company (tenant) */}
             <TabsContent value="company">
-              <Card className="glass-card texture-paper rounded-3xl">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-warm/25 to-sky-warm/5 text-sky-warm ring-1 ring-white/10 ring-inset dark:ring-white/5">
-                      <IconBuildingWarehouse
-                        className="size-4.5"
-                        strokeWidth={1.75}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-heading text-base font-semibold tracking-tight">
-                        Company
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Your farm organization and workspace details
-                      </p>
-                    </div>
-                  </div>
-                  <CardAction>
-                    {!editingCompany && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingCompany(true)}
-                        className="gap-1.5"
-                      >
-                        <IconSparkles className="size-3.5" strokeWidth={2} />
-                        Edit
-                      </Button>
-                    )}
-                  </CardAction>
-                </CardHeader>
+              <Form {...tenantForm}>
+                <form
+                  onSubmit={tenantForm.handleSubmit(onTenantSubmit)}
+                  noValidate
+                >
+                  <Card className="glass-card texture-paper rounded-3xl">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-warm/25 to-sky-warm/5 text-sky-warm ring-1 ring-white/10 ring-inset dark:ring-white/5">
+                          <IconBuildingWarehouse
+                            className="size-4.5"
+                            strokeWidth={1.75}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-heading text-base font-semibold tracking-tight">
+                            Company
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            Your farm organization and workspace details
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
 
-                <CardContent>
-                  {!editingCompany ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <InfoTile
-                        icon={IconBuildingWarehouse}
-                        label="Company name"
-                        value={u.tenantDetails?.name || "—"}
-                        accent="clay"
-                      />
-                      <InfoTile
-                        icon={IconFingerprint}
-                        label="Subdomain"
-                        value={u.tenantDetails?.subdomain || "—"}
-                        accent="sky"
-                        mono
-                      />
-                      <InfoTile
-                        icon={IconUserStar}
-                        label="Owner"
-                        value={u.fullName}
-                        accent="leaf"
-                      />
-                      <div className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/40 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-border/70 hover:bg-card/60 hover:shadow-md hover:shadow-foreground/5">
-                        <div className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-wheat/30 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-60" />
-                        <div className="relative flex items-center gap-3">
-                          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-wheat/30 to-wheat/5 text-wheat ring-1 ring-white/10 ring-inset dark:ring-white/5">
-                            <IconWorld
-                              className="size-4.5"
-                              strokeWidth={1.75}
+                    <CardContent>
+                      <FieldGroup>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
+                          {/* Left column — Workspace identity card */}
+                          <div className="flex flex-col items-center sm:items-start">
+                            <FieldLabel className="flex items-center gap-1.5">
+                              <IconBuilding
+                                className="size-3.5 text-muted-foreground"
+                                strokeWidth={1.75}
+                              />
+                              Workspace
+                            </FieldLabel>
+                            <div className="relative w-full max-w-[12rem]">
+                              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-sky-warm/30 via-leaf/20 to-clay/30 opacity-70 blur-md" />
+                              <div className="relative overflow-hidden rounded-2xl border border-foreground/5 bg-card/40 p-4 shadow-md">
+                                <div className="absolute inset-0 bg-gradient-to-br from-sky-warm/15 via-transparent to-leaf/10" />
+                                <div className="pattern-contour absolute inset-0 opacity-50 mix-blend-soft-light" />
+                                <div className="relative flex flex-col items-center gap-3 text-center">
+                                  <div className="relative shrink-0">
+                                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky-warm/40 to-leaf/40 opacity-70 blur-md" />
+                                    <div className="relative flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-warm via-leaf to-sage-deep text-3xl font-bold text-white shadow-md ring-2 ring-background">
+                                      {tenantInitial}
+                                    </div>
+                                  </div>
+                                  <div className="w-full min-w-0">
+                                    <p className="truncate text-sm font-semibold tracking-tight text-foreground">
+                                      {tenantName || "Your company"}
+                                    </p>
+                                    {u.tenantDetails?.subdomain && (
+                                      <p className="mt-0.5 truncate rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                        {u.tenantDetails.subdomain}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right column — Editable form + locked fields */}
+                          <div className="flex flex-col gap-4">
+                            <FormField
+                              control={tenantForm.control}
+                              name="name"
+                              rules={{
+                                required: "Company name is required",
+                                minLength: {
+                                  value: 2,
+                                  message: "At least 2 characters",
+                                },
+                                maxLength: {
+                                  value: 100,
+                                  message: "Too long",
+                                },
+                              }}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <RHFLabel className="flex items-center gap-1.5">
+                                    <IconBuildingWarehouse
+                                      className="size-3.5 text-muted-foreground"
+                                      strokeWidth={1.75}
+                                    />
+                                    Company name
+                                  </RHFLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <IconBuildingWarehouse
+                                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                                        strokeWidth={1.75}
+                                      />
+                                      <Input
+                                        placeholder="Your farm organization name"
+                                        autoComplete="organization"
+                                        className="pl-9"
+                                        {...field}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={tenantForm.control}
+                              name="description"
+                              rules={{
+                                maxLength: {
+                                  value: 500,
+                                  message: "Description is too long",
+                                },
+                              }}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <RHFLabel className="flex items-center gap-1.5">
+                                      <IconNote
+                                        className="size-3.5 text-muted-foreground"
+                                        strokeWidth={1.75}
+                                      />
+                                      Description
+                                    </RHFLabel>
+                                    <span className="text-[10px] text-muted-foreground/70 tabular-nums">
+                                      {field.value?.length ?? 0}/500
+                                    </span>
+                                  </div>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <IconNote
+                                        className="pointer-events-none absolute top-3 left-3 size-4 text-muted-foreground"
+                                        strokeWidth={1.75}
+                                      />
+                                      <Textarea
+                                        placeholder="Tell members what this workspace is for…"
+                                        className="resize-y pl-9"
+                                        {...field}
+                                        value={field.value ?? ""}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    A short blurb about your farm organization.
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-                              Description
-                            </p>
-                            <p className="line-clamp-2 text-sm font-medium text-foreground">
-                              {u.tenantDetails?.description ||
-                                "No description provided."}
-                            </p>
-                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        onCompanySave();
-                      }}
-                      className="space-y-4"
-                      noValidate
-                    >
-                      <Field>
-                        <FieldLabel
-                          htmlFor="tenantName"
-                          className="flex items-center gap-1.5"
-                        >
-                          <IconBuildingWarehouse
-                            className="size-3.5 text-muted-foreground"
-                            strokeWidth={1.75}
-                          />
-                          Company name
-                        </FieldLabel>
-                        <div className="relative">
-                          <IconBuildingWarehouse
-                            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                            strokeWidth={1.75}
-                          />
-                          <Input
-                            id="tenantName"
-                            value={companyName}
-                            onChange={(e) => setCompanyName(e.target.value)}
-                            placeholder="Your farm organization name"
-                            className="pl-9"
-                            required
-                            minLength={2}
-                            maxLength={100}
-                          />
-                        </div>
-                      </Field>
+                      </FieldGroup>
+                    </CardContent>
 
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <LockedField
-                          icon={IconFingerprint}
-                          label="Subdomain"
-                          value={u.tenantDetails?.subdomain}
-                          hint="Subdomain is locked to your workspace."
-                        />
-                        <LockedField
-                          icon={IconUserStar}
-                          label="Owner"
-                          value={u.fullName}
-                          hint="The workspace owner is fixed."
-                        />
-                      </div>
+                    <Separator />
 
-                      <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => {
-                            setCompanyName(u.tenantName || "");
-                            setEditingCompany(false);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button type="submit" className="gap-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2 px-6 py-4 sm:px-8">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={onTenantReset}
+                        disabled={!tenantIsDirty || isSavingTenant}
+                      >
+                        Discard
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={!tenantIsDirty || isSavingTenant}
+                        className="gap-2"
+                      >
+                        {isSavingTenant ? (
+                          <IconLoader2
+                            className="size-4 animate-spin"
+                            strokeWidth={2}
+                          />
+                        ) : (
                           <IconCheck className="size-4" strokeWidth={2} />
-                          Save changes
-                        </Button>
-                      </div>
-                    </form>
-                  )}
-                </CardContent>
-              </Card>
+                        )}
+                        {isSavingTenant ? "Saving…" : "Save changes"}
+                      </Button>
+                    </div>
+                  </Card>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </Reveal>

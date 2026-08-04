@@ -6,6 +6,7 @@ export {
   useGetProfileQuery,
   useLazyGetProfileQuery,
   useUpdateProfileMutation,
+  useUpdateTenantMutation,
 } from "./authApi";
 export {
   default as authReducer,
