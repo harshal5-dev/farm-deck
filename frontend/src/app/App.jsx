@@ -4,8 +4,6 @@ import ProtectedRoute, {
   PublicOnlyRoute,
 } from "@/components/auth/ProtectedRoute";
 
-// Public
-import Landing from "@/pages/Landing";
 import Login from "@/pages/auth/Login";
 import ProfilePreview from "@/pages/_ProfilePreview"; // TEMP preview route
 
@@ -23,13 +21,14 @@ import FarmType from "../features/resources/farm-type/FarmType";
 import SystemTypes from "../pages/SystemTypes";
 import CropCategories from "../pages/CropCategories";
 import SoilType from "@/features/resources/soil-type/SoilType";
+import Home from "@/pages/home/Home";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Home />} />
         <Route path="/__profile" element={<ProfilePreview />} /> {/* TEMP */}
         <Route
           path="/login"
@@ -39,7 +38,6 @@ function App() {
             </PublicOnlyRoute>
           }
         />
-
         {/* Protected app — everything under /app requires auth */}
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<Layout />}>
@@ -69,7 +67,6 @@ function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
-
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
