@@ -27,8 +27,8 @@ func NewStore(connPool *pgxpool.Pool) Store {
 	}
 }
 
-func (s *SQLStore) Close() {
-	s.connPool.Close()
+func (store *SQLStore) Close() {
+	store.connPool.Close()
 }
 
 func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {

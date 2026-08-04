@@ -5,15 +5,16 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
+	"github.com/jackc/pgx/v5"
 )
 
 type UserRepo interface {
 	RegisterUser(context.Context, domain.RegisterUserTxParams) (db.RegisterUserTxResult, error)
 	GetUserByEmailID(context.Context, string) (db.User, error)
 	GetUserByID(context.Context, uuid.UUID) (db.User, error)
+	GetUserProfileDetails(context.Context, uuid.UUID) (db.GetUserProfileDetailsRow, error)
 }
 
 type userRepo struct {
@@ -50,6 +51,17 @@ func (r *userRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, erro
 			return db.User{}, domain.ErrUserNotFound
 		}
 		return db.User{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error) {
+	result, err := r.store.GetUserProfileDetails(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.GetUserProfileDetailsRow{}, domain.ErrUserNotFound
+		}
+		return db.GetUserProfileDetailsRow{}, err
 	}
 	return result, nil
 }

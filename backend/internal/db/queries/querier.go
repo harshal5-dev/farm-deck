@@ -19,6 +19,7 @@ type Querier interface {
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetUserByEmailID(ctx context.Context, emailID string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
 }
 

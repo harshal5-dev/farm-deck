@@ -7,6 +7,7 @@ package queries
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -27,7 +28,7 @@ INSERT INTO users (
     full_name, email_id, password_hash, role, status, tenant_id
 ) VALUES (
     $1, $2, $3, $4, $5, $6
-) RETURNING id, tenant_id, email_id, password_hash, full_name, role, status, created_at, updated_at
+) RETURNING id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -55,6 +56,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.EmailID,
 		&i.PasswordHash,
 		&i.FullName,
+		&i.ProfilePicture,
 		&i.Role,
 		&i.Status,
 		&i.CreatedAt,
@@ -64,7 +66,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByEmailID = `-- name: GetUserByEmailID :one
-SELECT id, tenant_id, email_id, password_hash, full_name, role, status, created_at, updated_at FROM users WHERE email_id = $1
+SELECT id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE email_id = $1
 `
 
 func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, error) {
@@ -76,6 +78,7 @@ func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, e
 		&i.EmailID,
 		&i.PasswordHash,
 		&i.FullName,
+		&i.ProfilePicture,
 		&i.Role,
 		&i.Status,
 		&i.CreatedAt,
@@ -85,7 +88,7 @@ func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, e
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, tenant_id, email_id, password_hash, full_name, role, status, created_at, updated_at FROM users WHERE id = $1
+SELECT id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -97,10 +100,50 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.EmailID,
 		&i.PasswordHash,
 		&i.FullName,
+		&i.ProfilePicture,
 		&i.Role,
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserProfileDetails = `-- name: GetUserProfileDetails :one
+SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.created_at, t.id as tenant_id, t.name as tenant_name, t.subdomain, t.description, t.created_at as tenant_created_at FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.id = $1
+`
+
+type GetUserProfileDetailsRow struct {
+	ID              uuid.UUID
+	FullName        string
+	EmailID         string
+	Role            string
+	ProfilePicture  *string
+	Status          string
+	CreatedAt       time.Time
+	TenantID        uuid.UUID
+	TenantName      string
+	Subdomain       string
+	Description     *string
+	TenantCreatedAt time.Time
+}
+
+func (q *Queries) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error) {
+	row := q.db.QueryRow(ctx, getUserProfileDetails, id)
+	var i GetUserProfileDetailsRow
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.EmailID,
+		&i.Role,
+		&i.ProfilePicture,
+		&i.Status,
+		&i.CreatedAt,
+		&i.TenantID,
+		&i.TenantName,
+		&i.Subdomain,
+		&i.Description,
+		&i.TenantCreatedAt,
 	)
 	return i, err
 }

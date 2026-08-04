@@ -112,6 +112,8 @@ export default function Profile() {
   const u = user || {};
   const avatarId = u.avatarId || DEFAULT_AVATAR_ID;
 
+  console.log("Profile.jsx: user:", u);
+
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingCompany, setEditingCompany] = useState(false);
 
@@ -260,7 +262,7 @@ export default function Profile() {
                     <Label htmlFor="fullName">Full name</Label>
                     <div className="relative">
                       <IconUser
-                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                         strokeWidth={1.75}
                       />
                       <Input
@@ -271,7 +273,10 @@ export default function Profile() {
                         aria-invalid={!!profileForm.formState.errors.fullName}
                         {...profileForm.register("fullName", {
                           required: "Full name is required",
-                          minLength: { value: 2, message: "At least 2 characters" },
+                          minLength: {
+                            value: 2,
+                            message: "At least 2 characters",
+                          },
                           maxLength: { value: 100, message: "Too long" },
                         })}
                       />
@@ -288,7 +293,7 @@ export default function Profile() {
                     <Label htmlFor="emailId">Email</Label>
                     <div className="relative">
                       <IconMail
-                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                         strokeWidth={1.75}
                       />
                       <Input
@@ -300,7 +305,7 @@ export default function Profile() {
                         className="cursor-not-allowed pl-9 opacity-80"
                       />
                       <IconLock
-                        className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60"
+                        className="absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-muted-foreground/60"
                         strokeWidth={1.85}
                       />
                     </div>
@@ -358,7 +363,7 @@ export default function Profile() {
                   <div className="absolute -inset-1 rounded-full bg-linear-to-br from-leaf/30 to-sky-warm/30 blur-md" />
                   <Avatar
                     id={avatarId}
-                    className="relative size-16 ring-4 ring-background shadow-md"
+                    className="relative size-16 shadow-md ring-4 ring-background"
                   />
                 </div>
                 <div className="min-w-0">
@@ -404,16 +409,16 @@ export default function Profile() {
                   <MetaRow
                     icon={IconBuildingWarehouse}
                     label="Company name"
-                    value={u.tenantName}
+                    value={u.tenantDetails?.name || "—"}
                     accent="clay"
                   />
                   <MetaRow
                     icon={IconFingerprint}
-                    label="Tenant ID"
+                    label="Sub domain"
                     value={
-                      u.tenantId ? (
+                      u.tenantDetails?.subdomain ? (
                         <span className="font-mono">
-                          {shortId(u.tenantId)}
+                          {u.tenantDetails.subdomain}
                         </span>
                       ) : (
                         "—"
@@ -434,10 +439,11 @@ export default function Profile() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-                        Workspace
+                        Description
                       </p>
                       <p className="text-sm font-medium text-foreground">
-                        {u.tenantName || "My Farm Company"}
+                        {u.tenantDetails?.description ||
+                          "No description provided."}
                       </p>
                     </div>
                   </div>
@@ -452,7 +458,7 @@ export default function Profile() {
                     <Label htmlFor="tenantName">Company name</Label>
                     <div className="relative">
                       <IconBuildingWarehouse
-                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                         strokeWidth={1.75}
                       />
                       <Input
@@ -462,7 +468,10 @@ export default function Profile() {
                         aria-invalid={!!companyForm.formState.errors.tenantName}
                         {...companyForm.register("tenantName", {
                           required: "Company name is required",
-                          minLength: { value: 2, message: "At least 2 characters" },
+                          minLength: {
+                            value: 2,
+                            message: "At least 2 characters",
+                          },
                           maxLength: { value: 100, message: "Too long" },
                         })}
                       />
@@ -477,21 +486,21 @@ export default function Profile() {
                   {/* Tenant ID + Owner — read-only */}
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="tenantIdReadonly">Tenant ID</Label>
+                      <Label htmlFor="tenantIdReadonly">Sub domain</Label>
                       <div className="relative">
                         <IconFingerprint
-                          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                           strokeWidth={1.75}
                         />
                         <Input
                           id="tenantIdReadonly"
-                          value={u.tenantId || ""}
+                          value={u.tenantDetails?.subdomain || ""}
                           readOnly
                           disabled
-                          className="cursor-not-allowed font-mono pl-9 opacity-80"
+                          className="cursor-not-allowed pl-9 font-mono opacity-80"
                         />
                         <IconLock
-                          className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60"
+                          className="absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-muted-foreground/60"
                           strokeWidth={1.85}
                         />
                       </div>
@@ -500,7 +509,7 @@ export default function Profile() {
                       <Label htmlFor="ownerReadonly">Owner</Label>
                       <div className="relative">
                         <IconUserStar
-                          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                           strokeWidth={1.75}
                         />
                         <Input
@@ -511,7 +520,7 @@ export default function Profile() {
                           className="cursor-not-allowed pl-9 opacity-80"
                         />
                         <IconLock
-                          className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60"
+                          className="absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-muted-foreground/60"
                           strokeWidth={1.85}
                         />
                       </div>

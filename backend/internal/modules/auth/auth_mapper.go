@@ -1,10 +1,8 @@
 package auth
 
 import (
-	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
 )
 
 func toRegisterUserTxParams(req RegisterUserRequest) domain.RegisterUserTxParams {
@@ -14,23 +12,21 @@ func toRegisterUserTxParams(req RegisterUserRequest) domain.RegisterUserTxParams
 	}
 }
 
-func toUserProfileResponse(user db.User) UserProfileResponse {
+func toUserProfileResponse(user db.GetUserProfileDetailsRow) UserProfileResponse {
 	return UserProfileResponse{
-		ID:        user.ID,
-		FullName:  user.FullName,
-		EmailID:   user.EmailID,
-		Role:      user.Role,
-		TenantID:  user.TenantID,
-		CreatedAt: user.CreatedAt,
-	}
-}
-
-func toCookieConfig(cfg config.Config) cookie.CookieConfig {
-	return cookie.CookieConfig{
-		CookieSecure:           cfg.CookieSecure,
-		CookieHttpOnly:         cfg.CookieHttpOnly,
-		CookieDomain:           cfg.CookieDomain,
-		CookieTokenName:        cfg.CookieTokenName,
-		CookieRefreshTokenName: cfg.CookieRefreshTokenName,
+		ID:             user.ID,
+		FullName:       user.FullName,
+		EmailID:        user.EmailID,
+		Role:           user.Role,
+		Status:         user.Status,
+		ProfilePicture: user.ProfilePicture,
+		CreatedAt:      user.CreatedAt,
+		TenantDetails: TenantDetails{
+			Name:        user.TenantName,
+			Subdomain:   user.Subdomain,
+			Description: user.Description,
+			ID:          user.TenantID,
+			CreatedAt:   user.TenantCreatedAt,
+		},
 	}
 }

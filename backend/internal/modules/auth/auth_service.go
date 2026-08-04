@@ -77,7 +77,7 @@ func (s *AuthServiceImpl) LoginUser(ctx context.Context, req LoginRequest, meta 
 }
 
 func (s *AuthServiceImpl) GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error) {
-	user, err := s.userRepo.GetUserByID(ctx, userID)
+	user, err := s.userRepo.GetUserProfileDetails(ctx, userID)
 	if err != nil {
 		return UserProfileResponse{}, fmt.Errorf("get profile: %w", err)
 	}

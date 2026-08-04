@@ -22,23 +22,25 @@ type RefreshToken struct {
 }
 
 type Tenant struct {
-	ID        uuid.UUID
-	Name      string
-	Subdomain string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          uuid.UUID
+	Name        string
+	Subdomain   string
+	Description *string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type User struct {
-	ID           uuid.UUID
-	TenantID     uuid.UUID
-	EmailID      string
-	PasswordHash string
-	FullName     string
-	Role         string
-	Status       string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID             uuid.UUID
+	TenantID       uuid.UUID
+	EmailID        string
+	PasswordHash   string
+	FullName       string
+	ProfilePicture *string
+	Role           string
+	Status         string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type UserInvitation struct {

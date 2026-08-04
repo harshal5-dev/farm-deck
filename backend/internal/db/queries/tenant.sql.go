@@ -21,7 +21,7 @@ func (q *Queries) CheckTenantExistsBySubdomain(ctx context.Context, subdomain st
 }
 
 const createTenant = `-- name: CreateTenant :one
-INSERT INTO tenants (name, subdomain) VALUES ($1, $2) RETURNING id, name, subdomain, created_at, updated_at
+INSERT INTO tenants (name, subdomain) VALUES ($1, $2) RETURNING id, name, subdomain, description, created_at, updated_at
 `
 
 type CreateTenantParams struct {
@@ -36,6 +36,7 @@ func (q *Queries) CreateTenant(ctx context.Context, arg CreateTenantParams) (Ten
 		&i.ID,
 		&i.Name,
 		&i.Subdomain,
+		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

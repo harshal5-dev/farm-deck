@@ -27,12 +27,22 @@ type RegisterResponse struct {
 }
 
 type UserProfileResponse struct {
-	FullName  string    `json:"fullName"`
-	EmailID   string    `json:"emailId"`
-	Role      string    `json:"role"`
-	ID        uuid.UUID `json:"id"`
-	TenantID  uuid.UUID `json:"tenantId"`
-	CreatedAt time.Time `json:"createdAt"`
+	FullName       string        `json:"fullName"`
+	EmailID        string        `json:"emailId"`
+	Role           string        `json:"role"`
+	Status         string        `json:"status"`
+	ProfilePicture *string       `json:"profilePicture"`
+	ID             uuid.UUID     `json:"id"`
+	CreatedAt      time.Time     `json:"createdAt"`
+	TenantDetails  TenantDetails `json:"tenantDetails"`
+}
+
+type TenantDetails struct {
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	Subdomain   string    `json:"subdomain"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type SessionMeta struct {
