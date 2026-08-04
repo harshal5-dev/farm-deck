@@ -11,12 +11,14 @@ import (
 type CustomClaims struct {
 	UserId   uuid.UUID `json:"userId"`
 	TenantId uuid.UUID `json:"tenantId"`
+	Role     string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
 type UserDetails struct {
 	UserId   uuid.UUID
 	TenantId uuid.UUID
+	Role     string
 }
 
 type JwtConfig struct {
@@ -30,6 +32,7 @@ func GenerateToken(user UserDetails, jwtCfg JwtConfig) (string, error) {
 	claims := CustomClaims{
 		UserId:   user.UserId,
 		TenantId: user.TenantId,
+		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtCfg.AccessTokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

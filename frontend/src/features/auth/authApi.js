@@ -48,6 +48,16 @@ export const authApi = createApi({
       transformResponse: (response) => response?.data,
       providesTags: ["Profile"],
     }),
+
+    updateProfile: builder.mutation({
+      query: (patch) => ({
+        url: "/auth/profile",
+        method: "PATCH",
+        body: patch,
+      }),
+      transformResponse: (response) => response?.data,
+      invalidatesTags: ["Profile"],
+    }),
   }),
 });
 
@@ -57,4 +67,5 @@ export const {
   useRefreshMutation,
   useGetProfileQuery,
   useLazyGetProfileQuery,
+  useUpdateProfileMutation,
 } = authApi;

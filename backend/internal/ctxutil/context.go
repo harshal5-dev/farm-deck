@@ -10,12 +10,14 @@ import (
 const (
 	UserIDKey   = "userId"
 	TenantIDKey = "tenantId"
+	RoleKey     = "role"
 )
 
 var (
 	ErrUserIDNotFound   = errors.New("user id not found in context")
 	ErrTenantIDNotFound = errors.New("tenant id not found in context")
 	ErrInvalidType      = errors.New("invalid type in context")
+	ErrRoleNotFound     = errors.New("role not found in context")
 )
 
 func GetUserID(ctx *gin.Context) (uuid.UUID, error) {
@@ -44,4 +46,18 @@ func GetTenantID(ctx *gin.Context) (uuid.UUID, error) {
 	}
 
 	return tenantID, nil
+}
+
+func GetRole(ctx *gin.Context) (string, error) {
+	rawRole, exists := ctx.Get(RoleKey)
+	if !exists {
+		return "", ErrRoleNotFound
+	}
+
+	role, ok := rawRole.(string)
+	if !ok {
+		return "", ErrInvalidType
+	}
+
+	return role, nil
 }

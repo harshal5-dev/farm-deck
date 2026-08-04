@@ -22,19 +22,23 @@ type AuthService interface {
 	RefreshTokens(ctx context.Context, rawRefreshToken string, meta SessionMeta) (TokenPair, error)
 	Logout(ctx context.Context, rawRefreshToken string) error
 	GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error)
+	UpdateUserProfile(ctx context.Context, userID uuid.UUID, req UpdateUserProfileRequest) error
+	UpdateTenant(ctx context.Context, tenantID uuid.UUID, req UpdateTenantRequest) error
 }
 
 type AuthServiceImpl struct {
 	userRepo     repository.UserRepo
 	refreshRepo  repository.RefreshTokenRepo
+	tenantRepo   repository.TenantRepo
 	cfg          config.Config
 	emailService email.EmailService
 }
 
-func NewAuthService(userRepo repository.UserRepo, refreshRepo repository.RefreshTokenRepo, cfg config.Config, emailService email.EmailService) AuthService {
+func NewAuthService(userRepo repository.UserRepo, refreshRepo repository.RefreshTokenRepo, tenantRepo repository.TenantRepo, cfg config.Config, emailService email.EmailService) AuthService {
 	return &AuthServiceImpl{
 		userRepo:     userRepo,
 		refreshRepo:  refreshRepo,
+		tenantRepo:   tenantRepo,
 		cfg:          cfg,
 		emailService: emailService,
 	}
@@ -135,6 +139,26 @@ func (s *AuthServiceImpl) Logout(ctx context.Context, rawRefreshToken string) er
 	return nil
 }
 
+func (s *AuthServiceImpl) UpdateUserProfile(ctx context.Context, userID uuid.UUID, req UpdateUserProfileRequest) error {
+	_, err := s.userRepo.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("update profile: get user: %w", err)
+	}
+
+	if _, err := s.userRepo.UpdateUserProfile(ctx, toUpdateUserProfileParams(userID, req)); err != nil {
+		return fmt.Errorf("update profile: update user: %w", err)
+	}
+	return nil
+}
+
+func (s *AuthServiceImpl) UpdateTenant(ctx context.Context, tenantID uuid.UUID, req UpdateTenantRequest) error {
+	_, err := s.tenantRepo.UpdateTenant(ctx, toUpdateTenantParams(tenantID, req))
+	if err != nil {
+		return fmt.Errorf("failed to update tenant: %w", err)
+	}
+	return nil
+}
+
 // ---- internal helpers ----
 
 func (s *AuthServiceImpl) issueTokens(ctx context.Context, user dbUser, meta SessionMeta) (TokenPair, error) {
@@ -149,7 +173,7 @@ func (s *AuthServiceImpl) issueTokens(ctx context.Context, user dbUser, meta Ses
 	}
 
 	ua, ip := stringPtr(meta.UserAgent), stringPtr(meta.IP)
-	if _, err := s.refreshRepo.CreateRefreshToken(ctx, dbCreateRefreshTokenParams(user.ID, hash, s.cfg.RefreshTokenDuration, ua, ip)); err != nil {
+	if _, err := s.refreshRepo.CreateRefreshToken(ctx, toCreateRefreshTokenParams(user.ID, hash, s.cfg.RefreshTokenDuration, ua, ip)); err != nil {
 		return TokenPair{}, fmt.Errorf("issue refresh: %w", err)
 	}
 
@@ -158,18 +182,11 @@ func (s *AuthServiceImpl) issueTokens(ctx context.Context, user dbUser, meta Ses
 
 func (s *AuthServiceImpl) generateAccessToken(user dbUser) (string, error) {
 	return jwt.GenerateToken(
-		jwt.UserDetails{UserId: user.ID, TenantId: user.TenantID},
+		jwt.UserDetails{UserId: user.ID, TenantId: user.TenantID, Role: user.Role},
 		jwt.JwtConfig{
 			JWTSecret:           s.cfg.JWTSecret,
 			AccessTokenDuration: s.cfg.AccessTokenDuration,
 			Issuer:              s.cfg.JWTIssuer,
 		},
 	)
-}
-
-func stringPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
 }

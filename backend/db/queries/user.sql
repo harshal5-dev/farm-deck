@@ -16,3 +16,6 @@ SELECT * FROM users WHERE id = $1;
 
 -- name: GetUserProfileDetails :one
 SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.created_at, t.id as tenant_id, t.name as tenant_name, t.subdomain, t.description, t.created_at as tenant_created_at FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.id = $1;
+
+-- name: UpdateUserProfile :one
+UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING *;

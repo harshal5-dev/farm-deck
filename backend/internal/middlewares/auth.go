@@ -3,8 +3,8 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/ctxutil"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 )
 
 func AuthMiddleware(cookieTokenName, jwtSecret string) gin.HandlerFunc {
@@ -25,6 +25,7 @@ func AuthMiddleware(cookieTokenName, jwtSecret string) gin.HandlerFunc {
 
 		ctx.Set(ctxutil.UserIDKey, claims.UserId)
 		ctx.Set(ctxutil.TenantIDKey, claims.TenantId)
+		ctx.Set(ctxutil.RoleKey, claims.Role)
 
 		ctx.Next()
 	}

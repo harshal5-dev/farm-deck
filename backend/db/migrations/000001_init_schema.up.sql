@@ -15,7 +15,7 @@ CREATE TABLE users (
     email_id         VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,                 -- sentinel "<no-login>" while status='pending'
     full_name     VARCHAR(255) NOT NULL,
-    profile_picture TEXT,
+    profile_picture VARCHAR(55),
     role          VARCHAR(20) NOT NULL DEFAULT 'grower',
     status        VARCHAR(20) NOT NULL DEFAULT 'active', -- pending | active | disabled
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),

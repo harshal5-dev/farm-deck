@@ -2,12 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
+	"github.com/jackc/pgx/v5"
 )
 
 type TenantRepo interface {
 	CreateTenant(context.Context, db.CreateTenantParams) (db.Tenant, error)
+	UpdateTenant(context.Context, db.UpdateTenantParams) (db.Tenant, error)
 }
 
 type TenantRepoImpl struct {
@@ -21,6 +25,17 @@ func NewTenantRepo(store db.Store) TenantRepo {
 func (r *TenantRepoImpl) CreateTenant(ctx context.Context, params db.CreateTenantParams) (db.Tenant, error) {
 	tenant, err := r.store.CreateTenant(ctx, params)
 	if err != nil {
+		return db.Tenant{}, err
+	}
+	return tenant, nil
+}
+
+func (r *TenantRepoImpl) UpdateTenant(ctx context.Context, params db.UpdateTenantParams) (db.Tenant, error) {
+	tenant, err := r.store.UpdateTenant(ctx, params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.Tenant{}, domain.ErrTenantNotFound
+		}
 		return db.Tenant{}, err
 	}
 	return tenant, nil

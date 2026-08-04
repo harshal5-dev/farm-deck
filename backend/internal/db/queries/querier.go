@@ -21,6 +21,8 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
+	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)
+	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

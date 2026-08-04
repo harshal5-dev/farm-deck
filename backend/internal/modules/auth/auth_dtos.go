@@ -45,6 +45,16 @@ type TenantDetails struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
+type UpdateUserProfileRequest struct {
+	FullName       string  `json:"fullName" binding:"required,min=2,max=100"`
+	ProfilePicture *string `json:"profilePicture"`
+}
+
+type UpdateTenantRequest struct {
+	Name        string  `json:"name" binding:"required,min=2,max=100"`
+	Description *string `json:"description"`
+}
+
 type SessionMeta struct {
 	UserAgent string
 	IP        string

@@ -5,8 +5,8 @@
  * picker grid reads as one matching set.
  *
  * Use:
- *   <Avatar id={user.avatarId} className="size-16" />
- *   <AvatarPicker selected={user.avatarId} onSelect={(id) => ...} />
+ *   <Avatar id={user.profilePicture} className="size-16" />
+ *   <AvatarPicker selected={user.profilePicture} onSelect={(id) => ...} />
  */
 import { useId } from "react";
 import { IconCheck } from "@tabler/icons-react";
@@ -697,10 +697,11 @@ export function AvatarPicker({ selected, onSelect }) {
               <div className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-leaf text-white shadow ring-1.5 ring-background">
                 <IconCheck className="size-2.5" strokeWidth={3} />
               </div>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+             )}
+           </button>
+         );
+       })}
+     </div>
+   );
+ }
+

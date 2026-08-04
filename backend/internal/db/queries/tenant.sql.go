@@ -7,6 +7,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const checkTenantExistsBySubdomain = `-- name: CheckTenantExistsBySubdomain :one
@@ -31,6 +33,36 @@ type CreateTenantParams struct {
 
 func (q *Queries) CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error) {
 	row := q.db.QueryRow(ctx, createTenant, arg.Name, arg.Subdomain)
+	var i Tenant
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Subdomain,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateTenant = `-- name: UpdateTenant :one
+UPDATE tenants SET name = $2, subdomain = $3, description = $4 WHERE id = $1 RETURNING id, name, subdomain, description, created_at, updated_at
+`
+
+type UpdateTenantParams struct {
+	ID          uuid.UUID
+	Name        string
+	Subdomain   string
+	Description *string
+}
+
+func (q *Queries) UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error) {
+	row := q.db.QueryRow(ctx, updateTenant,
+		arg.ID,
+		arg.Name,
+		arg.Subdomain,
+		arg.Description,
+	)
 	var i Tenant
 	err := row.Scan(
 		&i.ID,

@@ -15,6 +15,7 @@ type UserRepo interface {
 	GetUserByEmailID(context.Context, string) (db.User, error)
 	GetUserByID(context.Context, uuid.UUID) (db.User, error)
 	GetUserProfileDetails(context.Context, uuid.UUID) (db.GetUserProfileDetailsRow, error)
+	UpdateUserProfile(context.Context, db.UpdateUserProfileParams) (db.User, error)
 }
 
 type userRepo struct {
@@ -62,6 +63,17 @@ func (r *userRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.
 			return db.GetUserProfileDetailsRow{}, domain.ErrUserNotFound
 		}
 		return db.GetUserProfileDetailsRow{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfileParams) (db.User, error) {
+	result, err := r.store.UpdateUserProfile(ctx, arg)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.User{}, domain.ErrUserNotFound
+		}
+		return db.User{}, err
 	}
 	return result, nil
 }

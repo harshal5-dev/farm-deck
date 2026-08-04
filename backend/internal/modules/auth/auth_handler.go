@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/ctxutil"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
@@ -16,6 +17,9 @@ type AuthHandler interface {
 	GetCurrentProfile(ctx *gin.Context)
 	Refresh(ctx *gin.Context)
 	Logout(ctx *gin.Context)
+	UpdateProfile(ctx *gin.Context)
+	UpdateTenant(ctx *gin.Context)
+	IsUpdateTenantAllowed(ctx *gin.Context)
 }
 
 type AuthHandlerImpl struct {
@@ -171,4 +175,81 @@ func (h *AuthHandlerImpl) GetCurrentProfile(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx, user)
+}
+
+// UpdateProfile godoc
+// @Summary      Update current user profile
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     CookieAuth
+// @Param        request body UpdateUserProfileRequest true "Profile update payload"
+// @Success      200 {object} response.APIResponse "profile updated successfully"
+// @Failure      400 {object} response.APIError "validation error"
+// @Failure      401 {object} response.APIError "authentication required"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/profile [patch]
+func (h *AuthHandlerImpl) UpdateProfile(ctx *gin.Context) {
+	userID, err := ctxutil.GetUserID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	var req UpdateUserProfileRequest
+	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	if err := h.authService.UpdateUserProfile(ctx, userID, req); err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	response.OK(ctx, "profile updated successfully")
+}
+
+// UpdateTenant godoc
+// @Summary      Update current tenant
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     CookieAuth
+// @Param        request body UpdateTenantRequest true "Tenant update payload"
+// @Success      200 {object} response.APIResponse "tenant updated successfully"
+// @Failure      400 {object} response.APIError "validation error"
+// @Failure      401 {object} response.APIError "authentication required"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/tenant [patch]
+func (h *AuthHandlerImpl) UpdateTenant(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	var req UpdateTenantRequest
+	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	if err := h.authService.UpdateTenant(ctx, tenantID, req); err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	response.OK(ctx, "tenant updated successfully")
+}
+
+func (h *AuthHandlerImpl) IsUpdateTenantAllowed(ctx *gin.Context) {
+	role, err := ctxutil.GetRole(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	if role != domain.UserRoleOwner {
+		response.Forbidden(ctx, "only owner can update tenant")
+		return
+	}
+
+	ctx.Next()
 }

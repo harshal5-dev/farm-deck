@@ -10,7 +10,7 @@ const mockUser = {
   fullName: "Harshal Ganbote",
   emailId: "harshal@farmdeck.app",
   role: "owner",
-  avatarId: "farmer",
+  profilePicture: "farmer",
   tenantId: "a2e727e2-69d8-47a2-8073-a23d99bc651c",
   tenantName: "Ganbote Farms",
   createdAt: "2024-01-15T00:00:00.000Z",

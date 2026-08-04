@@ -17,4 +17,7 @@ var (
 	// ErrRefreshTokenInvalid ---- refresh token errors ---------
 	ErrRefreshTokenInvalid = errors.New("refresh token is invalid")
 	ErrRefreshTokenExpired = errors.New("refresh token has expired")
+
+	// Role Access errors
+	ErrRoleAccessDenied = errors.New("role access denied")
 )

@@ -10,6 +10,8 @@ func Register(public, protected *gin.RouterGroup, h auth.AuthHandler) {
 
 	protectedRoutes := protected.Group("/auth")
 	protectedRoutes.GET("/profile", h.GetCurrentProfile)
+	protectedRoutes.PATCH("/profile", h.UpdateProfile)
+	protectedRoutes.PATCH("/tenant", h.IsUpdateTenantAllowed, h.UpdateTenant)
 
 	publicRoutes.POST("/register", h.Register)
 	publicRoutes.POST("/login", h.Login)
