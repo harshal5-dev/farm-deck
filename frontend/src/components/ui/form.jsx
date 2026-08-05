@@ -3,6 +3,8 @@ import { Controller, FormProvider, useFormContext, useFormState } from "react-ho
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const Form = FormProvider;
 
@@ -76,19 +78,46 @@ function FormControl({ children, ...props }) {
     ? formDescriptionId
     : `${formDescriptionId} ${formMessageId}`;
 
-  // Merge the form-field id + aria attributes directly onto the single
-  // form control child. This keeps the label's htmlFor → input id binding
-  // intact (radix-style Slot behavior, no wrapping div).
-  const child = React.Children.only(children);
-  if (!React.isValidElement(child)) {
-    return <>{children}</>;
-  }
-  return React.cloneElement(child, {
+  const formProps = {
     id: props.id ?? formItemId,
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": !!error,
-    ...props,
-  });
+  };
+
+  // Walk the children tree and merge `props` onto the first form control
+  // (Input, Textarea, or a host <input>/<textarea>/<select>) we find. This
+  // keeps the label's htmlFor → input id binding intact even when the
+  // immediate child is a wrapper <div> that holds an icon + the actual
+  // form control.
+  const FORM_CONTROL_COMPONENTS = new Set([Input, Textarea]);
+  const FORM_CONTROL_TAGS = new Set(["input", "textarea", "select"]);
+  const isFormControlElement = (node) => {
+    if (!React.isValidElement(node)) return false;
+    if (typeof node.type === "string") return FORM_CONTROL_TAGS.has(node.type);
+    return FORM_CONTROL_COMPONENTS.has(node.type);
+  };
+
+  const injectProps = (node, injectedProps, state) => {
+    if (state.done) return node;
+    if (!React.isValidElement(node)) return node;
+    if (isFormControlElement(node)) {
+      state.done = true;
+      return React.cloneElement(node, injectedProps);
+    }
+    const childChildren = node.props?.children;
+    if (childChildren === undefined || childChildren === null) return node;
+    const nextChildren = Array.isArray(childChildren)
+      ? React.Children.map(childChildren, (child) =>
+          injectProps(child, injectedProps, state)
+        )
+      : injectProps(childChildren, injectedProps, state);
+    if (state.done) {
+      return React.cloneElement(node, { children: nextChildren });
+    }
+    return node;
+  };
+
+  return injectProps(children, { ...formProps, ...props }, { done: false });
 }
 
 function FormDescription({ className, ...props }) {

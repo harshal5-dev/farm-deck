@@ -627,28 +627,26 @@ export default function Profile() {
                             name="avatarId"
                             render={({ field }) => (
                               <FormItem className="flex flex-col items-center">
-                                <RHFLabel className="flex items-center gap-1.5">
+                                <span className="flex items-center gap-1.5 text-sm leading-none font-medium select-none">
                                   <IconCamera
                                     className="size-3.5 text-muted-foreground"
                                     strokeWidth={1.75}
                                   />
                                   Profile avatar
-                                </RHFLabel>
-                                <FormControl>
-                                  <div className="flex flex-col items-center gap-3">
-                                    <div className="relative shrink-0">
-                                      <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-leaf/30 to-sky-warm/30 blur-md" />
-                                      <Avatar
-                                        id={field.value || savedAvatarId}
-                                        className="relative size-20 shadow-md ring-4 ring-background"
-                                      />
-                                    </div>
-                                    <AvatarPopover
-                                      value={field.value || savedAvatarId}
-                                      onChange={field.onChange}
+                                </span>
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="relative shrink-0">
+                                    <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-leaf/30 to-sky-warm/30 blur-md" />
+                                    <Avatar
+                                      id={field.value || savedAvatarId}
+                                      className="relative size-20 shadow-md ring-4 ring-background"
                                     />
                                   </div>
-                                </FormControl>
+                                  <AvatarPopover
+                                    value={field.value || savedAvatarId}
+                                    onChange={field.onChange}
+                                  />
+                                </div>
                                 <FormDescription>
                                   Pick a farm character to represent you.
                                 </FormDescription>

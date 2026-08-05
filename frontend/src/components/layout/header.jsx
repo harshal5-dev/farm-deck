@@ -8,6 +8,7 @@ import {
   IconCrown,
   IconSparkles,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth";
@@ -72,6 +73,7 @@ function MenuIcon({ icon: Icon, tone = "leaf" }) {
 function UserMenu() {
   const { user } = useAuth();
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [menuOpen, setMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUser = user || {};
@@ -82,7 +84,13 @@ function UserMenu() {
     "Your workspace";
   const isOwner = (currentUser.role || "").toLowerCase() === "owner";
 
+  const goToProfile = () => {
+    setMenuOpen(false);
+    navigate("/app/profile");
+  };
+
   const handleSignOut = async () => {
+    setMenuOpen(false);
     dispatch(clearCredentials());
     navigate("/login", { replace: true });
     try {
@@ -95,7 +103,7 @@ function UserMenu() {
   };
 
   return (
-    <Popover>
+    <Popover open={menuOpen} onOpenChange={setMenuOpen}>
       <PopoverTrigger
         render={
           <button
@@ -190,7 +198,7 @@ function UserMenu() {
         {/* ---------- Actions ---------- */}
         <div className="space-y-0.5 p-1.5">
           <button
-            onClick={() => navigate("/app/profile")}
+            onClick={goToProfile}
             className="group/menu relative flex w-full items-center gap-3 overflow-hidden rounded-xl px-2.5 py-2.5 text-left transition-all duration-200 hover:bg-leaf/8"
           >
             <div className="absolute inset-y-1.5 left-0 w-0.5 origin-top scale-y-0 rounded-r-full bg-leaf transition-transform duration-200 group-hover/menu:scale-y-100" />
