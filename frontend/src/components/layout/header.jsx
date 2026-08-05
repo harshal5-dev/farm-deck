@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/auth";
+import { useAuth } from "@/features/auth";
 import { useLogoutMutation, clearCredentials } from "@/features/auth";
 import { useDispatch } from "react-redux";
 import {
@@ -20,8 +20,11 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import FarmerAvatar from "@/components/effects/FarmerAvatar";
-import { Avatar as ChosenAvatar, DEFAULT_AVATAR_ID } from "@/components/avatars/avatars";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import {
+  Avatar as ChosenAvatar,
+  DEFAULT_AVATAR_ID,
+} from "@/components/avatars/avatars";
+import ThemeToggle from "@/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 /** Format a role like "owner" → "Owner". */
@@ -39,7 +42,8 @@ function HeaderAvatar({ id, className }) {
   return (
     <div
       className={
-        "overflow-hidden rounded-full ring-2 ring-background " + (className || "")
+        "overflow-hidden rounded-full ring-2 ring-background " +
+        (className || "")
       }
     >
       <FarmerAvatar className="size-full" />
@@ -52,9 +56,8 @@ function MenuIcon({ icon: Icon, tone = "leaf" }) {
   return (
     <div
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset ring-white/10 transition-all duration-300 dark:ring-white/5",
-        tone === "leaf" &&
-          "bg-gradient-to-br from-leaf/20 to-leaf/5 text-leaf",
+        "flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-white/10 transition-all duration-300 ring-inset dark:ring-white/5",
+        tone === "leaf" && "bg-gradient-to-br from-leaf/20 to-leaf/5 text-leaf",
         tone === "clay" &&
           "bg-gradient-to-br from-clay/25 to-clay/5 text-clay-deep dark:text-clay",
         tone === "danger" &&
@@ -213,9 +216,7 @@ function UserMenu() {
               <p className="text-sm font-semibold text-foreground">
                 What's new
               </p>
-              <p className="text-[11px] text-muted-foreground">
-                Coming soon
-              </p>
+              <p className="text-[11px] text-muted-foreground">Coming soon</p>
             </div>
             <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-muted-foreground uppercase">
               Soon

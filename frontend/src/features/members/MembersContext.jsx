@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { members as seedMembers } from "@/data/mock";
+import { members as seedMembers } from "@/mocks";
 
 /**
  * MembersContext — local source of truth for the workspace member list.

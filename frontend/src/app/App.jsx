@@ -1,48 +1,34 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/layout";
-import ProtectedRoute, {
+import {
+  ProtectedRoute,
   PublicOnlyRoute,
-} from "@/components/auth/ProtectedRoute";
-import { MembersProvider } from "@/features/members/MembersContext";
+  MembersLayout,
+} from "@/app/router-helpers";
 
-import Login from "@/pages/auth/Login";
-import ProfilePreview from "@/pages/_ProfilePreview"; // TEMP preview route
+import { Login } from "@/features/auth";
+import { Dashboard } from "@/features/dashboard";
+import { Profile } from "@/features/profile";
+import { FarmList, FarmDetail, FarmFormPage } from "@/features/farms";
+import { FieldList, FieldFormPage } from "@/features/fields";
+import {
+  MembersList,
+  AddMember,
+  EditMember,
+} from "@/features/members";
+import { FarmType } from "@/features/lookups/farm-type";
+import { SoilType } from "@/features/lookups/soil-type";
+import { SystemTypes } from "@/features/lookups/system-type";
+import { CropCategories } from "@/features/lookups/crop-category";
+import { Crops, Harvest } from "@/features/lookups/crop";
+import { Home } from "@/features/home";
+import NotFound from "@/pages/NotFound";
 
-// Protected (app)
-import Dashboard from "@/pages/Dashboard";
-import Members from "@/pages/Members";
-import AddMember from "@/pages/members/AddMember";
-import EditMember from "@/pages/members/EditMember";
-import Farms from "@/pages/Farms";
-import FarmDetail from "@/pages/FarmDetail";
-import FarmFormPage from "@/pages/FarmFormPage";
-import Fields from "@/pages/Fields";
-import FieldFormPage from "@/pages/FieldFormPage";
-import Crops from "@/pages/Crops";
-import Harvest from "@/pages/Harvest";
-import Profile from "@/pages/Profile";
-import FarmType from "../features/resources/farm-type/FarmType";
-import SystemTypes from "../pages/SystemTypes";
-import CropCategories from "../pages/CropCategories";
-import SoilType from "@/features/resources/soil-type/SoilType";
-import Home from "@/pages/home/Home";
-
-/** Tiny wrapper that just provides the members context to all /members/* routes. */
-function MembersLayout() {
-  return (
-    <MembersProvider>
-      <Outlet />
-    </MembersProvider>
-  );
-}
-
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/__profile" element={<ProfilePreview />} /> {/* TEMP */}
         <Route
           path="/login"
           element={
@@ -51,18 +37,17 @@ function App() {
             </PublicOnlyRoute>
           }
         />
-        {/* Protected app — everything under /app requires auth */}
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path="farms" element={<Farms />} />
+            <Route path="farms" element={<FarmList />} />
             <Route path="farms/new" element={<FarmFormPage mode="create" />} />
             <Route path="farms/:farmId" element={<FarmDetail />} />
             <Route
               path="farms/:farmId/edit"
               element={<FarmFormPage mode="edit" />}
             />
-            <Route path="fields" element={<Fields />} />
+            <Route path="fields" element={<FieldList />} />
             <Route
               path="fields/new"
               element={<FieldFormPage mode="create" />}
@@ -78,18 +63,15 @@ function App() {
             <Route path="crops" element={<Crops />} />
             <Route path="harvest" element={<Harvest />} />
             <Route element={<MembersLayout />}>
-              <Route path="members" element={<Members />} />
+              <Route path="members" element={<MembersList />} />
               <Route path="members/new" element={<AddMember />} />
               <Route path="members/:memberId/edit" element={<EditMember />} />
             </Route>
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;

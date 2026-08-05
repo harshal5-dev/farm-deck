@@ -1,17 +1,17 @@
 import { createRoot } from "react-dom/client";
+import { Provider as ReduxProvider } from "react-redux";
 
-import "./index.css";
-import App from "./app/App";
-import { ThemeProvider } from "./theme";
-import { AuthProvider } from "./auth";
+import "@/styles/index.css";
+import App from "@/app/App";
+import store from "@/app/store";
+import { ThemeProvider } from "@/theme";
+import { AuthProvider } from "@/features/auth";
+import ErrorBoundary from "@/components/feedback/error-boundary";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { Provider } from "react-redux";
-import store from "./app/store";
-import ErrorBoundary from "@/components/shared/error-boundary";
 
 createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
+  <ReduxProvider store={store}>
     <ThemeProvider>
       <AuthProvider>
         <ErrorBoundary fullscreen>
@@ -22,5 +22,5 @@ createRoot(document.getElementById("root")).render(
         <Toaster richColors />
       </AuthProvider>
     </ThemeProvider>
-  </Provider>
+  </ReduxProvider>
 );
