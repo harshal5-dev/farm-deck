@@ -718,6 +718,102 @@ const cropCategories = [
   },
 ];
 
+/**
+ * Workspace members + pending invites. Shape mirrors what a real
+ * GET /tenants/{id}/members would return.
+ *
+ * @typedef {Object} Member
+ * @property {string} id
+ * @property {string} fullName
+ * @property {string} emailId
+ * @property {"owner"|"manager"|"grower"|"viewer"} role
+ * @property {"active"|"invited"|"suspended"} status
+ * @property {string} [avatarId]    - matches an id from /components/avatars/avatars
+ * @property {string} joinedAt      - ISO timestamp
+ * @property {string} [lastActive]  - ISO timestamp (omitted for "invited")
+ * @property {string} [invitedBy]   - member id (for pending invites)
+ */
+const members = [
+  {
+    id: "ad10c1d3-bb68-4d00-b43b-f477ce2bd919",
+    fullName: "Harshal Ganbote",
+    emailId: "harshalganbote55@gmail.com",
+    role: "owner",
+    status: "active",
+    avatarId: "fox",
+    joinedAt: "2026-08-01T10:01:08.707834+05:30",
+    lastActive: "2026-08-04T09:12:00+05:30",
+  },
+  {
+    id: "3f1a2b3c-9d4e-4a7b-8c12-1a2b3c4d5e6f",
+    fullName: "Priya Deshmukh",
+    emailId: "priya.deshmukh@ganbotefarms.com",
+    role: "manager",
+    status: "active",
+    avatarId: "rooster",
+    joinedAt: "2025-09-12T08:30:00+05:30",
+    lastActive: "2026-08-04T08:45:00+05:30",
+  },
+  {
+    id: "7c8b9d0e-1f2a-4b3c-9d4e-5f6a7b8c9d0e",
+    fullName: "Arjun Patil",
+    emailId: "arjun.patil@ganbotefarms.com",
+    role: "grower",
+    status: "active",
+    avatarId: "goat",
+    joinedAt: "2025-11-03T11:15:00+05:30",
+    lastActive: "2026-08-03T17:50:00+05:30",
+  },
+  {
+    id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    fullName: "Sneha Kulkarni",
+    emailId: "sneha.kulkarni@ganbotefarms.com",
+    role: "grower",
+    status: "active",
+    avatarId: "bee",
+    joinedAt: "2026-01-22T09:00:00+05:30",
+    lastActive: "2026-08-04T07:30:00+05:30",
+  },
+  {
+    id: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    fullName: "Vikram Joshi",
+    emailId: "vikram.joshi@ganbotefarms.com",
+    role: "viewer",
+    status: "active",
+    avatarId: "owl",
+    joinedAt: "2026-03-14T14:20:00+05:30",
+    lastActive: "2026-08-02T16:10:00+05:30",
+  },
+  {
+    id: "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    fullName: "Meera Sawant",
+    emailId: "meera.sawant@ganbotefarms.com",
+    role: "viewer",
+    status: "invited",
+    invitedBy: "ad10c1d3-bb68-4d00-b43b-f477ce2bd919",
+    joinedAt: "2026-08-02T12:00:00+05:30",
+  },
+  {
+    id: "d4e5f6a7-b8c9-0123-defa-234567890123",
+    fullName: "Rohan Desai",
+    emailId: "rohan.desai@external-agronomy.io",
+    role: "manager",
+    status: "invited",
+    invitedBy: "3f1a2b3c-9d4e-4a7b-8c12-1a2b3c4d5e6f",
+    joinedAt: "2026-08-03T15:30:00+05:30",
+  },
+  {
+    id: "e5f6a7b8-c9d0-1234-efab-345678901234",
+    fullName: "Anika Sharma",
+    emailId: "anika.sharma@ganbotefarms.com",
+    role: "grower",
+    status: "suspended",
+    avatarId: "hen",
+    joinedAt: "2025-07-08T10:00:00+05:30",
+    lastActive: "2026-05-19T11:25:00+05:30",
+  },
+];
+
 export {
   farmTypes,
   farms,
@@ -727,4 +823,5 @@ export {
   cropCategories,
   stats,
   recentActivity,
+  members,
 };

@@ -2,19 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   IconLayoutDashboard,
-  IconPlant,
-  IconChartDots,
+  IconUsers,
   IconX,
   IconChevronLeft,
   IconChevronRight,
-  IconTractor,
-  IconSeedling,
-  IconLeaf,
-  IconBasket,
-  IconShovel,
-  IconBuildingWarehouse,
-  IconDroplet,
-  IconUserCircle,
+  IconUserPlus,
+  IconCommand,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -26,58 +19,47 @@ import {
 import Header from "@/components/layout/header";
 import Logo from "@/components/layout/Logo";
 
-/** Sidebar navigation, grouped into labeled sections. */
+/**
+ * Sidebar navigation — two sections:
+ *   1. Overview (Dashboard)
+ *   2. Team (Members)
+ *
+ * Members shows a small "pending invites" count chip when collapsed or
+ * expanded, so the workspace owner always sees pending work at a glance.
+ */
 const navGroups = [
   {
-    label: "Grow",
-    items: [
-      { label: "Dashboard", href: "/app", icon: IconLayoutDashboard },
-      { label: "Farms", href: "/app/farms", icon: IconPlant },
-      { label: "Fields", href: "/app/fields", icon: IconChartDots },
-    ],
-  },
-  {
-    label: "Cultivate",
-    items: [
-      { label: "Crops", href: "/app/crops", icon: IconSeedling },
-      { label: "Harvest", href: "/app/harvest", icon: IconBasket },
-    ],
-  },
-  {
-    label: "Resources",
+    label: "Overview",
     items: [
       {
-        label: "Farm Types",
-        href: "/app/farm-types",
-        icon: IconBuildingWarehouse,
-      },
-      { label: "Soil Types", href: "/app/soil-types", icon: IconShovel },
-      { label: "Grow Systems", href: "/app/system-types", icon: IconDroplet },
-      {
-        label: "Crop Categories",
-        href: "/app/crop-categories",
-        icon: IconLeaf,
+        label: "Dashboard",
+        href: "/app",
+        icon: IconLayoutDashboard,
+        end: true,
       },
     ],
   },
   {
-    label: "Account",
+    label: "Team",
     items: [
-      { label: "Profile", href: "/app/profile", icon: IconUserCircle },
+      {
+        label: "Members",
+        href: "/app/members",
+        icon: IconUsers,
+        badge: 2, // pending invites (mocked)
+      },
     ],
   },
 ];
 
 function NavItem({ item, collapsed, index }) {
   const Icon = item.icon;
+  const end = item.end ?? item.href === "/app";
 
   return (
     <NavLink
       to={item.href}
-      // Dashboard (index route /app) must only match exactly — otherwise every
-      // /app/* route also marks it active. All other links use prefix matching
-      // so e.g. /app/farms stays active on /app/farms/:id.
-      end={item.href === "/app"}
+      end={end}
       viewTransition
       style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
       className={({ isActive }) =>
@@ -93,8 +75,7 @@ function NavItem({ item, collapsed, index }) {
       {({ isActive }) => (
         <>
           {/* Active pill — solid farm-green with depth. First child so it sits
-              behind the icon/label without needing a negative z-index (which
-              would push it behind the sidebar). */}
+              behind the icon/label without needing a negative z-index. */}
           {isActive && (
             <span className="absolute inset-0 rounded-xl bg-linear-to-br from-leaf to-sage-deep shadow-md shadow-leaf/30" />
           )}
@@ -113,10 +94,29 @@ function NavItem({ item, collapsed, index }) {
             strokeWidth={1.85}
           />
           {!collapsed && (
-            <span className="relative truncate transition-transform duration-200 group-hover/nav:translate-x-0.5">
-              {item.label}
-            </span>
+            <>
+              <span className="relative flex-1 truncate transition-transform duration-200 group-hover/nav:translate-x-0.5">
+                {item.label}
+              </span>
+              {item.badge ? (
+                <span
+                  className={cn(
+                    "relative inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums",
+                    isActive
+                      ? "bg-white/20 text-primary-foreground ring-1 ring-white/20"
+                      : "bg-clay/15 text-clay-deep ring-1 ring-clay/25 dark:text-clay"
+                  )}
+                >
+                  {item.badge}
+                </span>
+              ) : null}
+            </>
           )}
+          {collapsed && item.badge ? (
+            <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-clay text-[9px] font-bold text-white shadow-sm ring-2 ring-sidebar">
+              {item.badge}
+            </span>
+          ) : null}
         </>
       )}
     </NavLink>
@@ -140,45 +140,56 @@ function BrandLogo({ collapsed }) {
   );
 }
 
-/** Compact "your harvest" stat panel shown at the bottom of the sidebar. */
-function HarvestPanel({ collapsed }) {
+/**
+ * Footer card — contextual tip that promotes the "invite member" CTA.
+ * Pulls double-duty as a navigation hint + invitation reminder.
+ */
+function InviteHintCard({ collapsed }) {
   if (collapsed) {
     return (
       <Tooltip>
-        <TooltipTrigger render={<span />}>
-          <div className="flex aspect-square w-full flex-col items-center justify-center rounded-xl bg-leaf/15 ring-1 ring-leaf/20 ring-inset">
-            <IconLeaf className="size-5 text-leaf" strokeWidth={1.85} />
-            <span className="mt-1 text-xs font-bold text-leaf">8</span>
+        <TooltipTrigger render={<span className="flex justify-center" />}>
+          <div className="group/icon relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-leaf/20 to-sky-warm/15 ring-1 ring-leaf/25 ring-inset transition-transform duration-200 hover:scale-105">
+            <div className="absolute inset-0 pattern-contour opacity-40" />
+            <IconUserPlus
+              className="relative size-4.5 text-leaf drop-shadow-sm"
+              strokeWidth={1.85}
+            />
+            <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-clay text-[8px] font-bold text-white shadow ring-1 ring-sidebar">
+              2
+            </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="right">8 crops growing</TooltipContent>
+        <TooltipContent side="right" className="max-w-[14rem]">
+          <p className="font-semibold">2 pending invites</p>
+          <p className="text-[11px] text-muted-foreground">
+            Open Members to review or resend.
+          </p>
+        </TooltipContent>
       </Tooltip>
     );
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-linear-to-br from-leaf/15 via-sage/10 to-transparent p-3.5 ring-1 ring-leaf/20 ring-inset">
-      {/* decorative sprout */}
-      <IconSeedling
-        className="absolute -top-2 -right-2 size-14 text-leaf/15"
-        strokeWidth={1.4}
-      />
-      <div className="relative">
-        <div className="flex items-center gap-1.5">
-          <IconLeaf className="size-3.5 text-leaf" strokeWidth={2} />
-          <span className="text-[10px] font-bold tracking-wider text-leaf uppercase">
-            Growing now
-          </span>
+    <div className="group/card relative overflow-hidden rounded-2xl border border-leaf/20 bg-linear-to-br from-leaf/15 via-sage/8 to-sky-warm/12 p-3.5 transition-all duration-200 hover:border-leaf/30 hover:shadow-md hover:shadow-leaf/10">
+      <div className="pattern-contour pointer-events-none absolute inset-0 opacity-40" />
+      <div className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-wheat/30 blur-2xl" />
+      <div className="relative flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-leaf to-sage-deep text-white shadow-sm ring-1 ring-white/15">
+          <IconUserPlus className="size-4" strokeWidth={1.85} />
         </div>
-        <p className="mt-1.5 text-2xl font-bold tracking-tight text-foreground">
-          8{" "}
-          <span className="text-sm font-medium text-muted-foreground">
-            crops
-          </span>
-        </p>
-        <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-          <IconTractor className="size-3" strokeWidth={1.85} />3 ready to
-          harvest
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-xs font-semibold tracking-tight">
+              Grow your team
+            </p>
+            <span className="inline-flex h-4 items-center rounded-full bg-clay/15 px-1.5 text-[9px] font-bold tabular-nums text-clay-deep dark:text-clay">
+              2 pending
+            </span>
+          </div>
+          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+            Invite growers, managers & viewers to collaborate.
+          </p>
         </div>
       </div>
     </div>
@@ -242,7 +253,7 @@ function MobileSidebar({ open, onClose }) {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-70 flex-col bg-sidebar shadow-2xl transition-transform duration-300 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sidebar shadow-2xl transition-transform duration-300 lg:hidden",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -260,7 +271,7 @@ function MobileSidebar({ open, onClose }) {
           <Separator />
           <NavList collapsed={false} />
           <div className="p-3">
-            <HarvestPanel collapsed={false} />
+            <InviteHintCard collapsed={false} />
           </div>
         </div>
       </aside>
@@ -282,7 +293,7 @@ function DesktopSidebar({ collapsed, onToggle }) {
         <Separator />
         <NavList collapsed={collapsed} />
         <div className="p-3">
-          <HarvestPanel collapsed={collapsed} />
+          <InviteHintCard collapsed={collapsed} />
         </div>
         <div className="border-t border-sidebar-border/60 p-2">
           <button
@@ -301,6 +312,10 @@ function DesktopSidebar({ collapsed, onToggle }) {
                   strokeWidth={1.85}
                 />
                 Collapse
+                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md border border-border/60 bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground">
+                  <IconCommand className="size-2.5" strokeWidth={2.2} />
+                  <span>B</span>
+                </kbd>
               </>
             )}
           </button>

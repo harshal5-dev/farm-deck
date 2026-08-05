@@ -1,14 +1,18 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Layout from "@/components/layout/layout";
 import ProtectedRoute, {
   PublicOnlyRoute,
 } from "@/components/auth/ProtectedRoute";
+import { MembersProvider } from "@/features/members/MembersContext";
 
 import Login from "@/pages/auth/Login";
 import ProfilePreview from "@/pages/_ProfilePreview"; // TEMP preview route
 
 // Protected (app)
 import Dashboard from "@/pages/Dashboard";
+import Members from "@/pages/Members";
+import AddMember from "@/pages/members/AddMember";
+import EditMember from "@/pages/members/EditMember";
 import Farms from "@/pages/Farms";
 import FarmDetail from "@/pages/FarmDetail";
 import FarmFormPage from "@/pages/FarmFormPage";
@@ -22,6 +26,15 @@ import SystemTypes from "../pages/SystemTypes";
 import CropCategories from "../pages/CropCategories";
 import SoilType from "@/features/resources/soil-type/SoilType";
 import Home from "@/pages/home/Home";
+
+/** Tiny wrapper that just provides the members context to all /members/* routes. */
+function MembersLayout() {
+  return (
+    <MembersProvider>
+      <Outlet />
+    </MembersProvider>
+  );
+}
 
 function App() {
   return (
@@ -64,6 +77,11 @@ function App() {
             <Route path="crop-categories" element={<CropCategories />} />
             <Route path="crops" element={<Crops />} />
             <Route path="harvest" element={<Harvest />} />
+            <Route element={<MembersLayout />}>
+              <Route path="members" element={<Members />} />
+              <Route path="members/new" element={<AddMember />} />
+              <Route path="members/:memberId/edit" element={<EditMember />} />
+            </Route>
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
