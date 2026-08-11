@@ -160,6 +160,8 @@
     }
   html {
     @apply font-sans scroll-smooth;
+    /* Offset in-page anchor jumps so section titles clear the sticky header. */
+    scroll-padding-top: 5rem;
     }
 
   /* Refined scrollbars */

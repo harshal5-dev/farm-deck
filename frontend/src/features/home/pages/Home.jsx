@@ -1,11 +1,10 @@
 import { useAuth } from "@/features/auth";
-import { Link } from "react-router-dom";
 import Header from "../components/Header";
-import Hero from "../components/Hero";
-import Feature from "../components/Feature";
-import TechStack from "../components/TechStack";
-import About from "../components/About";
-import FarmMark from "../components/FarmMark";
+import Hero from "../components/hero/Hero";
+import Feature from "../components/feature/Feature";
+import TechStack from "../components/tech-stack/TechStack";
+import About from "../components/about/About";
+import Footer from "../components/Footer";
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
@@ -13,6 +12,14 @@ const Home = () => {
 
   return (
     <div className="relative min-h-svh bg-background">
+      {/* Skip link for keyboard / screen-reader users */}
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-background px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-border focus:not-sr-only focus:absolute focus:left-4 focus:top-3"
+      >
+        Skip to content
+      </a>
+
       {/* Decorative background */}
       <div
         className="pointer-events-none fixed inset-0 overflow-hidden"
@@ -24,9 +31,9 @@ const Home = () => {
       </div>
 
       {/* Nav */}
-      <Header appLink={appLink} isAuthenticated={isAuthenticated} />
+      <Header isAuthenticated={isAuthenticated} />
 
-      <main className="relative">
+      <main id="main" className="relative scroll-mt-20">
         {/* Hero */}
         <Hero appLink={appLink} isAuthenticated={isAuthenticated} />
 
@@ -41,101 +48,7 @@ const Home = () => {
       </main>
 
       {/* Footer */}
-      <footer className="relative border-t border-border/40 bg-card/30">
-        <div className="absolute inset-0 pattern-contour opacity-20" aria-hidden />
-        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
-            <div>
-              <Link to={appLink} className="inline-flex items-center gap-2.5">
-                <div className="size-7">
-                  <FarmMark />
-                </div>
-                <span className="text-base font-bold tracking-tight">
-                  Farm
-                  <span className="bg-linear-to-r from-leaf to-sage-deep bg-clip-text text-transparent">
-                    deck
-                  </span>
-                </span>
-              </Link>
-              <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-                A full-stack portfolio project for modern, multi-tenant farm
-                management.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
-                Explore
-              </h4>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#features"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#stack"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Tech stack
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#about"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <Link
-                    to={isAuthenticated ? "/app" : "/login"}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {isAuthenticated ? "Dashboard" : "Sign in"}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
-                Source
-              </h4>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li>
-                  <a
-                    href="https://github.com/harshal5-dev/farm-deck"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    GitHub repository →
-                  </a>
-                </li>
-                <li>
-                  <span className="text-muted-foreground/70">
-                    MIT-licensed · v1.0
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row">
-            <p>
-              © {new Date().getFullYear()} Farmdeck · Built with Go, Gin,
-              PostgreSQL & React
-            </p>
-            <p className="font-mono">portfolio.project</p>
-          </div>
-        </div>
-      </footer>
+      <Footer appLink={appLink} isAuthenticated={isAuthenticated} />
     </div>
   );
 };

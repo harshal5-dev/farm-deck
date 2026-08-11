@@ -1,31 +1,14 @@
-import { Reveal, AnimatedNumber } from "@/components/effects";
+import { Reveal } from "@/components/effects";
 import { Button } from "@/components/ui/button";
 import {
   IconArrowRight,
   IconBrandGithub,
-  IconCheck,
-  IconStar,
-  IconCode,
   IconHeartHandshake,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import StatTile from "./StatTile";
+import { highlights, stats } from "../../constants";
 
-const highlights = [
-  { label: "Type-safe SQL with sqlc", icon: IconCode },
-  { label: "JWT auth + refresh tokens", icon: IconStar },
-  { label: "Row-level tenant isolation", icon: IconCheck },
-  { label: "RESTful API design", icon: IconCheck },
-  { label: "Optimistic UI updates", icon: IconCheck },
-  { label: "Dark / light theming", icon: IconCheck },
-];
-
-const stats = [
-  { value: 18, suffix: "+", label: "Pages & screens" },
-  { value: 40, suffix: "+", label: "REST endpoints" },
-  { value: 6, suffix: "", label: "DB tables" },
-  { value: 100, suffix: "%", label: "Type-safe" },
-];
 
 const About = ({ appLink, isAuthenticated }) => {
   return (
@@ -63,7 +46,7 @@ const About = ({ appLink, isAuthenticated }) => {
               href="https://github.com/harshal5-dev/farm-deck"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-leaf transition-colors hover:text-leaf/80"
+              className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-leaf transition-colors hover:text-leaf/80"
             >
               <span className="flex size-9 items-center justify-center rounded-lg bg-leaf/10 ring-1 ring-leaf/20 transition-transform group-hover:scale-105">
                 <IconBrandGithub className="size-4" strokeWidth={1.85} />
@@ -174,24 +157,3 @@ const About = ({ appLink, isAuthenticated }) => {
 };
 
 export default About;
-
-function StatTile({ value, suffix, label }) {
-  return (
-    <div
-      className={cn(
-        "glass-card relative overflow-hidden rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-0.5"
-      )}
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-leaf/40 to-transparent"
-      />
-      <p className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-        <AnimatedNumber value={value} suffix={suffix} />
-      </p>
-      <p className="mt-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-        {label}
-      </p>
-    </div>
-  );
-}

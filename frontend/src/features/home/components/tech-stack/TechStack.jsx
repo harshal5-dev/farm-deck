@@ -1,45 +1,8 @@
 import { Reveal } from "@/components/effects";
-import {
-  IconApi,
-  IconBrandGolang,
-  IconBrandReact,
-  IconDatabase,
-  IconLayoutGrid,
-  IconServer,
-  IconStack2,
-  IconShieldCheck,
-  IconRoute,
-  IconBolt,
-} from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import TechRow from "./TechRow";
+import { groups } from "../../constants";
+import { IconStack2 } from "@tabler/icons-react";
 
-const groups = [
-  {
-    label: "Backend",
-    items: [
-      { icon: IconBrandGolang, name: "Go", role: "Language" },
-      { icon: IconApi, name: "Gin", role: "HTTP framework" },
-      { icon: IconRoute, name: "REST API", role: "Type-safe routes" },
-      { icon: IconShieldCheck, name: "JWT", role: "Auth + refresh" },
-    ],
-  },
-  {
-    label: "Data",
-    items: [
-      { icon: IconDatabase, name: "PostgreSQL", role: "Database" },
-      { icon: IconServer, name: "sqlc", role: "Type-safe SQL" },
-    ],
-  },
-  {
-    label: "Frontend",
-    items: [
-      { icon: IconBrandReact, name: "React 19", role: "UI library" },
-      { icon: IconLayoutGrid, name: "shadcn/ui", role: "Component system" },
-      { icon: IconBolt, name: "Vite", role: "Build tool" },
-      { icon: IconStack2, name: "Redux Toolkit", role: "State + cache" },
-    ],
-  },
-];
 
 const TechStack = () => {
   return (
@@ -100,28 +63,3 @@ const TechStack = () => {
 };
 
 export default TechStack;
-
-function TechRow({ item, index }) {
-  const Icon = item.icon;
-  return (
-    <li
-      className={cn(
-        "group flex items-center gap-3 rounded-xl border border-transparent bg-background/40 px-3 py-2.5 transition-all duration-200",
-        "hover:border-leaf/20 hover:bg-card hover:shadow-sm hover:shadow-leaf/5"
-      )}
-    >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-leaf/10 text-leaf ring-1 ring-leaf/15 transition-transform group-hover:scale-105">
-        <Icon className="size-4.5" strokeWidth={1.75} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold tracking-tight">{item.name}</p>
-        <p className="truncate text-[11px] text-muted-foreground">
-          {item.role}
-        </p>
-      </div>
-      <span className="font-mono text-[10px] text-muted-foreground/40">
-        {String(index).padStart(2, "0")}
-      </span>
-    </li>
-  );
-}

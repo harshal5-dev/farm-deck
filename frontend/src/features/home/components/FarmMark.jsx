@@ -39,4 +39,5 @@ const FarmMark = () => {
     </svg>
   );
 };
+
 export default FarmMark;
