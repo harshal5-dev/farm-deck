@@ -6,7 +6,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import FieldWrapper from "./FieldWrapper";
 import { IconArrowRight, IconEye, IconEyeOff, IconKey, IconLoader2, IconLock, IconMail } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
@@ -85,12 +84,6 @@ const LoginForm = ({ onSubmit, serverError, isLoading }) => {
                   <FormLabel className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Password
                   </FormLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs font-semibold text-leaf transition-colors hover:text-leaf/80 hover:underline"
-                  >
-                    Forgot?
-                  </Link>
                 </div>
                 <FormControl>
                   <FieldWrapper

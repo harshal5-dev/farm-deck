@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useGetProfileQuery } from "./authApi";
 import { setCredentials, clearCredentials } from "./authSlice";
+import { useGetProfileQuery } from "../profile";
 
 /**
  * useSessionBootstrap — single source of truth for "do we have a session?".

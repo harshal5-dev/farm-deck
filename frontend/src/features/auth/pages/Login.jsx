@@ -9,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import {
   useLoginMutation,
-  useLazyGetProfileQuery,
   setCredentials,
 } from "@/features/auth";
 import { normalizeError } from "@/lib/api-errors";
@@ -23,6 +22,7 @@ import {
 import AuthLayout from "../components/AuthLayout";
 import { Reveal } from "@/components/effects";
 import LoginForm from "../components/LoginForm";
+import { useLazyGetProfileQuery } from "@/features/profile";
 
 const Login = () => {
   const [login, { isLoading, error }] = useLoginMutation();

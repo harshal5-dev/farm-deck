@@ -3,8 +3,6 @@ export {
   useLoginMutation,
   useLogoutMutation,
   useRefreshMutation,
-  useGetProfileQuery,
-  useLazyGetProfileQuery,
   useUpdateProfileMutation,
   useUpdateTenantMutation,
 } from "./authApi";
@@ -26,9 +24,6 @@ export {
 } from "./constants";
 
 export { default as Login } from "./pages/Login";
-export { default as ForgotPassword } from "./pages/ForgotPassword";
-export { default as Verify } from "./pages/Verify";
-export { default as ResetPassword } from "./pages/ResetPassword";
 export { default as AuthLayout } from "./components/AuthLayout";
 export {
   default as ProtectedRoute,

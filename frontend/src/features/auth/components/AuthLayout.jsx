@@ -3,18 +3,7 @@ import { IconArrowLeft, IconSeedling, IconCheck } from "@tabler/icons-react";
 import { FarmScene, Reveal } from "@/components/effects";
 import Logo from "@/components/layout/Logo";
 import ThemeToggle from "@/theme/theme-toggle";
-
-/**
- * AuthLayout — split-screen for login/register. Left: branded art panel with
- * the farm scene + value props. Right: the form (children). Collapses to a
- * single column on mobile.
- */
-const features = [
-  "Multi-tenant farm isolation",
-  "Track pH, EC & growth cycles",
-  "Manage fields, crops & harvests",
-  "Soil-type intelligence",
-];
+import { features } from "../constants";
 
 const AuthLayout = ({ children }) => {
   return (

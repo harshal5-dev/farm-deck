@@ -6,7 +6,7 @@ import {
   MembersLayout,
 } from "@/app/router-helpers";
 
-import { Login, ForgotPassword, Verify, ResetPassword } from "@/features/auth";
+import { Login } from "@/features/auth";
 import { Dashboard } from "@/features/dashboard";
 import { Profile } from "@/features/profile";
 import { FarmList, FarmDetail, FarmFormPage } from "@/features/farms";
@@ -34,30 +34,6 @@ export default function App() {
           element={
             <PublicOnlyRoute>
               <Login />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicOnlyRoute>
-              <ForgotPassword />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/verify"
-          element={
-            <PublicOnlyRoute>
-              <Verify />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            <PublicOnlyRoute>
-              <ResetPassword />
             </PublicOnlyRoute>
           }
         />

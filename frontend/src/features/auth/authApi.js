@@ -43,12 +43,6 @@ export const authApi = createApi({
       transformResponse: (response) => response?.data,
     }),
 
-    getProfile: builder.query({
-      query: () => ({ url: "/auth/profile" }),
-      transformResponse: (response) => response?.data,
-      providesTags: ["Profile"],
-    }),
-
     updateProfile: builder.mutation({
       query: (patch) => ({
         url: "/auth/profile",
@@ -75,8 +69,6 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useRefreshMutation,
-  useGetProfileQuery,
-  useLazyGetProfileQuery,
   useUpdateProfileMutation,
   useUpdateTenantMutation,
 } = authApi;

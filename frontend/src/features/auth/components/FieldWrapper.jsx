@@ -1,16 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/**
- * FieldWrapper — a themed input container shared across the auth screens.
- *
- * Renders a leading @tabler icon, an optional trailing slot (e.g. a show/hide
- * password toggle), and a focus-within highlight ring in the brand `leaf`
- * color. The actual form control (an <Input/>) is passed as `children` with
- * its own border/ring stripped so the wrapper supplies the visual chrome.
- *
- * Extracted verbatim from Login.jsx so every auth screen shares one look.
- */
-export default function FieldWrapper({ icon: Icon, trailing, hasError, children }) {
+const FieldWrapper = ({ icon: Icon, trailing, hasError, children }) => {
   return (
     <div
       className={cn(
@@ -32,4 +22,6 @@ export default function FieldWrapper({ icon: Icon, trailing, hasError, children 
       {trailing && <div className="shrink-0">{trailing}</div>}
     </div>
   );
-}
+};
+
+export default FieldWrapper;

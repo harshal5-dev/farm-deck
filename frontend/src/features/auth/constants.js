@@ -24,3 +24,10 @@ export const DEMO_USER = {
   tenantName: "Ganbote Farms",
   createdAt: "2026-08-01T10:01:08.707834+05:30",
 }
+
+export const features = [
+  "Multi-tenant farm isolation",
+  "Track pH, EC & growth cycles",
+  "Manage fields, crops & harvests",
+  "Soil-type intelligence",
+];
