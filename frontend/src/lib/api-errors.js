@@ -25,6 +25,17 @@ const HTTP_MESSAGES = {
   504: "The server took too long to respond. Please try again.",
 };
 
+/**
+ * Copy for auth-FORM submissions (login, register, OTP verify, reset-password).
+ * On these endpoints a 401/403 means bad credentials or missing permissions —
+ * NOT an expired session — so we never say "session expired" here. A backend
+ * message (if present) always takes precedence over these fallbacks.
+ */
+const AUTH_FORM_MESSAGES = {
+  401: "The email or password you entered is incorrect. Please try again.",
+  403: "You don't have permission to sign in with this account.",
+};
+
 /** Extract a backend message string from a response body if present. */
 function extractBackendMessage(data) {
   if (!data) return null;
@@ -46,11 +57,14 @@ function extractBackendMessage(data) {
 /**
  * Normalize any error value into { title, message, status, isAuthError }.
  * @param {*} error - the `error` field from an RTK Query result, or any thrown value.
- * @param {{ entity?: string, action?: string }} opts - context for fallback copy.
+ * @param {{ entity?: string, action?: string, isAuthForm?: boolean }} opts - context for fallback copy.
+ *   - `isAuthForm`: set true for auth-form submissions (login, register, OTP verify,
+ *     reset-password). On these endpoints a 401/403 means bad credentials / not
+ *     allowed — NOT an expired session — so the copy must not say "session expired".
  */
 export function normalizeError(
   error,
-  { entity = "data", action = "load" } = {}
+  { entity = "data", action = "load", isAuthForm = false } = {}
 ) {
   // No error
   if (!error) return null;
@@ -106,11 +120,21 @@ export function normalizeError(
     // Numeric HTTP status
     if (typeof status === "number") {
       const backend = extractBackendMessage(error.data);
+      // Auth-form endpoints (login, register, …) return 401/403 for bad
+      // credentials or missing permissions — not for an expired session.
+      // Prefer any backend message; otherwise use auth-form fallback copy so
+      // we never tell a user their session "expired" at the sign-in step.
+      const fallback =
+        isAuthForm && (status === 401 || status === 403)
+          ? AUTH_FORM_MESSAGES[status]
+          : HTTP_MESSAGES[status];
       return {
-        title: httpTitle(status),
-        message: backend || HTTP_MESSAGES[status] || `Request failed with status ${status}.`,
+        title: httpTitle(status, { isAuthForm }),
+        message: backend || fallback || `Request failed with status ${status}.`,
         status,
-        isAuthError: status === 401 || status === 403,
+        // On an auth form a 401 is NOT a session-expiry we should act on
+        // (no redirect/clear), so isAuthError stays false there.
+        isAuthError: !isAuthForm && (status === 401 || status === 403),
       };
     }
 
@@ -132,7 +156,8 @@ export function normalizeError(
   };
 }
 
-function httpTitle(status) {
+function httpTitle(status, { isAuthForm = false } = {}) {
+  if (isAuthForm && (status === 401 || status === 403)) return "Sign-in failed";
   if (status === 401) return "Session expired";
   if (status === 403) return "Access denied";
   if (status === 404) return "Not found";

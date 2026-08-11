@@ -109,7 +109,7 @@ export default function ResetPassword() {
                 >
                   {serverError && (
                     <ErrorState
-                      variant="auth"
+                      variant="error"
                       title={serverError.title}
                       message={serverError.message}
                       compact

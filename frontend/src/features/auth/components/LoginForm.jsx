@@ -30,7 +30,7 @@ const LoginForm = ({ onSubmit, serverError, isLoading }) => {
         >
           {serverError && (
             <ErrorState
-              variant="auth"
+              variant="error"
               title={serverError.title}
               message={serverError.message}
               compact

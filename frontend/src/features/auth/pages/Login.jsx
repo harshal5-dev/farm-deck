@@ -59,10 +59,12 @@ const Login = () => {
   };
 
   const serverError = error
-    ? normalizeError(error, { entity: "sign-in", action: "sign in to" })
+    ? normalizeError(error, {
+        entity: "sign-in",
+        action: "sign in to",
+        isAuthForm: true,
+      })
     : null;
-
-  console.log("Server error:", serverError);
 
   return (
     <AuthLayout>

@@ -161,7 +161,7 @@ export default function Verify() {
                 >
                   {serverError && (
                     <ErrorState
-                      variant="auth"
+                      variant="error"
                       title={serverError.title}
                       message={serverError.message}
                       compact
