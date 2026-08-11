@@ -1,58 +1,29 @@
 package auth
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
-	"github.com/jackc/pgx/v5"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/slug"
 )
 
-type dbUser = db.User
-
-func toRegisterUserTxParams(req RegisterUserRequest) domain.RegisterUserTxParams {
+func toRegisterUserTxParams(req RegisterUserRequest, hashedPassword string) domain.RegisterUserTxParams {
 	return domain.RegisterUserTxParams{
-		UserInfo:   domain.UserInfo{FullName: req.FullName, EmailID: req.EmailID, PasswordHash: req.Password},
-		TenantInfo: domain.TenantInfo{Name: req.TenantName, Subdomain: generateTenantDomain(req.TenantName)},
+		UserInfo:   domain.UserInfo{FullName: req.FullName, EmailID: req.EmailID},
+		TenantInfo: domain.TenantInfo{Name: req.TenantName, Subdomain: slug.GenerateTenantDomain(req.TenantName)},
+		Credential: domain.Credential{PasswordHash: hashedPassword, EmailID: req.EmailID},
 	}
 }
 
-func toUserProfileResponse(user db.GetUserProfileDetailsRow) UserProfileResponse {
-	return UserProfileResponse{
-		ID:             user.ID,
-		FullName:       user.FullName,
-		EmailID:        user.EmailID,
-		Role:           user.Role,
-		Status:         user.Status,
-		ProfilePicture: user.ProfilePicture,
-		CreatedAt:      user.CreatedAt,
-		TenantDetails: TenantDetails{
-			Name:        user.TenantName,
-			Subdomain:   user.Subdomain,
-			Description: user.Description,
-			ID:          user.TenantID,
-			CreatedAt:   user.TenantCreatedAt,
-		},
-	}
-}
-
-func toUpdateUserProfileParams(userId uuid.UUID, req UpdateUserProfileRequest) db.UpdateUserProfileParams {
-	return db.UpdateUserProfileParams{
-		ID:             userId,
-		FullName:       req.FullName,
-		ProfilePicture: req.ProfilePicture,
-	}
-}
-
-func toRotateParams(old db.RefreshToken, newHash string, meta SessionMeta, ttl time.Duration) db.RotateRefreshTokenTxParams {
+func toRotateParams(oldHash, newHash string, meta SessionMeta, ttl time.Duration) domain.RotateRefreshTokenTxParams {
 	ua, ip := stringPtr(meta.UserAgent), stringPtr(meta.IP)
-	return db.RotateRefreshTokenTxParams{
-		OldTokenHash: tHash(old),
+	return domain.RotateRefreshTokenTxParams{
+		OldTokenHash: oldHash,
 		NewTokenHash: newHash,
 		NewExpiresAt: time.Now().Add(ttl),
-		UserID:       old.UserID,
 		UserAgent:    ua,
 		Ip:           ip,
 	}
@@ -68,26 +39,12 @@ func toCreateRefreshTokenParams(userID uuid.UUID, hash string, ttl time.Duration
 	}
 }
 
-func toUpdateTenantParams(tenantID uuid.UUID, req UpdateTenantRequest) db.UpdateTenantParams {
-	return db.UpdateTenantParams{
-		ID:          tenantID,
-		Name:        req.Name,
-		Description: req.Description,
-		Subdomain:   generateTenantDomain(req.Name),
-	}
+func toJwtUserDetailsFromEmail(user db.GetCredentialByEmailRow) jwt.UserDetails {
+	return jwt.UserDetails{UserId: user.UserID, TenantId: user.TenantID, Role: user.Role}
 }
 
-func userFromRefresh(t db.RefreshToken) dbUser {
-	return dbUser{ID: t.UserID}
-}
-
-func tHash(t db.RefreshToken) string { return t.TokenHash }
-
-func pgxNoRows(err error) error {
-	if errors.Is(err, pgx.ErrNoRows) {
-		return pgx.ErrNoRows
-	}
-	return err
+func toJwtUserDetailsFromUserID(user db.GetCredentialByUserIDRow) jwt.UserDetails {
+	return jwt.UserDetails{UserId: user.UserID, TenantId: user.TenantID, Role: user.Role}
 }
 
 func stringPtr(s string) *string {

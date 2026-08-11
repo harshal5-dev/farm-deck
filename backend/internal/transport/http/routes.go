@@ -7,6 +7,8 @@ import (
 
 	"github.com/harshal5-dev/farm-deck/backend/internal/middlewares"
 	authhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/auth/http"
+	tenanthttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/tenant/http"
+	userhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/user/http"
 )
 
 func (server *Server) setupRoutes(router *gin.Engine) {
@@ -22,4 +24,6 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 
 	api.GET("/health", server.healthCheck)
 	authhttp.Register(public, protected, server.container.Handlers.Auth)
+	userhttp.Register(public, protected, server.container.Handlers.User)
+	tenanthttp.Register(public, protected, server.container.Handlers.Tenant)
 }

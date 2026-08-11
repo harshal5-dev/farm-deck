@@ -3,6 +3,9 @@ package domain
 import "errors"
 
 var (
+	// ErrCredentialNotFound ---- credential errors ---------
+	ErrCredentialNotFound = errors.New("credential not found")
+
 	// ErrTenantExists ---- tenant errors ---------
 	ErrTenantExists   = errors.New("tenant already exists")
 	ErrTenantNotFound = errors.New("tenant not found")

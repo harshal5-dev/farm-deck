@@ -11,11 +11,10 @@ import (
 )
 
 type UserRepo interface {
-	RegisterUser(context.Context, domain.RegisterUserTxParams) (db.RegisterUserTxResult, error)
-	GetUserByEmailID(context.Context, string) (db.User, error)
-	GetUserByID(context.Context, uuid.UUID) (db.User, error)
-	GetUserProfileDetails(context.Context, uuid.UUID) (db.GetUserProfileDetailsRow, error)
-	UpdateUserProfile(context.Context, db.UpdateUserProfileParams) (db.User, error)
+	GetUserByEmailID(ctx context.Context, emailID string) (db.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error)
+	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error)
+	UpdateUserProfile(ctx context.Context, params db.UpdateUserProfileParams) (db.User, error)
 }
 
 type userRepo struct {
@@ -24,14 +23,6 @@ type userRepo struct {
 
 func NewUserRepo(store db.Store) UserRepo {
 	return &userRepo{store: store}
-}
-
-func (r *userRepo) RegisterUser(ctx context.Context, arg domain.RegisterUserTxParams) (db.RegisterUserTxResult, error) {
-	result, err := r.store.RegisterUserTx(ctx, arg)
-	if err != nil {
-		return db.RegisterUserTxResult{}, err
-	}
-	return result, nil
 }
 
 func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.User, error) {

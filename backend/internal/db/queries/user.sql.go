@@ -25,26 +25,24 @@ func (q *Queries) CheckUserExistsByEmailID(ctx context.Context, emailID string) 
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-    full_name, email_id, password_hash, role, status, tenant_id
+    full_name, email_id, role, status, tenant_id
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
-) RETURNING id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at
+    $1, $2, $3, $4, $5
+) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	FullName     string
-	EmailID      string
-	PasswordHash string
-	Role         string
-	Status       string
-	TenantID     uuid.UUID
+	FullName string
+	EmailID  string
+	Role     string
+	Status   string
+	TenantID uuid.UUID
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.FullName,
 		arg.EmailID,
-		arg.PasswordHash,
 		arg.Role,
 		arg.Status,
 		arg.TenantID,
@@ -54,7 +52,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.TenantID,
 		&i.EmailID,
-		&i.PasswordHash,
 		&i.FullName,
 		&i.ProfilePicture,
 		&i.Role,
@@ -66,7 +63,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByEmailID = `-- name: GetUserByEmailID :one
-SELECT id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE email_id = $1
+SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE email_id = $1
 `
 
 func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, error) {
@@ -76,7 +73,6 @@ func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, e
 		&i.ID,
 		&i.TenantID,
 		&i.EmailID,
-		&i.PasswordHash,
 		&i.FullName,
 		&i.ProfilePicture,
 		&i.Role,
@@ -88,7 +84,7 @@ func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, e
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE id = $1
+SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -98,7 +94,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.ID,
 		&i.TenantID,
 		&i.EmailID,
-		&i.PasswordHash,
 		&i.FullName,
 		&i.ProfilePicture,
 		&i.Role,
@@ -149,7 +144,7 @@ func (q *Queries) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetU
 }
 
 const updateUserProfile = `-- name: UpdateUserProfile :one
-UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING id, tenant_id, email_id, password_hash, full_name, profile_picture, role, status, created_at, updated_at
+UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
 `
 
 type UpdateUserProfileParams struct {
@@ -165,7 +160,6 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 		&i.ID,
 		&i.TenantID,
 		&i.EmailID,
-		&i.PasswordHash,
 		&i.FullName,
 		&i.ProfilePicture,
 		&i.Role,

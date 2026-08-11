@@ -10,6 +10,27 @@ import (
 	"github.com/google/uuid"
 )
 
+type Credential struct {
+	UserID       uuid.UUID
+	EmailID      string
+	PasswordHash string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type PasswordReset struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	OtpHash     string
+	ResetToken  *string
+	Attempts    int32
+	MaxAttempts int32
+	IsUsed      bool
+	ExpiresAt   time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type RefreshToken struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
@@ -34,7 +55,6 @@ type User struct {
 	ID             uuid.UUID
 	TenantID       uuid.UUID
 	EmailID        string
-	PasswordHash   string
 	FullName       string
 	ProfilePicture *string
 	Role           string

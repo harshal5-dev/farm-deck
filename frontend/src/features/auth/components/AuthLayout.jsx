@@ -16,7 +16,7 @@ const features = [
   "Soil-type intelligence",
 ];
 
-export default function AuthLayout({ children }) {
+const AuthLayout = ({ children }) => {
   return (
     <div className="relative flex min-h-svh bg-background">
       {/* Floating theme toggle — top right, above everything. */}
@@ -107,3 +107,5 @@ export default function AuthLayout({ children }) {
     </div>
   );
 }
+
+export default AuthLayout;

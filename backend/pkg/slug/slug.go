@@ -1,4 +1,4 @@
-package auth
+package slug
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
-func generateTenantDomain(name string) string {
+func GenerateTenantDomain(name string) string {
 	slug := strings.ToLower(name)
 
 	regInvalidChars := regexp.MustCompile(`[^a-z0-9-]+`)

@@ -62,6 +62,8 @@ const Login = () => {
     ? normalizeError(error, { entity: "sign-in", action: "sign in to" })
     : null;
 
+  console.log("Server error:", serverError);
+
   return (
     <AuthLayout>
       <Reveal delay={0} duration={500} className="w-full max-w-md">

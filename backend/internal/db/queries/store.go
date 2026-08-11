@@ -11,7 +11,7 @@ import (
 type Store interface {
 	Querier
 	RegisterUserTx(ctx context.Context, arg domain.RegisterUserTxParams) (RegisterUserTxResult, error)
-	RotateRefreshTokenTx(ctx context.Context, arg RotateRefreshTokenTxParams) (RefreshToken, error)
+	RotateRefreshTokenTx(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (RotateRefreshTokenTxResult, error)
 	Close()
 }
 

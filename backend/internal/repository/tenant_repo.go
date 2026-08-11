@@ -10,8 +10,8 @@ import (
 )
 
 type TenantRepo interface {
-	CreateTenant(context.Context, db.CreateTenantParams) (db.Tenant, error)
-	UpdateTenant(context.Context, db.UpdateTenantParams) (db.Tenant, error)
+	CreateTenant(ctx context.Context, params db.CreateTenantParams) (db.Tenant, error)
+	UpdateTenant(ctx context.Context, params db.UpdateTenantParams) (db.Tenant, error)
 }
 
 type TenantRepoImpl struct {

@@ -4,13 +4,14 @@ import (
 	"context"
 
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
 type RefreshTokenRepo interface {
 	CreateRefreshToken(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error)
 	GetByHash(ctx context.Context, tokenHash string) (db.RefreshToken, error)
 	RevokeByHash(ctx context.Context, tokenHash string) error
-	Rotate(ctx context.Context, arg db.RotateRefreshTokenTxParams) (db.RefreshToken, error)
+	Rotate(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error)
 }
 
 type RefreshTokenRepoImpl struct {
@@ -33,6 +34,6 @@ func (r *RefreshTokenRepoImpl) RevokeByHash(ctx context.Context, tokenHash strin
 	return r.store.RevokeRefreshTokenByHash(ctx, tokenHash)
 }
 
-func (r *RefreshTokenRepoImpl) Rotate(ctx context.Context, arg db.RotateRefreshTokenTxParams) (db.RefreshToken, error) {
+func (r *RefreshTokenRepoImpl) Rotate(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error) {
 	return r.store.RotateRefreshTokenTx(ctx, arg)
 }

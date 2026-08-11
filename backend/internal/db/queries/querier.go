@@ -13,9 +13,13 @@ import (
 type Querier interface {
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
+	CreateCredential(ctx context.Context, arg CreateCredentialParams) (Credential, error)
+	CreatePasswordReset(ctx context.Context, arg CreatePasswordResetParams) (PasswordReset, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetCredentialByEmail(ctx context.Context, emailID string) (GetCredentialByEmailRow, error)
+	GetCredentialByUserID(ctx context.Context, userID uuid.UUID) (GetCredentialByUserIDRow, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetUserByEmailID(ctx context.Context, emailID string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)

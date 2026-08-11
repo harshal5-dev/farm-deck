@@ -1,5 +1,7 @@
+DROP TABLE IF EXISTS password_resets;
 DROP TABLE IF EXISTS refresh_tokens;
 DROP TABLE IF EXISTS user_invitations;
+DROP TABLE IF EXISTS credentials;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tenants;
 

@@ -7,7 +7,7 @@ import (
 )
 
 type EmailService interface {
-	SendWelcomeEmail(string, string) error
+	SendWelcomeEmail(to, name string) error
 }
 
 type emailService struct {

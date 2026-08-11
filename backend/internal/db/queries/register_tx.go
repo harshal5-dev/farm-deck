@@ -28,6 +28,11 @@ func (store *SQLStore) RegisterUserTx(ctx context.Context, arg domain.RegisterUs
 			return err
 		}
 
+		err = saveCredential(ctx, q, result.User.ID, arg.Credential)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -60,12 +65,20 @@ func saveUser(ctx context.Context, q *Queries, arg domain.UserInfo, tenantID uui
 	}
 
 	user, err := q.CreateUser(ctx, CreateUserParams{
-		FullName:     arg.FullName,
-		EmailID:      arg.EmailID,
-		PasswordHash: arg.PasswordHash,
-		Role:         domain.UserRoleOwner,
-		Status:       domain.UserStatusActive,
-		TenantID:     tenantID,
+		FullName: arg.FullName,
+		EmailID:  arg.EmailID,
+		Role:     domain.UserRoleOwner,
+		Status:   domain.UserStatusActive,
+		TenantID: tenantID,
 	})
 	return user, err
+}
+
+func saveCredential(ctx context.Context, q *Queries, userID uuid.UUID, arg domain.Credential) error {
+	_, err := q.CreateCredential(ctx, CreateCredentialParams{
+		UserID:       userID,
+		EmailID:      arg.EmailID,
+		PasswordHash: arg.PasswordHash,
+	})
+	return err
 }

@@ -1,0 +1,78 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="TMEHgiSpCqJ93KLEFLZ2">
+    <mxGraphModel dx="999" dy="872" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="160" x="170" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="180" x="440" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-9" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="80" y="540" as="sourcePoint" />
+            <mxPoint x="80" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 15px;&quot;&gt;Backend API&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="100" x="200" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;PostgresSQL&lt;/span&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="100" x="480" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="180" x="710" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;Email / SMS Service&lt;/span&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="150" x="730" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-15" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.431;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="qDQQxxI0nhBk0PU7Qhay-6" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="240" y="570" as="sourcePoint" />
+            <mxPoint x="440" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-16" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="80" y="260" as="sourcePoint" />
+            <mxPoint x="240" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;color: rgb(0, 0, 255);&quot;&gt;1. POST /forgot-password {email}&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="210" x="60" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-18" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;endFill=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="290" y="290" />
+              <mxPoint x="290" y="330" />
+              <mxPoint x="240" y="330" />
+            </Array>
+            <mxPoint x="240" y="290" as="sourcePoint" />
+            <mxPoint x="240" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-19" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.444;entryY=1.058;entryDx=0;entryDy=0;entryPerimeter=0;" target="qDQQxxI0nhBk0PU7Qhay-8" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="519.92" y="560" as="sourcePoint" />
+            <mxPoint x="440" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-20" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;color: rgb(0, 0, 255);&quot;&gt;2. Generate 6-digit OTP &amp;amp; hash it (SHA-256)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="210" x="290" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-21" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="240" y="380" as="sourcePoint" />
+            <mxPoint x="520" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qDQQxxI0nhBk0PU7Qhay-22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font color=&quot;#cdcdff&quot; face=&quot;Comic Sans MS&quot;&gt;3.Invalidate previous OTPS &amp;amp; INSERT into passowrd&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="525" x="145" y="390" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
