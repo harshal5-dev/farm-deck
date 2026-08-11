@@ -19,7 +19,6 @@ import { baseQuery } from "@/lib/api";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery,
-  tagTypes: ["Profile"],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -43,25 +42,6 @@ export const authApi = createApi({
       transformResponse: (response) => response?.data,
     }),
 
-    updateProfile: builder.mutation({
-      query: (patch) => ({
-        url: "/auth/profile",
-        method: "PATCH",
-        body: patch,
-      }),
-      transformResponse: (response) => response?.data,
-      invalidatesTags: ["Profile"],
-    }),
-
-    updateTenant: builder.mutation({
-      query: (patch) => ({
-        url: "/auth/tenant",
-        method: "PATCH",
-        body: patch,
-      }),
-      transformResponse: (response) => response?.data,
-      invalidatesTags: ["Profile"],
-    }),
   }),
 });
 
@@ -69,6 +49,4 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useRefreshMutation,
-  useUpdateProfileMutation,
-  useUpdateTenantMutation,
 } = authApi;

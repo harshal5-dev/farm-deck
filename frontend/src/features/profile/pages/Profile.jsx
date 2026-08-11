@@ -22,10 +22,6 @@ import {
   IconBuilding,
 } from "@tabler/icons-react";
 import { useAuth } from "@/features/auth";
-import {
-  useUpdateProfileMutation,
-  useUpdateTenantMutation,
-} from "@/features/auth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -67,6 +63,7 @@ import {
   getAvatar,
 } from "@/components/avatars/avatars";
 import { cn } from "@/lib/utils";
+import { useUpdateProfileMutation, useUpdateTenantMutation } from "../profileApi";
 
 /* ---------- formatters ---------- */
 

@@ -3,8 +3,6 @@ export {
   useLoginMutation,
   useLogoutMutation,
   useRefreshMutation,
-  useUpdateProfileMutation,
-  useUpdateTenantMutation,
 } from "./authApi";
 
 export {
@@ -26,7 +24,6 @@ export {
 export { default as Login } from "./pages/Login";
 export { default as AuthLayout } from "./components/AuthLayout";
 export {
-  default as ProtectedRoute,
-  PublicOnlyRoute,
-  FullPageLoader,
+  default as ProtectedRoute
 } from "./components/ProtectedRoute";
+export { default as PublicOnlyRoute } from "./components/PublicOnlyRoute";

@@ -1,156 +1,72 @@
+
 import {
-  IconPlant,
-  IconChartDots,
-  IconArrowsMoveVertical,
-  IconChecklist,
-  IconDroplet,
-  IconLeaf,
-  IconFlower,
-  IconBasket,
   IconActivity,
-  IconTrendingUp,
-  IconArrowUpRight,
-} from "@tabler/icons-react"
-import { stats, recentActivity } from "@/mocks"
-import { cn } from "@/lib/utils"
-import {
-  Reveal,
-  AnimatedCounter,
-  AnimatedBar,
-  FarmScene,
-} from "@/components/effects"
+  IconBasket,
+  IconChartDots,
+  IconDroplet,
+} from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
+import { Reveal, FarmScene } from "@/components/effects";
+import { useAuth } from "@/features/auth";
 
-const statMeta = {
-  farms: {
-    icon: IconPlant,
-    text: "text-leaf",
-    chip: "from-leaf/20 to-leaf/5 text-leaf",
-    glow: "bg-leaf/15",
-  },
-  fields: {
+/**
+ * The roadmap of dashboard modules that aren't built yet. Each becomes a
+ * "Coming soon" card. Accent keys map into `accentMap` below so every card
+ * draws from the farm palette.
+ */
+const roadmap = [
+  {
     icon: IconChartDots,
-    text: "text-sky-warm",
-    chip: "from-sky-warm/20 to-sky-warm/5 text-sky-warm",
-    glow: "bg-sky-warm/15",
+    title: "Farm Analytics",
+    desc: "Deep insights into yields, growth cycles, and performance across every growing location.",
+    accent: "leaf",
   },
-  area: {
-    icon: IconArrowsMoveVertical,
-    text: "text-clay-deep dark:text-clay",
-    chip: "from-clay/20 to-clay/5 text-clay-deep dark:text-clay",
-    glow: "bg-clay/15",
+  {
+    icon: IconDroplet,
+    title: "Field Intelligence",
+    desc: "Live pH, EC, and soil-health readings from every active field, refreshed in real time.",
+    accent: "sky",
   },
-  crops: {
-    icon: IconChecklist,
-    text: "text-wheat",
-    chip: "from-wheat/25 to-wheat/5 text-wheat",
-    glow: "bg-wheat/20",
+  {
+    icon: IconBasket,
+    title: "Harvest Planning",
+    desc: "Plan crop cycles, schedule harvests, and forecast yields with smart timelines.",
+    accent: "wheat",
   },
-}
+  {
+    icon: IconActivity,
+    title: "Team Activity",
+    desc: "A unified feed of every action across your farms — who did what, and when.",
+    accent: "clay",
+  },
+];
 
-function StatCard({ metaKey, label, value, format, subtitle, trend, delay }) {
-  const meta = statMeta[metaKey]
-  const Icon = meta.icon
-
-  return (
-    <Reveal delay={delay} duration={500}>
-      <div className="glass-card texture-paper highlight-edge group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-leaf/15">
-        {/* Hover wash */}
-        <div
-          className={cn(
-            "absolute -right-10 -top-10 size-32 rounded-full opacity-50 blur-2xl transition-all duration-500 group-hover:scale-150 group-hover:opacity-90",
-            meta.glow
-          )}
-        />
-        <div className="relative flex items-start justify-between">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            <div className="mt-2 flex items-end gap-1.5">
-              <span className="font-heading text-3xl font-semibold tracking-tight tabular-nums">
-                <AnimatedCounter
-                  value={value}
-                  duration={1000}
-                  format={format}
-                />
-              </span>
-            </div>
-            {subtitle && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
-                {trend && (
-                  <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
-                    <IconArrowUpRight className="size-3" strokeWidth={2.2} />
-                    {trend}
-                  </span>
-                )}
-                {subtitle}
-              </p>
-            )}
-          </div>
-          <div
-            className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/10 dark:ring-white/5",
-              meta.chip
-            )}
-          >
-            <Icon className={cn("size-5", meta.text)} strokeWidth={1.75} />
-          </div>
-        </div>
-      </div>
-    </Reveal>
-  )
-}
-
-const activityMeta = {
-  harvest: { Icon: IconBasket, text: "text-wheat", bg: "bg-wheat/15" },
-  plant: { Icon: IconLeaf, text: "text-leaf", bg: "bg-leaf/15" },
-  ph: { Icon: IconDroplet, text: "text-sky-warm", bg: "bg-sky-warm/15" },
-  status: { Icon: IconFlower, text: "text-clay", bg: "bg-clay/15" },
-}
-
-function ActivityItem({ activity }) {
-  const { Icon, text, bg } = activityMeta[activity.type] || activityMeta.status
-
-  return (
-    <div className="group flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/50">
-      <div
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110",
-          bg
-        )}
-      >
-        <Icon className={cn("size-4", text)} strokeWidth={1.75} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-snug">{activity.message}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {activity.farm} &middot; {activity.time}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function HealthRow({ label, value, max, color, delay }) {
-  const pct = Math.min((value / max) * 100, 100)
-
-  return (
-    <Reveal delay={delay} duration={500}>
-      <div className="flex items-center gap-3">
-        <span className="w-24 shrink-0 text-xs font-medium text-muted-foreground">
-          {label}
-        </span>
-        <AnimatedBar pct={pct} color={color} />
-        <span className="w-10 text-right text-xs font-semibold tabular-nums">
-          {value}
-        </span>
-      </div>
-    </Reveal>
-  )
-}
+const accentMap = {
+  leaf: {
+    chip: "bg-leaf/15 text-leaf ring-leaf/20",
+    glow: "bg-leaf/10",
+  },
+  sky: {
+    chip: "bg-sky-warm/15 text-sky-warm ring-sky-warm/20",
+    glow: "bg-sky-warm/10",
+  },
+  wheat: {
+    chip: "bg-wheat/20 text-wheat ring-wheat/30",
+    glow: "bg-wheat/10",
+  },
+  clay: {
+    chip: "bg-clay/15 text-clay-deep ring-clay/20 dark:text-clay",
+    glow: "bg-clay/10",
+  },
+};
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const firstName = user?.fullName?.split(" ")[0] || "there";
+
   return (
     <div className="space-y-8">
-      {/* Illustrated landscape hero */}
+      {/* ---------- Welcome header ---------- */}
       <Reveal duration={500}>
         <div className="relative h-60 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-lg shadow-leaf/5 sm:h-64">
           <FarmScene />
@@ -163,128 +79,85 @@ export default function Dashboard() {
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf opacity-75" />
                 <span className="relative inline-flex size-2 rounded-full bg-leaf" />
               </span>
-              All systems operational
+              Dashboard
             </span>
-            <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Your Harvest Awaits 🌾
+            <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+              Welcome back, {firstName} 🌱
             </h1>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Welcome back — your fields are thriving. Here's today's overview
-              across all your growing locations.
+              The dashboard is sprouting. Insights and live monitoring are on
+              the roadmap — explore the modules below to see what&rsquo;s
+              coming.
             </p>
           </div>
         </div>
       </Reveal>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          metaKey="farms"
-          label="Total Farms"
-          value={stats.totalFarms}
-          subtitle={`${stats.activeFarms} active`}
-          trend="100%"
-          delay={60}
-        />
-        <StatCard
-          metaKey="fields"
-          label="Active Fields"
-          value={stats.activeFields}
-          subtitle={`of ${stats.totalFields} total`}
-          delay={130}
-        />
-        <StatCard
-          metaKey="area"
-          label="Total Area"
-          value={stats.totalArea / 1000}
-          format={(n) => `${n.toFixed(1)}k`}
-          subtitle="sq ft across all farms"
-          delay={200}
-        />
-        <StatCard
-          metaKey="crops"
-          label="Crops Growing"
-          value={stats.cropsInProgress}
-          subtitle={`${stats.harvestedThisMonth} harvested this month`}
-          delay={270}
-        />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Reveal delay={120} duration={500} className="lg:col-span-2">
-          <div className="glass-card texture-paper h-full rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <IconTrendingUp
-                  className="size-5 text-leaf"
-                  strokeWidth={1.75}
-                />
-                <h2 className="font-heading text-base font-semibold">
-                  Farm Health Overview
-                </h2>
-              </div>
-              <span className="text-xs text-muted-foreground">Live</span>
-            </div>
-            <div className="mt-6 space-y-4">
-              <HealthRow
-                label="pH Level"
-                value={stats.averagePh}
-                max={8}
-                color="bg-gradient-to-r from-leaf to-sage-deep"
-                delay={180}
-              />
-              <HealthRow
-                label="EC (mS/cm)"
-                value={stats.averageEc}
-                max={3}
-                color="bg-gradient-to-r from-sky-warm to-sky-warm"
-                delay={250}
-              />
-              <HealthRow
-                label="Active Crops"
-                value={stats.cropsInProgress}
-                max={12}
-                color="bg-gradient-to-r from-wheat to-clay"
-                delay={320}
-              />
-              <HealthRow
-                label="Harvests"
-                value={stats.harvestedThisMonth}
-                max={10}
-                color="bg-gradient-to-r from-clay to-clay-deep"
-                delay={390}
-              />
-            </div>
+      {/* ---------- Coming soon cards ---------- */}
+      <section>
+        <Reveal delay={80} duration={500}>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-base font-semibold tracking-tight">
+              On the roadmap
+            </h2>
+            <span className="text-xs text-muted-foreground">In progress</span>
           </div>
         </Reveal>
 
-        <Reveal delay={200} duration={500}>
-          <div className="glass-card texture-paper h-full rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <IconActivity
-                  className="size-5 text-leaf"
-                  strokeWidth={1.75}
-                />
-                <h2 className="font-heading text-base font-semibold">
-                  Recent Activity
-                </h2>
-              </div>
-            </div>
-            <div className="mt-4 -mx-3 space-y-0.5">
-              {recentActivity.map((a, i) => (
-                <Reveal
-                  key={a.id}
-                  delay={280 + i * 70}
-                  duration={400}
-                  changeKey={a.id}
-                >
-                  <ActivityItem activity={a} />
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+          {roadmap.map((item, i) => (
+            <ComingSoonCard key={item.title} item={item} delay={120 + i * 80} />
+          ))}
+        </div>
+      </section>
     </div>
-  )
+  );
+}
+
+/**
+ * ComingSoonCard — a themed placeholder for an unbuilt dashboard module.
+ * Shows the icon, title, description, and a "Coming soon" pill.
+ */
+function ComingSoonCard({ item, delay }) {
+  const meta = accentMap[item.accent];
+  const Icon = item.icon;
+
+  return (
+    <Reveal delay={delay} duration={500}>
+      <div className="glass-card texture-paper group relative h-full overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-leaf/10">
+        {/* hover glow */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute -top-12 -right-8 size-32 rounded-full opacity-60 blur-2xl transition-all duration-500 group-hover:scale-150 group-hover:opacity-90",
+            meta.glow
+          )}
+        />
+
+        <div className="relative flex h-full flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className={cn(
+                "flex size-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset",
+                meta.chip
+              )}
+            >
+              <Icon className="size-6" strokeWidth={1.7} />
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+              <span className="size-1.5 rounded-full bg-wheat" />
+              Coming soon
+            </span>
+          </div>
+
+          <h3 className="mt-5 font-heading text-lg font-bold tracking-tight">
+            {item.title}
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {item.desc}
+          </p>
+        </div>
+      </div>
+    </Reveal>
+  );
 }
