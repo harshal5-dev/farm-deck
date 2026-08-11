@@ -9,10 +9,9 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://farmdeck.app/terms",
         "contact": {
             "name": "Farm Deck Support",
-            "email": "support@farmdeck.app"
+            "email": "harshalganbote55@gmail.com"
         },
         "license": {
             "name": "Proprietary"
@@ -24,7 +23,6 @@ const docTemplate = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Authenticates the user with email and password, sets the auth cookie, and returns a JWT.",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,36 +72,51 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/profile": {
-            "get": {
-                "security": [
-                    {
-                        "CookieAuth": []
-                    }
-                ],
-                "description": "Returns the profile of the currently authenticated user.",
+        "/auth/logout": {
+            "post": {
+                "description": "Revokes the current refresh token and clears auth cookies.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "auth"
                 ],
-                "summary": "Get current user profile",
+                "summary": "Log out",
                 "responses": {
                     "200": {
-                        "description": "user profile",
+                        "description": "logged out",
                         "schema": {
-                            "$ref": "#/definitions/UserProfileResponse"
+                            "$ref": "#/definitions/RegisterResponse"
                         }
                     },
-                    "401": {
-                        "description": "authentication required or invalid token",
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "$ref": "#/definitions/APIError"
                         }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Uses the httpOnly refresh_token cookie to issue a new access token (and rotates the refresh token).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access token",
+                "responses": {
+                    "200": {
+                        "description": "tokens refreshed",
+                        "schema": {
+                            "$ref": "#/definitions/LoginResponse"
+                        }
                     },
-                    "404": {
-                        "description": "user not found",
+                    "401": {
+                        "description": "refresh token missing, invalid, or expired",
                         "schema": {
                             "$ref": "#/definitions/APIError"
                         }
@@ -188,6 +201,159 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tenants/me": {
+            "patch": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tenant"
+                ],
+                "summary": "Update current tenant",
+                "parameters": [
+                    {
+                        "description": "Tenant update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTenantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "tenant updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "validation error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the profile of the currently authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get current user profile",
+                "responses": {
+                    "200": {
+                        "description": "user profile",
+                        "schema": {
+                            "$ref": "#/definitions/UserProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update current user profile",
+                "parameters": [
+                    {
+                        "description": "Profile update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateUserProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "profile updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "validation error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -197,6 +363,18 @@ const docTemplate = `{
                 "error": {
                     "$ref": "#/definitions/ErrorDetail"
                 },
+                "success": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
                 "success": {
                     "type": "boolean"
                 },
@@ -248,7 +426,7 @@ const docTemplate = `{
         "LoginResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "accessToken": {
                     "type": "string"
                 }
             }
@@ -291,6 +469,58 @@ const docTemplate = `{
                 }
             }
         },
+        "TenantDetails": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateTenantRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                }
+            }
+        },
+        "UpdateUserProfileRequest": {
+            "type": "object",
+            "required": [
+                "fullName"
+            ],
+            "properties": {
+                "fullName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "profilePicture": {
+                    "type": "string"
+                }
+            }
+        },
         "UserProfileResponse": {
             "type": "object",
             "properties": {
@@ -306,11 +536,17 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "profilePicture": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
-                "tenantId": {
+                "status": {
                     "type": "string"
+                },
+                "tenantDetails": {
+                    "$ref": "#/definitions/TenantDetails"
                 }
             }
         }

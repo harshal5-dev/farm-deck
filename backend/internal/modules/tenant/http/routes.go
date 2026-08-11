@@ -7,6 +7,6 @@ import (
 
 func Register(public, protected *gin.RouterGroup, h tenant.TenantHandler) {
 
-	protectedRoutes := protected.Group("/auth")
-	protectedRoutes.PATCH("/tenant", h.IsUpdateTenantAllowed, h.UpdateTenant)
+	protectedRoutes := protected.Group("/tenants")
+	protectedRoutes.PATCH("/me", h.IsUpdateTenantAllowed, h.UpdateTenant)
 }

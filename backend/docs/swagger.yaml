@@ -9,6 +9,14 @@ definitions:
       timestamp:
         type: string
     type: object
+  APIResponse:
+    properties:
+      data: {}
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
   ErrorDetail:
     properties:
       code:
@@ -38,7 +46,7 @@ definitions:
     type: object
   LoginResponse:
     properties:
-      token:
+      accessToken:
         type: string
     type: object
   RegisterResponse:
@@ -69,6 +77,41 @@ definitions:
     - password
     - tenantName
     type: object
+  TenantDetails:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      subdomain:
+        type: string
+    type: object
+  UpdateTenantRequest:
+    properties:
+      description:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  UpdateUserProfileRequest:
+    properties:
+      fullName:
+        maxLength: 100
+        minLength: 2
+        type: string
+      profilePicture:
+        type: string
+    required:
+    - fullName
+    type: object
   UserProfileResponse:
     properties:
       createdAt:
@@ -79,22 +122,25 @@ definitions:
         type: string
       id:
         type: string
+      profilePicture:
+        type: string
       role:
         type: string
-      tenantId:
+      status:
         type: string
+      tenantDetails:
+        $ref: '#/definitions/TenantDetails'
     type: object
 host: localhost:8083
 info:
   contact:
-    email: support@farmdeck.app
+    email: harshalganbote55@gmail.com
     name: Farm Deck Support
   description: |-
     Farm management multi-tenant API.
     All responses follow a standard envelope (see Schemas).
   license:
     name: Proprietary
-  termsOfService: https://farmdeck.app/terms
   title: Farm Deck API
   version: "1.0"
 paths:
@@ -102,8 +148,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticates the user with email and password, sets the auth cookie,
-        and returns a JWT.
       parameters:
       - description: Login payload
         in: body
@@ -133,31 +177,43 @@ paths:
       summary: Log in
       tags:
       - auth
-  /auth/profile:
-    get:
-      description: Returns the profile of the currently authenticated user.
+  /auth/logout:
+    post:
+      description: Revokes the current refresh token and clears auth cookies.
       produces:
       - application/json
       responses:
         "200":
-          description: user profile
+          description: logged out
           schema:
-            $ref: '#/definitions/UserProfileResponse'
-        "401":
-          description: authentication required or invalid token
+            $ref: '#/definitions/RegisterResponse'
+        "500":
+          description: internal server error
           schema:
             $ref: '#/definitions/APIError'
-        "404":
-          description: user not found
+      summary: Log out
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Uses the httpOnly refresh_token cookie to issue a new access token
+        (and rotates the refresh token).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokens refreshed
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        "401":
+          description: refresh token missing, invalid, or expired
           schema:
             $ref: '#/definitions/APIError'
         "500":
           description: internal server error
           schema:
             $ref: '#/definitions/APIError'
-      security:
-      - CookieAuth: []
-      summary: Get current user profile
+      summary: Refresh access token
       tags:
       - auth
   /auth/register:
@@ -208,6 +264,102 @@ paths:
       summary: Liveness check
       tags:
       - health
+  /tenants/me:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tenant update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateTenantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tenant updated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Update current tenant
+      tags:
+      - tenant
+  /users/me:
+    get:
+      description: Returns the profile of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user profile
+          schema:
+            $ref: '#/definitions/UserProfileResponse'
+        "401":
+          description: authentication required or invalid token
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Get current user profile
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profile update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: profile updated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Update current user profile
+      tags:
+      - user
 schemes:
 - http
 - https

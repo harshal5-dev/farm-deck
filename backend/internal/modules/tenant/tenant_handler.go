@@ -26,7 +26,7 @@ func NewTenantHandler(tenantService TenantService) TenantHandler {
 
 // UpdateTenant godoc
 // @Summary      Update current tenant
-// @Tags         auth
+// @Tags         tenant
 // @Accept       json
 // @Produce      json
 // @Security     CookieAuth
@@ -35,7 +35,7 @@ func NewTenantHandler(tenantService TenantService) TenantHandler {
 // @Failure      400 {object} response.APIError "validation error"
 // @Failure      401 {object} response.APIError "authentication required"
 // @Failure      500 {object} response.APIError "internal server error"
-// @Router       /auth/tenant [patch]
+// @Router       /tenants/me [patch]
 func (h *TenantHandlerImpl) UpdateTenant(ctx *gin.Context) {
 	tenantID, err := ctxutil.GetTenantID(ctx)
 	if err != nil {

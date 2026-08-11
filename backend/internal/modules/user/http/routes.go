@@ -7,7 +7,7 @@ import (
 
 func Register(public, protected *gin.RouterGroup, h user.UserHandler) {
 
-	protectedRoutes := protected.Group("/user")
-	protectedRoutes.GET("/profile", h.GetCurrentProfile)
-	protectedRoutes.PATCH("/profile", h.UpdateProfile)
+	protectedRoutes := protected.Group("/users")
+	protectedRoutes.GET("/me", h.GetCurrentProfile)
+	protectedRoutes.PATCH("/me", h.UpdateProfile)
 }

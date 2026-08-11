@@ -26,14 +26,14 @@ func NewUserHandler(userService UserService) *UserHandlerImpl {
 // GetCurrentProfile godoc
 // @Summary      Get current user profile
 // @Description  Returns the profile of the currently authenticated user.
-// @Tags         auth
+// @Tags         user
 // @Produce      json
 // @Security     CookieAuth
 // @Success      200 {object} UserProfileResponse "user profile"
 // @Failure      401 {object} response.APIError "authentication required or invalid token"
 // @Failure      404 {object} response.APIError "user not found"
 // @Failure      500 {object} response.APIError "internal server error"
-// @Router       /auth/profile [get]
+// @Router       /users/me [get]
 func (h *UserHandlerImpl) GetCurrentProfile(ctx *gin.Context) {
 	userID, err := ctxutil.GetUserID(ctx)
 	if err != nil {
@@ -51,7 +51,7 @@ func (h *UserHandlerImpl) GetCurrentProfile(ctx *gin.Context) {
 
 // UpdateProfile godoc
 // @Summary      Update current user profile
-// @Tags         auth
+// @Tags         user
 // @Accept       json
 // @Produce      json
 // @Security     CookieAuth
@@ -60,7 +60,7 @@ func (h *UserHandlerImpl) GetCurrentProfile(ctx *gin.Context) {
 // @Failure      400 {object} response.APIError "validation error"
 // @Failure      401 {object} response.APIError "authentication required"
 // @Failure      500 {object} response.APIError "internal server error"
-// @Router       /auth/profile [patch]
+// @Router       /users/me [patch]
 func (h *UserHandlerImpl) UpdateProfile(ctx *gin.Context) {
 	userID, err := ctxutil.GetUserID(ctx)
 	if err != nil {

@@ -107,7 +107,7 @@ func parseEnvFile(name string) (map[string]string, error) {
 		}
 		k = strings.TrimSpace(k)
 		v = strings.TrimSpace(v)
-		v = strings.Trim(v, `"`)
+		v = strings.Trim(v, `"'`)
 		result[k] = v
 	}
 	return result, nil
