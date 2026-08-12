@@ -7,8 +7,6 @@ import { AuthProviderContext } from "./context";
  *
  *   user            - the backend UserProfileResponse, or null
  *   isAuthenticated - true once a valid session is established
- *   updateUser(p)   - merges a patch into the current user (local-only;
- *                     replace with a real PATCH /auth/profile when available)
  *   clearAuth()     - clears local auth state (used on 401 + refresh failure)
  */
 export function useAuth() {

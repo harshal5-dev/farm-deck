@@ -8,7 +8,6 @@ export {
 export {
   default as authReducer,
   setCredentials,
-  updateUser,
   clearCredentials,
 } from "./authSlice";
 

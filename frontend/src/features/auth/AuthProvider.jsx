@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { AuthProviderContext } from "./context";
-import { updateUser as updateUserAction, clearCredentials } from "./authSlice";
+import { clearCredentials } from "./authSlice";
 
 /**
- * AuthProvider — provides the auth context (updateUser, clearAuth).
+ * AuthProvider — provides the auth context (clearAuth).
  *
  * The actual session check is route-driven: ProtectedRoute and
  * PublicOnlyRoute each mount `useSessionBootstrap`, which fires the
@@ -15,15 +15,11 @@ import { updateUser as updateUserAction, clearCredentials } from "./authSlice";
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
 
-  const updateUser = useCallback(
-    (patch) => dispatch(updateUserAction(patch)),
-    [dispatch]
-  );
   const clearAuth = useCallback(() => dispatch(clearCredentials()), [dispatch]);
 
   const value = useMemo(
-    () => ({ updateUser, clearAuth }),
-    [updateUser, clearAuth]
+    () => ({ clearAuth }),
+    [clearAuth]
   );
 
   return (

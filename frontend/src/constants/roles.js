@@ -122,6 +122,13 @@ export const STATUS_META = {
   },
 };
 
+export const USER_ROLES = {
+  owner: ROLES.owner,
+  manager: ROLES.manager,
+  grower: ROLES.grower,
+  viewer: ROLES.viewer,
+};
+
 export function getRole(roleId) {
   return ROLES[roleId] || ROLES.viewer;
 }

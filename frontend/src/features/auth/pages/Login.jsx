@@ -71,7 +71,7 @@ const Login = () => {
       <Reveal delay={0} duration={500} className="w-full max-w-md">
         <Card
           size="sm"
-          className="glass-card texture-paper highlight-edge relative gap-0 overflow-hidden rounded-3xl border-0 p-0 ring-1 ring-foreground/5"
+          className="glass-card texture-paper highlight-edge relative gap-0 overflow-hidden border-0 p-0 ring-1 ring-foreground/5"
         >
           {/* ---------- Decorative top band ---------- */}
           <div className="relative h-1.5 overflow-hidden">
