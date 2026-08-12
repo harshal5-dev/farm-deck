@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/effects";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar as ProfileAvatar } from "@/components/avatars/avatars";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { IconBuildingWarehouse, IconCalendar, IconCopy, IconCrown, IconFingerpri
 import InfoTile from "./InfoTile";
 import { toast } from "sonner";
 import { useMemo } from "react";
-import { DEFAULT_AVATAR_ID, getAvatar } from "@/components/avatars/avatars";
+import { DEFAULT_AVATAR_ID, getAvatar } from "@/components/avatars/avatars-data";
 
 const formatDate = (iso) => {
   if (!iso) return "—";
@@ -49,7 +49,6 @@ const Hero = ({ user, isOwner }) => {
 
   const savedAvatarId = user.profilePicture || DEFAULT_AVATAR_ID;
   const savedAvatarLabel = getAvatar(savedAvatarId).label;
-  console.log(savedAvatarId, savedAvatarLabel, "savedAvatar");
 
   return (
     <Reveal delay={60} duration={500}>
@@ -90,7 +89,7 @@ const Hero = ({ user, isOwner }) => {
             <div className="relative -mt-12 shrink-0 sm:-mt-14">
               <div className="absolute -inset-2 rounded-full bg-linear-to-br from-leaf/40 via-sky-warm/30 to-clay/30 opacity-70 blur-xl" />
               <div className="relative rounded-full bg-background p-1 shadow-lg ring-1 ring-foreground/5">
-                <Avatar
+                <ProfileAvatar
                   id={savedAvatarId}
                   className="size-24 sm:size-28"
                   title={savedAvatarLabel}

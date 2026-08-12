@@ -123,10 +123,10 @@ export const STATUS_META = {
 };
 
 export const USER_ROLES = {
-  owner: ROLES.owner,
-  manager: ROLES.manager,
-  grower: ROLES.grower,
-  viewer: ROLES.viewer,
+  owner: "owner",
+  manager: "manager",
+  grower: "grower",
+  viewer: "viewer",
 };
 
 export function getRole(roleId) {

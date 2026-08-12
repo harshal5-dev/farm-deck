@@ -23,7 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, DEFAULT_AVATAR_ID } from "@/components/avatars/avatars";
+import { Avatar } from "@/components/avatars/avatars";
+import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import { Reveal } from "@/components/effects";
 import {
   Popover,

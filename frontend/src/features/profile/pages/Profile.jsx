@@ -13,6 +13,7 @@ import { useUpdateProfileMutation, useUpdateTenantMutation } from "../profileApi
 import ProfileForm from "../components/ProfileForm";
 import TenantForm from "../components/TenantForm";
 import Hero from "../components/Hero";
+import { checkIsOwner } from "@/lib/utils";
 
 
 
@@ -20,7 +21,6 @@ import Hero from "../components/Hero";
 
 const Profile = () => {
   const { user } = useAuth();
-  console.log(user, "user");
 
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
   const [updateTenant, { isLoading: isSavingTenant }] =
@@ -40,7 +40,7 @@ const Profile = () => {
     );
   }
 
-  const isOwner = (user.role || "").toLowerCase() === "owner";
+  const isOwner = checkIsOwner(user.role);
 
   const onProfileSubmit = async (values) => {
     try {
@@ -104,9 +104,9 @@ const Profile = () => {
                 <TabsTrigger value="profile" icon={IconUser}>
                   Personal info
                 </TabsTrigger>
-                <TabsTrigger value="company" icon={IconBuildingWarehouse}>
+                {isOwner && (<TabsTrigger value="company" icon={IconBuildingWarehouse}>
                   Company
-                </TabsTrigger>
+                </TabsTrigger>)}
               </TabsList>
               <p className="hidden text-xs text-muted-foreground sm:block">
                 Changes save when you press the Save button.
@@ -118,10 +118,11 @@ const Profile = () => {
               <ProfileForm onProfileSubmit={onProfileSubmit} isSaving={isSaving} user={user} />
             </TabsContent>
 
-            {/* §2 — Company (tenant) */}
-            <TabsContent value="company">
+          {/* §2 — Company (tenant) */}
+          { isOwner && (<TabsContent value="company">
               <TenantForm onTenantSubmit={onTenantSubmit} isSavingTenant={isSavingTenant} tenantDetails={user.tenantDetails} />
             </TabsContent>
+          )}
           </Tabs>
         </Reveal>
       </div>

@@ -21,10 +21,8 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import FarmerAvatar from "@/components/effects/FarmerAvatar";
-import {
-  Avatar as ChosenAvatar,
-  DEFAULT_AVATAR_ID,
-} from "@/components/avatars/avatars";
+import { Avatar as ChosenAvatar } from "@/components/avatars/avatars";
+import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import ThemeToggle from "@/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 

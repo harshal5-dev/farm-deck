@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar as ProfileAvatar } from "@/components/avatars/avatars";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import LockedField from "@/components/ui/locked-field";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars";
+import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import { useForm, useWatch } from "react-hook-form";
 
 
@@ -73,7 +73,7 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
                       <div className="flex flex-col items-center gap-3">
                         <div className="relative shrink-0">
                           <div className="absolute -inset-1 rounded-full bg-linear-to-br from-leaf/30 to-sky-warm/30 blur-md" />
-                          <Avatar
+                          <ProfileAvatar
                             id={field.value || savedAvatarId}
                             className="relative size-20 shadow-md ring-4 ring-background"
                           />

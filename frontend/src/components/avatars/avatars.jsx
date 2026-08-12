@@ -42,7 +42,7 @@ function Backdrop({ idPrefix, light, deep }) {
 /* ------------------------------------------------------------------ */
 
 /* 1 — Farmer (sun hat, mustache, overalls) */
-function Farmer() {
+export function Farmer() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -76,7 +76,7 @@ function Farmer() {
 }
 
 /* 2 — Gardener (cap, watering can, cheerful) */
-function Gardener() {
+export function Gardener() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -105,7 +105,7 @@ function Gardener() {
 }
 
 /* 3 — Cow */
-function Cow() {
+export function Cow() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -139,7 +139,7 @@ function Cow() {
 }
 
 /* 4 — Hen */
-function Hen() {
+export function Hen() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -169,7 +169,7 @@ function Hen() {
 }
 
 /* 5 — Pig */
-function Pig() {
+export function Pig() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -200,7 +200,7 @@ function Pig() {
 }
 
 /* 6 — Lamb */
-function Lamb() {
+export function Lamb() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -231,7 +231,7 @@ function Lamb() {
 }
 
 /* 7 — Horse */
-function Horse() {
+export function Horse() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -260,7 +260,7 @@ function Horse() {
 }
 
 /* 8 — Bee */
-function Bee() {
+export function Bee() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -293,7 +293,7 @@ function Bee() {
 }
 
 /* 9 — Fox */
-function Fox() {
+export function Fox() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -321,7 +321,7 @@ function Fox() {
 }
 
 /* 10 — Scarecrow */
-function Scarecrow() {
+export function Scarecrow() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -350,7 +350,7 @@ function Scarecrow() {
 }
 
 /* 11 — Mushroom */
-function Mushroom() {
+export function Mushroom() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -381,7 +381,7 @@ function Mushroom() {
 }
 
 /* 12 — Pumpkin */
-function Pumpkin() {
+export function Pumpkin() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -416,7 +416,7 @@ function Pumpkin() {
 /* ------------------------------------------------------------------ */
 
 /* 13 — Rooster */
-function Rooster() {
+export function Rooster() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -447,7 +447,7 @@ function Rooster() {
 }
 
 /* 14 — Goat */
-function Goat() {
+export function Goat() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -480,7 +480,7 @@ function Goat() {
 }
 
 /* 15 — Owl */
-function Owl() {
+export function Owl() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -511,7 +511,7 @@ function Owl() {
 }
 
 /* 16 — Strawberry */
-function Strawberry() {
+export function Strawberry() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -545,7 +545,7 @@ function Strawberry() {
 }
 
 /* 17 — Tomato */
-function Tomato() {
+export function Tomato() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -574,7 +574,7 @@ function Tomato() {
 }
 
 /* 18 — Wheat */
-function Wheat() {
+export function Wheat() {
   const uid = useId().replace(/[:#]/g, "");
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -605,32 +605,7 @@ function Wheat() {
   );
 }
 
-export const FARM_AVATARS = [
-  { id: "farmer", label: "Farmer", Component: Farmer },
-  { id: "gardener", label: "Gardener", Component: Gardener },
-  { id: "cow", label: "Cow", Component: Cow },
-  { id: "hen", label: "Hen", Component: Hen },
-  { id: "pig", label: "Pig", Component: Pig },
-  { id: "lamb", label: "Lamb", Component: Lamb },
-  { id: "horse", label: "Horse", Component: Horse },
-  { id: "bee", label: "Bee", Component: Bee },
-  { id: "fox", label: "Fox", Component: Fox },
-  { id: "scarecrow", label: "Scarecrow", Component: Scarecrow },
-  { id: "mushroom", label: "Mushroom", Component: Mushroom },
-  { id: "pumpkin", label: "Pumpkin", Component: Pumpkin },
-  { id: "rooster", label: "Rooster", Component: Rooster },
-  { id: "goat", label: "Goat", Component: Goat },
-  { id: "owl", label: "Owl", Component: Owl },
-  { id: "strawberry", label: "Strawberry", Component: Strawberry },
-  { id: "tomato", label: "Tomato", Component: Tomato },
-  { id: "wheat", label: "Wheat", Component: Wheat },
-];
-
-export const DEFAULT_AVATAR_ID = "farmer";
-
-export function getAvatar(id) {
-  return FARM_AVATARS.find((a) => a.id === id) || FARM_AVATARS[0];
-}
+import { FARM_AVATARS, getAvatar } from "./avatars-data";
 
 /* ------------------------------------------------------------------ */
 /*  Public components                                                  */
@@ -682,7 +657,7 @@ export function AvatarPicker({ selected, onSelect }) {
             {/* label on hover (always visible on selected) */}
             <div
               className={cn(
-                "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-1 py-1 text-center transition-opacity",
+                "absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent px-1 py-1 text-center transition-opacity",
                 isSelected
                   ? "opacity-100"
                   : "opacity-0 group-hover:opacity-100"
@@ -704,4 +679,3 @@ export function AvatarPicker({ selected, onSelect }) {
      </div>
    );
  }
-

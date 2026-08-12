@@ -1,4 +1,4 @@
-import { FARM_AVATARS, getAvatar } from "@/components/avatars/avatars";
+import { FARM_AVATARS, getAvatar } from "@/components/avatars/avatars-data";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";

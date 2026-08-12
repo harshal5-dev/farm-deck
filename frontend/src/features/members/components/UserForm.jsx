@@ -1,4 +1,4 @@
-import { useId, useMemo } from "react";
+import { useId } from "react";
 import { useForm } from "react-hook-form";
 import {
   IconUser,
@@ -14,12 +14,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Avatar,
-  DEFAULT_AVATAR_ID,
-  FARM_AVATARS,
-  getAvatar,
-} from "@/components/avatars/avatars";
+import { Avatar } from "@/components/avatars/avatars";
+import { DEFAULT_AVATAR_ID, FARM_AVATARS, getAvatar } from "@/components/avatars/avatars-data";
 import {
   Popover,
   PopoverTrigger,
@@ -321,7 +317,7 @@ export default function UserForm({
   const role = watch("role");
   const avatarId = watch("avatarId");
 
-  const roleMeta = useMemo(() => getRole(role), [role]);
+  // const roleMeta = useMemo(() => getRole(role), [role]);
 
   const submit = async (values) => {
     await onSubmit({

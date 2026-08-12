@@ -7,6 +7,6 @@ export const cn = (...inputs) => {
 }
 
 
-export const isOwner = (role) => {
+export const checkIsOwner = (role) => {
   return role === USER_ROLES.owner;
 }
