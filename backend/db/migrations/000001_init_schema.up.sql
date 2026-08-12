@@ -48,27 +48,6 @@ CREATE TABLE refresh_tokens (
 CREATE UNIQUE INDEX uq_refresh_token_hash ON refresh_tokens(token_hash);
 CREATE INDEX idx_refresh_user_live ON refresh_tokens(user_id) WHERE revoked_at IS NULL;
 
-CREATE TABLE password_resets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES credentials(user_id) ON DELETE CASCADE,
-    otp_hash CHAR(64) NOT NULL,
-    reset_token VARCHAR(255) NULL UNIQUE,
-    attempts INT NOT NULL DEFAULT 0,
-    max_attempts INT NOT NULL DEFAULT 3,
-    is_used BOOLEAN NOT NULL DEFAULT FALSE,
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_password_resets_user_active
-ON password_resets (user_id, expires_at)
-WHERE is_used = FALSE;
-
-CREATE INDEX idx_password_resets_token
-ON password_resets (reset_token)
-WHERE is_used = FALSE AND reset_token IS NOT NULL;
-
 
 CREATE TABLE user_invitations (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),

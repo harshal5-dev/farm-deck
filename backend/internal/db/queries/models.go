@@ -18,19 +18,6 @@ type Credential struct {
 	UpdatedAt    time.Time
 }
 
-type PasswordReset struct {
-	ID          uuid.UUID
-	UserID      uuid.UUID
-	OtpHash     string
-	ResetToken  *string
-	Attempts    int32
-	MaxAttempts int32
-	IsUsed      bool
-	ExpiresAt   time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
 type RefreshToken struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
