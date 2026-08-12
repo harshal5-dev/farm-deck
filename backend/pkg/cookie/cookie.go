@@ -32,11 +32,14 @@ func ClearRefreshCookie(ctx *gin.Context, cfg Config) {
 }
 
 func setCookie(ctx *gin.Context, name, value string, ttl time.Duration, cfg Config) {
-	ctx.SetCookie(name, value, int(ttl.Seconds()), "/", cfg.CookieDomain, cfg.CookieSecure, cfg.CookieHttpOnly)
+	// SetSameSite must run before SetCookie: gin bakes c.sameSite into the
+	// http.Cookie at SetCookie time, so setting it afterwards has no effect.
 	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie(name, value, int(ttl.Seconds()), "/", cfg.CookieDomain, cfg.CookieSecure, cfg.CookieHttpOnly)
 }
 
 func clearCookie(ctx *gin.Context, name string, cfg Config) {
-	ctx.SetCookie(name, "", -1, "/", cfg.CookieDomain, cfg.CookieSecure, cfg.CookieHttpOnly)
+	// SetSameSite must run before SetCookie (see setCookie for details).
 	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie(name, "", -1, "/", cfg.CookieDomain, cfg.CookieSecure, cfg.CookieHttpOnly)
 }
