@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import FarmMark from "./FarmMark";
+import Logo from "@/components/layout/Logo";
 
 const Footer = ({ appLink, isAuthenticated }) => {
   return (
@@ -9,9 +9,7 @@ const Footer = ({ appLink, isAuthenticated }) => {
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <Link to={appLink} className="inline-flex items-center gap-2.5">
-              <div className="size-7">
-                <FarmMark />
-              </div>
+              <Logo variant="mark" className="size-7" />
               <span className="text-base font-bold tracking-tight">
                 Farm
                 <span className="bg-linear-to-r from-leaf to-sage-deep bg-clip-text text-transparent">

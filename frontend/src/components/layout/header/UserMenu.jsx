@@ -1,74 +1,23 @@
-import {
-  IconUser,
-  IconLogout,
-  IconChevronRight,
-  IconMenu2,
-  IconLoader2,
-  IconBuildingWarehouse,
-  IconCrown,
-  IconSparkles,
-} from "@tabler/icons-react";
+import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { clearCredentials, useAuth, useLogoutMutation } from "@/features/auth";
+import { ProfileApi } from "@/features/profile";
+import { checkIsOwner, cn } from "@/lib/utils";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/features/auth";
-import { useLogoutMutation, clearCredentials } from "@/features/auth";
-import { useDispatch } from "react-redux";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import HeaderAvatar from "./HeaderAvatar";
+import { IconBuildingWarehouse, IconChevronRight, IconCrown, IconLoader2, IconLogout, IconSparkles, IconUser } from "@tabler/icons-react";
 import { Separator } from "@/components/ui/separator";
-import FarmerAvatar from "@/components/effects/FarmerAvatar";
-import { Avatar as ChosenAvatar } from "@/components/avatars/avatars";
-import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
-import ThemeToggle from "@/theme/theme-toggle";
-import { cn } from "@/lib/utils";
+import MenuIcon from "./MenuIcon";
 
-/** Format a role like "owner" → "Owner". */
 function displayRole(role) {
   if (!role) return "Member";
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-/** Renders the user's chosen avatar if they have one, else the default
- *  FarmerAvatar illustration. */
-function HeaderAvatar({ id, className }) {
-  if (id) {
-    return <ChosenAvatar id={id} className={className} />;
-  }
-  return (
-    <div
-      className={
-        "overflow-hidden rounded-full ring-2 ring-background " +
-        (className || "")
-      }
-    >
-      <FarmerAvatar className="size-full" />
-    </div>
-  );
-}
-
-/** Small icon chip used inside menu items. */
-function MenuIcon({ icon: Icon, tone = "leaf" }) {
-  return (
-    <div
-      className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-white/10 transition-all duration-300 ring-inset dark:ring-white/5",
-        tone === "leaf" && "bg-gradient-to-br from-leaf/20 to-leaf/5 text-leaf",
-        tone === "clay" &&
-          "bg-gradient-to-br from-clay/25 to-clay/5 text-clay-deep dark:text-clay",
-        tone === "danger" &&
-          "bg-gradient-to-br from-red-500/20 to-red-500/5 text-red-500"
-      )}
-    >
-      <Icon className="size-4" strokeWidth={1.85} />
-    </div>
-  );
-}
-
-function UserMenu() {
+const UserMenu = () => {
   const { user } = useAuth();
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -80,7 +29,7 @@ function UserMenu() {
     currentUser.tenantName ||
     currentUser.tenantDetails?.name ||
     "Your workspace";
-  const isOwner = (currentUser.role || "").toLowerCase() === "owner";
+  const isOwner = checkIsOwner(currentUser.role);
 
   const goToProfile = () => {
     setMenuOpen(false);
@@ -89,13 +38,14 @@ function UserMenu() {
 
   const handleSignOut = async () => {
     setMenuOpen(false);
-    dispatch(clearCredentials());
-    navigate("/login", { replace: true });
     try {
       await logout().unwrap();
+      dispatch(clearCredentials());
+      dispatch(ProfileApi.util.resetApiState());
+      navigate("/login", { replace: true });
     } catch {
       toast.error("Couldn't reach the server", {
-        description: "You've been signed out locally.",
+        description: "Please try again — your session is still active.",
       });
     }
   };
@@ -129,14 +79,14 @@ function UserMenu() {
         {/* ---------- Identity card ---------- */}
         <div className="relative overflow-hidden">
           {/* layered gradient + blobs */}
-          <div className="absolute inset-0 bg-gradient-to-br from-leaf/20 via-sage-deep/10 to-sky-warm/15" />
+          <div className="absolute inset-0 bg-linear-to-br from-leaf/20 via-sage-deep/10 to-sky-warm/15" />
           <div className="absolute -top-12 -right-12 size-32 rounded-full bg-wheat/30 blur-2xl" />
           <div className="absolute -bottom-16 -left-10 size-36 rounded-full bg-sky-warm/25 blur-2xl" />
           <div className="pattern-contour absolute inset-0 opacity-50 mix-blend-soft-light" />
 
           <div className="relative flex items-center gap-3 px-4 pt-4 pb-3.5">
             <div className="relative shrink-0">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-leaf/40 via-sky-warm/30 to-clay/30 opacity-70 blur-md" />
+              <div className="absolute -inset-1 rounded-full bg-linear-to-br from-leaf/40 via-sky-warm/30 to-clay/30 opacity-70 blur-md" />
               <div className="relative rounded-full bg-background p-0.5 shadow-md ring-1 ring-foreground/5">
                 <HeaderAvatar id={avatarId} className="size-12" />
                 <span className="absolute right-0 bottom-0 flex size-3.5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-background">
@@ -157,7 +107,7 @@ function UserMenu() {
                   className={cn(
                     "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ring-1 ring-inset",
                     isOwner
-                      ? "bg-gradient-to-br from-clay/20 to-clay/5 text-clay-deep ring-clay/30 dark:text-clay"
+                      ? "bg-linear-to-br from-clay/20 to-clay/5 text-clay-deep ring-clay/30 dark:text-clay"
                       : "bg-leaf/10 text-leaf ring-leaf/20"
                   )}
                 >
@@ -183,7 +133,7 @@ function UserMenu() {
             </span>
             {currentUser.tenantDetails?.subdomain && (
               <>
-                <span className="ml-auto inline-flex items-center gap-1 rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                <span className="ml-auto inline-flex items-center gap-1 rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground truncate">
                   {currentUser.tenantDetails.subdomain}
                 </span>
               </>
@@ -266,57 +216,4 @@ function UserMenu() {
   );
 }
 
-function Greeting() {
-  const { user } = useAuth();
-  const hour = new Date().getHours();
-  let greeting = "Good evening";
-  let emoji = "🌙";
-  if (hour < 12) {
-    greeting = "Good morning";
-    emoji = "🌅";
-  } else if (hour < 17) {
-    greeting = "Good afternoon";
-    emoji = "☀️";
-  }
-
-  const fullName = user?.fullName || "";
-  const firstName = (fullName || "there").split(" ")[0];
-
-  return (
-    <div className="flex min-w-0 items-center gap-2.5">
-      <span className="hidden text-xl sm:block">{emoji}</span>
-      <div className="min-w-0 leading-tight">
-        <p className="truncate text-sm font-semibold tracking-tight">
-          {greeting},{" "}
-          <span className="bg-linear-to-r from-leaf to-sage-deep bg-clip-text text-transparent">
-            {firstName}
-          </span>
-        </p>
-        <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-          Here's what's growing today 🌱
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export default function Header({ onMenuClick }) {
-  return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/40 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
-      <button
-        onClick={onMenuClick}
-        className="flex size-9 items-center justify-center rounded-xl border border-border/50 bg-card/50 text-muted-foreground transition-all hover:text-foreground active:scale-95 lg:hidden"
-        aria-label="Open menu"
-      >
-        <IconMenu2 className="size-4" strokeWidth={2} />
-      </button>
-
-      <Greeting />
-
-      <div className="ml-auto flex items-center gap-2">
-        <ThemeToggle variant="solid" />
-        <UserMenu />
-      </div>
-    </header>
-  );
-}
+export default UserMenu;

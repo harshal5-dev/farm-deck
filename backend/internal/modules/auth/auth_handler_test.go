@@ -60,12 +60,18 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	if svc.registerCalls != 1 {
 		t.Errorf("expected RegisterUser called once, got %d", svc.registerCalls)
 	}
-	var resp map[string]string
+	var resp struct {
+		Success bool              `json:"success"`
+		Data    map[string]string `json:"data"`
+	}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("invalid json: %v", err)
 	}
-	if resp["message"] != "user registered successfully" {
-		t.Errorf("message: got %q", resp["message"])
+	if !resp.Success {
+		t.Error("expected success=true")
+	}
+	if resp.Data["message"] != "user registered successfully" {
+		t.Errorf("message: got %q", resp.Data["message"])
 	}
 }
 
@@ -120,12 +126,15 @@ func TestAuthHandler_Login_SuccessSetsCookies(t *testing.T) {
 	if cookieValue(t, w, "refresh_token") != "refresh-val" {
 		t.Error("expected refresh_token cookie to be set")
 	}
-	var resp map[string]string
+	var resp struct {
+		Success bool              `json:"success"`
+		Data    map[string]string `json:"data"`
+	}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("invalid json: %v", err)
 	}
-	if resp["accessToken"] != "access-val" {
-		t.Errorf("accessToken: got %q", resp["accessToken"])
+	if resp.Data["accessToken"] != "access-val" {
+		t.Errorf("accessToken: got %q", resp.Data["accessToken"])
 	}
 }
 

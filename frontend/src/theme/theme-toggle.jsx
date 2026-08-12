@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils"
 
 /**
  * ThemeToggle — a self-contained light/dark switch that morphs its icon.
- * `variant="ghost"` matches the floating landing/login style (pill on glass);
- * `variant="solid"` matches the dashboard header's bordered chip style.
+ * Borderless icon button — relies on the hover background + icon colour
+ * change for affordance so the header reads as one clean band instead of
+ * a row of bordered chips.
  */
 export default function ThemeToggle({ variant = "ghost", className }) {
   const { theme, setTheme } = useTheme()
@@ -17,16 +18,13 @@ export default function ThemeToggle({ variant = "ghost", className }) {
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       className={cn(
-        "group relative flex size-9 items-center justify-center overflow-hidden rounded-xl backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0",
-        variant === "solid"
-          ? "border border-border/50 bg-card/50 text-muted-foreground hover:border-leaf/40 hover:text-leaf hover:shadow-md hover:shadow-leaf/10"
-          : "border border-border/40 bg-card/40 text-muted-foreground hover:border-leaf/40 hover:text-leaf hover:shadow-md hover:shadow-leaf/10",
+        "group relative flex size-10 items-center justify-center overflow-hidden rounded-xl text-muted-foreground transition-all duration-300 hover:bg-leaf/10 hover:text-leaf active:scale-95",
         className
       )}
     >
       <IconSun
         className={cn(
-          "absolute size-4 transition-all duration-300",
+          "absolute size-5 transition-all duration-300",
           isDark
             ? "scale-100 rotate-0 opacity-100"
             : "scale-0 -rotate-90 opacity-0"
@@ -35,7 +33,7 @@ export default function ThemeToggle({ variant = "ghost", className }) {
       />
       <IconMoon
         className={cn(
-          "absolute size-4 transition-all duration-300",
+          "absolute size-5 transition-all duration-300",
           isDark
             ? "scale-0 rotate-90 opacity-0"
             : "scale-100 rotate-0 opacity-100"

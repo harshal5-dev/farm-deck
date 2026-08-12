@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
-import FarmMark from "@/features/home/components/FarmMark";
+import Logo from "@/components/layout/Logo";
 import { useAuth } from "@/features/auth";
 import {
   IconArrowLeft,
@@ -41,9 +41,7 @@ export default function NotFound() {
               className="inline-flex items-center gap-2"
               aria-label="Farmdeck home"
             >
-              <div className="size-8">
-                <FarmMark />
-              </div>
+              <Logo variant="mark" className="size-8" />
               <span className="text-lg font-bold tracking-tight">
                 Farm
                 <span className="bg-linear-to-r from-leaf to-sage-deep bg-clip-text text-transparent">

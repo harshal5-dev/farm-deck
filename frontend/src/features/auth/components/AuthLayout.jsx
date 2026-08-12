@@ -70,22 +70,20 @@ const AuthLayout = ({ children }) => {
 
       {/* Right form panel */}
       <div className="relative flex w-full flex-col lg:w-1/2">
-        <div className="flex items-center justify-between p-6">
+        <div className="flex flex-col items-center gap-4 px-6 pt-8 pb-2">
+          {/* Mobile logo — centered above the form so the brand sits at
+              the top of attention instead of being tucked in the corner.
+              No `animate` here: the entrance animation forces a transform
+              compositing layer which can render blurry on mobile GPUs. */}
+          <Link to="/" className="lg:hidden">
+            <Logo variant="full" withSubtitle={false} />
+          </Link>
           <Link
             to="/"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <IconArrowLeft className="size-4" strokeWidth={1.75} />
             Back to home
-          </Link>
-          {/* mobile logo */}
-          <Link to="/" className="lg:hidden">
-            <Logo
-              variant="full"
-              withSubtitle={false}
-              animate
-              className="[&_span]:text-sm"
-            />
           </Link>
         </div>
 

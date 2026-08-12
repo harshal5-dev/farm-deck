@@ -6,17 +6,15 @@ import {
   IconX,
   IconChevronLeft,
   IconChevronRight,
-  IconUserPlus,
   IconCommand,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import Header from "@/components/layout/header";
+import Header from "@/components/layout/header/Header";
 import Logo from "@/components/layout/Logo";
 
 /**
@@ -52,7 +50,7 @@ const navGroups = [
   },
 ];
 
-function NavItem({ item, collapsed, index }) {
+function NavItem({ item, collapsed, index, onNavigate }) {
   const Icon = item.icon;
   const end = item.end ?? item.href === "/app";
 
@@ -61,6 +59,7 @@ function NavItem({ item, collapsed, index }) {
       to={item.href}
       end={end}
       viewTransition
+      onClick={onNavigate}
       style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
       className={({ isActive }) =>
         cn(
@@ -132,72 +131,18 @@ function BrandLogo({ collapsed }) {
       )}
     >
       {collapsed ? (
-        <Logo variant="badge" className="size-9" withSubtitle={false} />
+        <Logo variant="badge" />
       ) : (
-        <Logo variant="full" withSubtitle />
+        <Logo variant="full" />
       )}
     </div>
   );
 }
 
-/**
- * Footer card — contextual tip that promotes the "invite member" CTA.
- * Pulls double-duty as a navigation hint + invitation reminder.
- */
-function InviteHintCard({ collapsed }) {
-  if (collapsed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={<span className="flex justify-center" />}>
-          <div className="group/icon relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-leaf/20 to-sky-warm/15 ring-1 ring-leaf/25 ring-inset transition-transform duration-200 hover:scale-105">
-            <div className="absolute inset-0 pattern-contour opacity-40" />
-            <IconUserPlus
-              className="relative size-4.5 text-leaf drop-shadow-sm"
-              strokeWidth={1.85}
-            />
-            <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-clay text-[8px] font-bold text-white shadow ring-1 ring-sidebar">
-              2
-            </span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right" className="max-w-[14rem]">
-          <p className="font-semibold">2 pending invites</p>
-          <p className="text-[11px] text-muted-foreground">
-            Open Members to review or resend.
-          </p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <div className="group/card relative overflow-hidden rounded-2xl border border-leaf/20 bg-linear-to-br from-leaf/15 via-sage/8 to-sky-warm/12 p-3.5 transition-all duration-200 hover:border-leaf/30 hover:shadow-md hover:shadow-leaf/10">
-      <div className="pattern-contour pointer-events-none absolute inset-0 opacity-40" />
-      <div className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-wheat/30 blur-2xl" />
-      <div className="relative flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-leaf to-sage-deep text-white shadow-sm ring-1 ring-white/15">
-          <IconUserPlus className="size-4" strokeWidth={1.85} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-xs font-semibold tracking-tight">
-              Grow your team
-            </p>
-            <span className="inline-flex h-4 items-center rounded-full bg-clay/15 px-1.5 text-[9px] font-bold tabular-nums text-clay-deep dark:text-clay">
-              2 pending
-            </span>
-          </div>
-          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-            Invite growers, managers & viewers to collaborate.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Renders the grouped navigation with section labels + staggered entrance. */
-function NavList({ collapsed }) {
+/** Renders the grouped navigation with section labels + staggered entrance.
+ *  `onNavigate` (optional) — called when a nav item is activated. Used by
+ *  the mobile drawer so tapping a link auto-closes the sidebar. */
+function NavList({ collapsed, onNavigate }) {
   let runningIndex = 0;
   return (
     <nav className="flex flex-1 flex-col gap-4 p-3">
@@ -215,7 +160,7 @@ function NavList({ collapsed }) {
                 <TooltipTrigger
                   render={<span className="flex justify-center" />}
                 >
-                  <NavItem item={item} collapsed index={idx} />
+                  <NavItem item={item} collapsed index={idx} onNavigate={onNavigate} />
                 </TooltipTrigger>
                 <TooltipContent side="right">{item.label}</TooltipContent>
               </Tooltip>
@@ -225,6 +170,7 @@ function NavList({ collapsed }) {
                 item={item}
                 collapsed={false}
                 index={idx}
+                onNavigate={onNavigate}
               />
             );
           })}
@@ -244,9 +190,13 @@ function MobileSidebar({ open, onClose }) {
 
   return (
     <>
+      {/* Dim overlay. `backdrop-blur` was removed: combined with the
+          sidebar's transform-composited layer it was producing a blurry
+          Mark logo on some mobile browsers. The semi-transparent bg
+          alone is enough to dim the page content. */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-soil/40 backdrop-blur-sm transition-all duration-300 lg:hidden",
+          "fixed inset-0 z-40 bg-soil/50 transition-opacity duration-300 lg:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         onClick={onClose}
@@ -257,22 +207,21 @@ function MobileSidebar({ open, onClose }) {
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="pattern-contour absolute inset-0 opacity-40" />
+        <div className="pattern-contour pointer-events-none absolute inset-0 opacity-40" />
         <div className="relative flex flex-1 flex-col">
           <div className="flex h-16 items-center justify-between pr-3">
             <BrandLogo collapsed={false} />
             <button
               onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-sidebar-accent hover:text-foreground active:scale-95"
+              aria-label="Close menu"
             >
               <IconX className="size-4" strokeWidth={2} />
             </button>
           </div>
-          <Separator />
-          <NavList collapsed={false} />
-          <div className="p-3">
-            <InviteHintCard collapsed={false} />
-          </div>
+          <div className="mx-3 h-px bg-linear-to-r from-transparent via-leaf/45 to-transparent" />
+          {/* onNavigate closes the drawer when a link is tapped. */}
+          <NavList collapsed={false} onNavigate={onClose} />
         </div>
       </aside>
     </>
@@ -283,19 +232,22 @@ function DesktopSidebar({ collapsed, onToggle }) {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 lg:flex",
+        "fixed inset-y-0 left-0 z-40 hidden flex-col bg-sidebar transition-all duration-300 lg:flex",
         collapsed ? "w-19" : "w-65"
       )}
     >
-      <div className="pattern-contour absolute inset-0 opacity-30" />
+      <div className="pattern-contour pointer-events-none absolute inset-0 opacity-30" />
+      {/* Outer leaf-tinted glow — gives the sidebar a soft farm-green halo
+          on its right edge, sitting on the page surface. */}
+      <div className="pointer-events-none absolute inset-y-2 -right-3 w-3 bg-linear-to-b from-transparent via-leaf/20 to-transparent blur-md" />
+      {/* Themed right edge — fades at top/bottom, peaks in leaf through
+          sage-deep so the boundary reads clearly without a hard line. */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-linear-to-b from-leaf/10 via-sage-deep/60 to-leaf/10" />
       <div className="relative flex flex-1 flex-col">
         <BrandLogo collapsed={collapsed} />
-        <Separator />
+        <div className="mx-3 h-px bg-linear-to-r from-transparent via-leaf/45 to-transparent" />
         <NavList collapsed={collapsed} />
-        <div className="p-3">
-          <InviteHintCard collapsed={collapsed} />
-        </div>
-        <div className="border-t border-sidebar-border/60 p-2">
+        <div className="p-2">
           <button
             onClick={onToggle}
             className="group flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-muted-foreground transition-colors duration-200 hover:bg-sidebar-accent hover:text-foreground"
@@ -312,7 +264,7 @@ function DesktopSidebar({ collapsed, onToggle }) {
                   strokeWidth={1.85}
                 />
                 Collapse
-                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md border border-border/60 bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground">
+                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground ring-1 ring-inset ring-leaf/40">
                   <IconCommand className="size-2.5" strokeWidth={2.2} />
                   <span>B</span>
                 </kbd>

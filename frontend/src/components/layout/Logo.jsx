@@ -1,157 +1,176 @@
 import { cn } from "@/lib/utils";
+
 /**
- * Logo — FarmDeck's unique mark: a stylized barn/silo roof resting on
- * rolling field rows. Fuses the "deck" (layered rows) with growth (the
- * rising sun + sprout) in one symbol.
+ * Mark — the FarmDeck leaf-shaped brand symbol.
+ *
+ * A stylized leaf pointing up: gradient body (leaf → sage-deep), a sun
+ * rising behind the horizon, a single sprout climbing toward it, a
+ * centre vein, and a top highlight for depth. Self-contained SVG that
+ * any component can drop in (sidebar, home page, footer, 404 page,
+ * favicon). Sized via the wrapper's className (e.g. `size-9`, `size-8`).
+ */
+export const Mark = ({ className }) => (
+  <svg
+    viewBox="0 0 48 48"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className || "size-full"}
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient
+        id="fd-leaf-body"
+        x1="24"
+        y1="4"
+        x2="24"
+        y2="46"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0%" stopColor="#66BB6A" />
+        <stop offset="45%" stopColor="#43A047" />
+        <stop offset="100%" stopColor="#2E7D32" />
+      </linearGradient>
+      <linearGradient
+        id="fd-leaf-shine"
+        x1="24"
+        y1="4"
+        x2="24"
+        y2="22"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.22" />
+        <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+      </linearGradient>
+    </defs>
+
+    {/* Leaf body */}
+    <path
+      d="M24 4 C 17 6, 7 16, 6 27 C 5 41, 15 46, 24 46 C 33 46, 43 41, 42 27 C 41 16, 31 6, 24 4 Z"
+      fill="url(#fd-leaf-body)"
+    />
+
+    {/* Sun rising behind the horizon — slow breathing */}
+    <g
+      style={{ transformOrigin: "32px 20px", transformBox: "fill-box" }}
+      className="animate-sun-pulse"
+    >
+      <circle cx="32" cy="20" r="4.5" fill="#FFD56B" opacity="0.95" />
+      <circle cx="32" cy="20" r="7" fill="#FFD56B" opacity="0.3" />
+    </g>
+
+    {/* Horizon line */}
+    <path
+      d="M0 32 C 10 30, 20 30, 24 32 C 28 34, 38 34, 48 32 L 48 48 L 0 48 Z"
+      fill="#1F5C3A"
+      opacity="0.4"
+    />
+
+    {/* Sprout climbing toward the sun — gentle sway */}
+    <g
+      style={{ transformOrigin: "24px 32px", transformBox: "fill-box" }}
+      className="animate-sprout-sway"
+    >
+      <path
+        d="M24 32 L 24 18"
+        stroke="#FFFFFF"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        opacity="0.95"
+      />
+      <circle cx="24" cy="17" r="1.6" fill="#FFFFFF" />
+    </g>
+
+    {/* Vein down the middle */}
+    <line
+      x1="24"
+      y1="8"
+      x2="24"
+      y2="42"
+      stroke="#FFFFFF"
+      strokeWidth="0.6"
+      opacity="0.22"
+    />
+
+    {/* Top highlight */}
+    <path
+      d="M24 4 C 17 6, 7 16, 6 27 L 7 25 C 11 14, 17 7, 24 5 C 31 7, 37 14, 41 25 L 42 27 C 41 16, 31 6, 24 4 Z"
+      fill="url(#fd-leaf-shine)"
+    />
+
+    {/* Outline — thicker so the silhouette pops on light backgrounds */}
+    <path
+      d="M24 4 C 17 6, 7 16, 6 27 C 5 41, 15 46, 24 46 C 33 46, 43 41, 42 27 C 41 16, 31 6, 24 4 Z"
+      fill="none"
+      stroke="#FFFFFF"
+      strokeWidth="0.9"
+      opacity="0.55"
+    />
+  </svg>
+);
+
+/**
+ * Logo — composes the leaf `Mark` with the wordmark.
  *
  * Variants:
- *  - `mark`   : the symbol only (for favicon, avatars, collapsed sidebar)
- *  - `full`   : symbol + wordmark "Farmdeck"
- *  - `badge`  : symbol inside a rounded gradient tile
- *
- * Sizes via className (width/height). Pass `className="size-9"` etc.
+ *  - `mark`  : leaf only — for favicon, avatars, header logos
+ *  - `badge` : leaf in a size-10 holder (collapsed sidebar)
+ *  - `full`  : leaf + "Farmdeck" wordmark + optional tagline
  */
 export default function Logo({
   variant = "full",
   className,
-  withSubtitle = true,
+  withSubtitle = false,
   animate = false,
 }) {
-  const Mark = (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="size-full"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient
-          id="fd-field"
-          x1="6"
-          y1="30"
-          x2="42"
-          y2="44"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#7FD66E" />
-          <stop offset="55%" stopColor="#4CAF50" />
-          <stop offset="100%" stopColor="#2E7D52" />
-        </linearGradient>
-        <linearGradient
-          id="fd-barn"
-          x1="14"
-          y1="8"
-          x2="34"
-          y2="32"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#E0825C" />
-          <stop offset="100%" stopColor="#C25A36" />
-        </linearGradient>
-        <radialGradient id="fd-sun" cx="35%" cy="30%" r="55%">
-          <stop offset="0%" stopColor="#FFD56B" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#FFD56B" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* Rising sun glow behind the barn — slow breathing */}
-      <circle
-        cx="24"
-        cy="20"
-        r="13"
-        fill="url(#fd-sun)"
-        style={{
-          transformOrigin: "24px 20px",
-          transformBox: "fill-box",
-        }}
-        className="animate-sun-pulse"
-      />
-
-      {/* Barn roof — a peaked silhouette */}
-      <path
-        d="M24 6 L36 17 L33 17 L33 28 L15 28 L15 17 L12 17 Z"
-        fill="url(#fd-barn)"
-      />
-      {/* Barn door */}
-      <path d="M21 21 H27 V28 H21 Z" fill="#7A2E16" opacity="0.75" />
-
-      {/* Layered field rows — the "deck" */}
-      <path
-        d="M4 38 C 12 34, 20 34, 24 38 C 28 42, 36 42, 44 38 L44 44 L4 44 Z"
-        fill="url(#fd-field)"
-      />
-      <path
-        d="M4 34 C 12 30, 20 30, 24 34 C 28 38, 36 38, 44 34"
-        stroke="#2E7D52"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.5"
-      />
-      {/* Sprout rising from the field — gentle sway */}
-      <path
-        d="M24 30 L 24 24"
-        stroke="#FFFFFF"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.95"
-        style={{
-          transformOrigin: "24px 30px",
-          transformBox: "fill-box",
-        }}
-        className="animate-sprout-sway"
-      />
-    </svg>
-  );
-
   if (variant === "mark") {
     return (
       <div className={cn("size-9", animate && "animate-logo-pop", className)}>
-        {Mark}
+        <Mark />
       </div>
     );
   }
 
-  if (variant === "badge") {
-    return (
-      <div
-        className={cn(
-          "relative flex size-9 items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-leaf to-sage-deep shadow-lg shadow-leaf/40",
-          animate && "animate-logo-pop",
-          className
-        )}
-      >
-        {/* soft inner glow + top highlight */}
-        <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-white/25 to-transparent" />
-        <div className="size-full p-1.5">{Mark}</div>
+  // The Mark already carries the gradient + highlight + outline, so the
+  // "badge" is just the leaf sized to 10 with optional pop animation.
+  // `transition-transform` is only added alongside `animate` so static
+  // renders stay on the default paint path — keeping the leaf crisp on
+  // mobile devices where transform-composited layers can sub-pixel-blur.
+  const MarkBadge = (
+    <div
+      className={cn(
+        "relative shrink-0",
+        animate && "animate-logo-pop transition-transform duration-300",
+        className
+      )}
+    >
+      <div className="size-10">
+        <Mark />
       </div>
-    );
+    </div>
+  );
+
+  if (variant === "badge") {
+    return MarkBadge;
   }
 
   // full
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <div
-        className={cn(
-          "size-9 shrink-0 drop-shadow-sm",
-          animate && "animate-logo-pop"
-        )}
-      >
-        {Mark}
-      </div>
-      <div className="leading-tight">
-        <span className="block text-base font-bold tracking-tight">
-          Farm<span className="text-leaf">deck</span>
-        </span>
-        {withSubtitle && (
-          <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-leaf/20 bg-leaf/10 px-2 py-0.5 text-[9px] font-semibold tracking-wider text-leaf uppercase">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-leaf opacity-75" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-leaf" />
-            </span>
-            Farm OS
+    <div className={cn("group/logo flex items-center gap-3", className)}>
+      {MarkBadge}
+      <div className="flex flex-col leading-none">
+        <h1 className="font-heading text-[17px] font-bold tracking-tight">
+          <span className="text-foreground">Farm</span>
+          <span className="bg-linear-to-br from-leaf via-sage to-sage-deep bg-clip-text text-transparent">
+            deck
           </span>
+        </h1>
+        {withSubtitle && (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <span className="h-px w-4 bg-linear-to-r from-leaf/60 to-transparent" />
+            <span className="text-[9px] font-semibold tracking-[0.18em] text-muted-foreground/70 uppercase">
+              Cultivate · Track · Grow
+            </span>
+          </div>
         )}
       </div>
     </div>

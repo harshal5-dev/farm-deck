@@ -10,7 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import FarmMark from "./FarmMark";
+import Logo from "@/components/layout/Logo";
 import { navLinks, REPO_URL } from "../constants";
 import { useActiveSection } from "../useActiveSection";
 
@@ -52,9 +52,10 @@ const Header = ({ isAuthenticated }) => {
           className="group flex items-center gap-2.5 rounded-md transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95"
           aria-label="Farmdeck home — back to top"
         >
-          <div className="size-8 transition-transform duration-300 group-hover:rotate-[-8deg]">
-            <FarmMark />
-          </div>
+          <Logo
+            variant="mark"
+            className="size-8 transition-transform duration-300 group-hover:rotate-[-8deg]"
+          />
           <span className="text-lg font-bold tracking-tight">
             Farm<span className="bg-linear-to-r from-leaf to-sage-deep bg-clip-text text-transparent">deck</span>
           </span>

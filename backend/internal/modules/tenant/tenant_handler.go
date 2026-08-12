@@ -59,11 +59,13 @@ func (h *TenantHandlerImpl) IsUpdateTenantAllowed(ctx *gin.Context) {
 	role, err := ctxutil.GetRole(ctx)
 	if err != nil {
 		response.Unauthorized(ctx, "authentication required")
+		ctx.Abort()
 		return
 	}
 
 	if role != domain.UserRoleOwner {
 		response.Forbidden(ctx, "only owner can update tenant")
+		ctx.Abort()
 		return
 	}
 
