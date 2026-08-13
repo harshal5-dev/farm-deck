@@ -1,21 +1,19 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  IconMapPin,
+  IconBuildingWarehouse,
+  IconPlus,
+  IconSearch,
   IconArrowsMoveVertical,
   IconChartDots,
-  IconSun,
-  IconBuildingWarehouse,
-  IconArrowsExchange,
-  IconBuilding,
-  IconChevronRight,
-  IconPlus,
+  IconSeeding,
+  IconX,
 } from "@tabler/icons-react";
-import { farms, fields } from "@/mocks";
+import { farms as seedFarms, fields } from "@/mocks";
 import { cn } from "@/lib/utils";
 import { useMockLoading } from "@/hooks/use-mock-loading";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -25,203 +23,145 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import {
-  Reveal,
-  FieldPlot,
-  FarmTypeArt,
-  FarmCardSkeleton,
-} from "@/components/effects";
+import { Reveal, AnimatedCounter } from "@/components/effects";
+import { FarmCard } from "../components/FarmCard";
+import { FarmCardSkeleton } from "../components/FarmCardSkeleton";
+import { FarmTypeChip } from "../components/FarmTypeChip";
+import { EmptyFarms } from "../components/EmptyFarms";
+import { farmTypeOrder } from "../lib/farm-meta";
+import { buildPageList } from "../lib/format";
 
-const typeMeta = {
-  outdoor: {
-    icon: IconSun,
-    color: "amber",
-    gradient: "from-amber-500/20 via-amber-400/10 to-transparent",
-    bg: "bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-500/20",
-    glow: "shadow-amber-500/10",
-  },
-  greenhouse: {
-    icon: IconBuildingWarehouse,
-    color: "emerald",
-    gradient: "from-emerald-500/20 via-emerald-400/10 to-transparent",
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-500/20",
-    glow: "shadow-emerald-500/10",
-  },
-  mixed: {
-    icon: IconArrowsExchange,
-    color: "violet",
-    gradient: "from-violet-500/20 via-violet-400/10 to-transparent",
-    bg: "bg-violet-500/10",
-    text: "text-violet-600 dark:text-violet-400",
-    border: "border-violet-500/20",
-    glow: "shadow-violet-500/10",
-  },
-  indoor: {
-    icon: IconBuilding,
-    color: "sky",
-    gradient: "from-sky-500/20 via-sky-400/10 to-transparent",
-    bg: "bg-sky-500/10",
-    text: "text-sky-600 dark:text-sky-400",
-    border: "border-sky-500/20",
-    glow: "shadow-sky-500/10",
-  },
-};
+const PAGE_SIZE = 4;
+const ACTIVE_STATUSES = new Set(["seeding", "growing", "flowering"]);
 
-function FarmCard({ farm }) {
-  const meta = typeMeta[farm.farmType] || typeMeta.outdoor;
-  const Icon = meta.icon;
-  const farmFields = fields.filter((f) => f.farmId === farm.id);
-  const fieldStatuses = farmFields.map((f) => f.status).filter(Boolean);
-
+/** A single glass stat tile for the summary strip. */
+function StatTile({ icon: Icon, label, children, accent }) {
+  const accents = {
+    leaf: "bg-leaf/15 text-leaf",
+    "sky-warm": "bg-sky-warm/15 text-sky-warm",
+    wheat: "bg-wheat/20 text-wheat",
+    clay: "bg-clay/15 text-clay-deep dark:text-clay",
+  };
   return (
-    <Link
-      to={`/app/farms/${farm.id}`}
-      className="glass-card texture-paper highlight-edge group relative block overflow-hidden rounded-2xl py-0 transition-shadow duration-200 hover:shadow-lg hover:shadow-leaf/10"
-    >
-      {/* Slim art banner */}
-      <div className="relative h-20 overflow-hidden">
-        <div
-          className={cn("absolute inset-0 bg-linear-to-br", meta.gradient)}
-        />
-        <FarmTypeArt variant={farm.farmType} className="relative size-full" />
-        <Badge
-          variant={meta.color}
-          className="absolute top-2.5 right-2.5 px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-sm backdrop-blur-sm"
-        >
-          {farm.farmType}
-        </Badge>
-      </div>
-
-      <div className="relative px-5 pb-5">
-        {/* Overlapping icon chip */}
-        <div
-          className={cn(
-            "absolute -top-6 left-5 flex size-12 items-center justify-center rounded-2xl shadow-md ring-4 ring-card",
-            meta.bg
-          )}
-        >
-          <Icon className={cn("size-6", meta.text)} strokeWidth={1.7} />
-        </div>
-
-        {/* Title */}
-        <div className="mt-7 pl-16">
-          <h3 className="truncate font-heading text-base font-bold tracking-tight">
-            {farm.name}
-          </h3>
-          <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-            <IconMapPin className="size-3 shrink-0" strokeWidth={1.75} />
-            <span className="truncate">{farm.location}</span>
-          </div>
-        </div>
-
-        {/* Stat chips */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-2.5 py-2">
-            <IconArrowsMoveVertical
-              className="size-4 shrink-0 text-muted-foreground"
-              strokeWidth={1.7}
-            />
-            <div className="min-w-0">
-              <p className="text-[10px] tracking-wider text-muted-foreground/70 uppercase">
-                Area
-              </p>
-              <p className="text-sm font-bold tabular-nums">
-                {(farm.totalArea / 1000).toFixed(1)}k
-                <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
-                  sqft
-                </span>
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-2.5 py-2">
-            <IconChartDots
-              className="size-4 shrink-0 text-muted-foreground"
-              strokeWidth={1.7}
-            />
-            <div className="min-w-0">
-              <p className="text-[10px] tracking-wider text-muted-foreground/70 uppercase">
-                Fields
-              </p>
-              <p className="text-sm font-bold tabular-nums">
-                {farm.fieldCount}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {farm.notes && (
-          <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-            {farm.notes}
-          </p>
+    <div className="glass highlight-edge flex items-center gap-3 rounded-2xl p-4">
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl",
+          accents[accent]
         )}
-
-        {/* Mini field plot */}
-        <div className="mt-4">
-          <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-            <span className="size-1.5 rounded-full bg-leaf/70" />
-            Field plot · {farmFields.length} zones
-          </div>
-          <FieldPlot statuses={fieldStatuses} cols={6} />
-        </div>
-
-        <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3">
-          <span className="text-xs text-muted-foreground">
-            Created{" "}
-            {new Date(farm.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
-          <span className="flex items-center gap-1 text-xs font-medium text-leaf">
-            View
-            <IconChevronRight className="size-4" strokeWidth={1.75} />
-          </span>
-        </div>
+      >
+        <Icon className="size-5" strokeWidth={1.7} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
+          {label}
+        </p>
+        <p className="font-heading text-xl font-bold leading-tight tabular-nums">
+          {children}
+        </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
-const PAGE_SIZE = 4;
-
-/** Build the page-number list with ellipses, e.g. [1, "...", 4, 5, "...", 9] */
-function buildPageList(current, totalPages) {
-  if (totalPages <= 7)
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  const pages = new Set([1, totalPages, current, current - 1, current + 1]);
-  const sorted = [...pages]
-    .filter((p) => p >= 1 && p <= totalPages)
-    .sort((a, b) => a - b);
-  const result = [];
-  sorted.forEach((p, i) => {
-    result.push(p);
-    const next = sorted[i + 1];
-    if (next && next - p > 1) result.push("...");
-  });
-  return result;
-}
-
-export default function Farms() {
+export default function FarmList() {
+  // Own the farm collection so the action menu can mutate it locally.
+  const [farmList, setFarmList] = useState(seedFarms);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  // Simulate async loading; resets when the view (tab) changes.
+  // Monotonic counter for duplicate farm ids — a ref avoids re-renders and
+  // keeps id generation out of render purity rules.
+  const duplicateSeq = useRef(0);
+
   const loading = useMockLoading(850, []);
 
-  const totalPages = Math.ceil(farms.length / PAGE_SIZE);
-  const pagedFarms = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return farms.slice(start, start + PAGE_SIZE);
-  }, [page]);
+  // Live per-type counts for the filter chips.
+  const typeCounts = useMemo(() => {
+    const counts = { all: farmList.length };
+    farmTypeOrder.forEach((t) => (counts[t] = 0));
+    farmList.forEach((f) => {
+      if (counts[f.farmType] != null) counts[f.farmType]++;
+    });
+    return counts;
+  }, [farmList]);
 
-  const pageItems = buildPageList(page, totalPages);
+  // Apply search + type filter.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return farmList.filter((f) => {
+      if (typeFilter !== "all" && f.farmType !== typeFilter) return false;
+      if (!q) return true;
+      return (
+        f.name.toLowerCase().includes(q) ||
+        f.location.toLowerCase().includes(q) ||
+        (f.notes || "").toLowerCase().includes(q)
+      );
+    });
+  }, [farmList, query, typeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedFarms = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, currentPage]);
+
+  const pageItems = buildPageList(currentPage, totalPages);
+
+  // Aggregate stats across all farms + their fields.
+  const stats = useMemo(() => {
+    const totalArea = farmList.reduce((sum, f) => sum + (f.totalArea || 0), 0);
+    const farmIds = new Set(farmList.map((f) => f.id));
+    const farmFields = fields.filter((f) => farmIds.has(f.farmId));
+    const activeFields = farmFields.filter((f) => f.isActive).length;
+    const cropsInProgress = farmFields.filter((f) =>
+      ACTIVE_STATUSES.has(f.status)
+    ).length;
+    return { totalArea, activeFields, cropsInProgress };
+  }, [farmList]);
+
+  // ── Action handlers (menu mutations) ───────────────────────────────
+  const resetPage = () => setPage(1);
+
+  const handleDuplicate = (farm) => {
+    duplicateSeq.current += 1;
+    const copy = {
+      ...farm,
+      id: `${farm.id}-copy-${duplicateSeq.current}`,
+      name: `${farm.name} (Copy)`,
+      createdAt: new Date().toISOString(),
+      isActive: true,
+    };
+    setFarmList((prev) => [copy, ...prev]);
+    resetPage();
+  };
+
+  const handleToggleActive = (farm) => {
+    setFarmList((prev) =>
+      prev.map((f) =>
+        f.id === farm.id ? { ...f, isActive: !(f.isActive !== false) } : f
+      )
+    );
+  };
+
+  const handleDelete = (farm) => {
+    setFarmList((prev) => prev.filter((f) => f.id !== farm.id));
+    resetPage();
+  };
+
+  const clearFilters = () => {
+    setQuery("");
+    setTypeFilter("all");
+    resetPage();
+  };
+
+  const hasFilters = query.trim() || typeFilter !== "all";
 
   return (
     <div className="space-y-6">
+      {/* ── Header ─────────────────────────────────────────────────── */}
       <Reveal duration={450}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -249,6 +189,90 @@ export default function Farms() {
         </div>
       </Reveal>
 
+      {/* ── Stats strip ────────────────────────────────────────────── */}
+      <Reveal delay={60} duration={450}>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile icon={IconBuildingWarehouse} label="Total Farms" accent="leaf">
+            <AnimatedCounter value={farmList.length} duration={700} />
+          </StatTile>
+          <StatTile icon={IconArrowsMoveVertical} label="Total Area" accent="wheat">
+            <AnimatedCounter
+              value={stats.totalArea / 1000}
+              duration={900}
+              format={(n) => `${n.toFixed(1)}k`}
+            />
+            <span className="ml-1 text-xs font-medium text-muted-foreground">
+              sq ft
+            </span>
+          </StatTile>
+          <StatTile icon={IconChartDots} label="Active Fields" accent="sky-warm">
+            <AnimatedCounter value={stats.activeFields} duration={800} />
+          </StatTile>
+          <StatTile icon={IconSeeding} label="Crops Growing" accent="clay">
+            <AnimatedCounter value={stats.cropsInProgress} duration={800} />
+          </StatTile>
+        </div>
+      </Reveal>
+
+      {/* ── Toolbar: search + type filter ──────────────────────────── */}
+      <Reveal delay={120} duration={450}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative max-w-xs flex-1">
+            <IconSearch
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={1.85}
+            />
+            <Input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                resetPage();
+              }}
+              placeholder="Search farms, locations…"
+              className="pl-9 pr-9"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  resetPage();
+                }}
+                aria-label="Clear search"
+                className="absolute top-1/2 right-2.5 flex size-5 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <IconX className="size-3.5" strokeWidth={2} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <FarmTypeChip
+              type="all"
+              count={typeCounts.all}
+              active={typeFilter === "all"}
+              onClick={() => {
+                setTypeFilter("all");
+                resetPage();
+              }}
+            />
+            {farmTypeOrder.map((t) => (
+              <FarmTypeChip
+                key={t}
+                type={t}
+                count={typeCounts[t]}
+                active={typeFilter === t}
+                onClick={() => {
+                  setTypeFilter(t);
+                  resetPage();
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ── Grid / loading / empty ─────────────────────────────────── */}
       <div className="space-y-6">
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -256,11 +280,24 @@ export default function Farms() {
               <FarmCardSkeleton key={i} />
             ))}
           </div>
+        ) : filtered.length === 0 ? (
+          <EmptyFarms
+            filtered={hasFilters || farmList.length > 0}
+            onAdd={hasFilters ? clearFilters : () => undefined}
+          />
         ) : (
           <>
-            <div key={`farms-${page}`} className="grid gap-4 sm:grid-cols-2">
-              {pagedFarms.map((farm) => (
-                <FarmCard key={farm.id} farm={farm} />
+            <div key={`farms-${currentPage}`} className="grid gap-4 sm:grid-cols-2">
+              {pagedFarms.map((farm, i) => (
+                <FarmCard
+                  key={farm.id}
+                  farm={farm}
+                  index={i}
+                  farmFields={fields.filter((f) => f.farmId === farm.id)}
+                  onDuplicate={() => handleDuplicate(farm)}
+                  onToggleActive={() => handleToggleActive(farm)}
+                  onDelete={() => handleDelete(farm)}
+                />
               ))}
             </div>
 
@@ -270,10 +307,13 @@ export default function Farms() {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        aria-disabled={page === 1}
+                        onClick={() =>
+                          setPage((p) => Math.max(1, p - 1))
+                        }
+                        aria-disabled={currentPage === 1}
                         className={cn(
-                          page === 1 && "pointer-events-none opacity-40"
+                          currentPage === 1 &&
+                            "pointer-events-none opacity-40"
                         )}
                       />
                     </PaginationItem>
@@ -286,7 +326,7 @@ export default function Farms() {
                       ) : (
                         <PaginationItem key={item}>
                           <PaginationLink
-                            isActive={item === page}
+                            isActive={item === currentPage}
                             onClick={() => setPage(item)}
                           >
                             {item}
@@ -300,9 +340,9 @@ export default function Farms() {
                         onClick={() =>
                           setPage((p) => Math.min(totalPages, p + 1))
                         }
-                        aria-disabled={page === totalPages}
+                        aria-disabled={currentPage === totalPages}
                         className={cn(
-                          page === totalPages &&
+                          currentPage === totalPages &&
                             "pointer-events-none opacity-40"
                         )}
                       />
@@ -311,9 +351,9 @@ export default function Farms() {
                 </Pagination>
 
                 <p className="text-xs text-muted-foreground">
-                  Showing {(page - 1) * PAGE_SIZE + 1}–
-                  {Math.min(page * PAGE_SIZE, farms.length)} of {farms.length}{" "}
-                  farms
+                  Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+                  {Math.min(currentPage * PAGE_SIZE, filtered.length)} of{" "}
+                  {filtered.length} farms
                 </p>
               </div>
             )}

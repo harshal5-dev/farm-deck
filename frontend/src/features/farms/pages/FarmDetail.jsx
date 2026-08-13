@@ -1,4 +1,6 @@
-import { useParams, Link } from "react-router-dom"
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   IconArrowLeft,
   IconPlant,
@@ -6,10 +8,6 @@ import {
   IconArrowsMoveVertical,
   IconChartDots,
   IconDroplet,
-  IconSun,
-  IconBuildingWarehouse,
-  IconArrowsExchange,
-  IconBuilding,
   IconLeaf,
   IconSeeding,
   IconFlower,
@@ -20,121 +18,161 @@ import {
   IconChevronRight,
   IconEdit,
   IconCalendar,
-} from "@tabler/icons-react"
-import { farms, fields } from "@/mocks"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Reveal, AnimatedCounter, FarmTypeArt } from "@/components/effects"
+} from "@tabler/icons-react";
+import { farms, fields } from "@/mocks";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Reveal, AnimatedCounter, FarmTypeArt } from "@/components/effects";
+import { getFarmTypeMeta } from "../lib/farm-meta";
+import { FarmActionMenu } from "../components/FarmActionMenu";
 
-const typeMeta = {
-  outdoor: {
-    icon: IconSun,
-    color: "amber",
-    gradient: "from-amber-500/20 via-amber-400/10 to-transparent",
-    bg: "bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-  },
-  greenhouse: {
-    icon: IconBuildingWarehouse,
-    color: "emerald",
-    gradient: "from-emerald-500/20 via-emerald-400/10 to-transparent",
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-  },
-  mixed: {
-    icon: IconArrowsExchange,
-    color: "violet",
-    gradient: "from-violet-500/20 via-violet-400/10 to-transparent",
-    bg: "bg-violet-500/10",
-    text: "text-violet-600 dark:text-violet-400",
-  },
-  indoor: {
-    icon: IconBuilding,
+const statusMeta = {
+  seeding: {
+    icon: IconSeeding,
+    label: "Seeding",
     color: "sky",
-    gradient: "from-sky-500/20 via-sky-400/10 to-transparent",
     bg: "bg-sky-500/10",
     text: "text-sky-600 dark:text-sky-400",
   },
-}
-
-const statusMeta = {
-  seeding: { icon: IconSeeding, label: "Seeding", color: "sky", bg: "bg-sky-500/10", text: "text-sky-600 dark:text-sky-400" },
-  growing: { icon: IconLeaf, label: "Growing", color: "emerald", bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400" },
-  flowering: { icon: IconFlower, label: "Flowering", color: "violet", bg: "bg-violet-500/10", text: "text-violet-600 dark:text-violet-400" },
-  harvested: { icon: IconBasket, label: "Harvested", color: "amber", bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400" },
-  completed: { icon: IconCircleCheck, label: "Completed", color: "emerald", bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400" },
-  failed: { icon: IconCircleX, label: "Failed", color: "red", bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400" },
-}
+  growing: {
+    icon: IconLeaf,
+    label: "Growing",
+    color: "emerald",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-600 dark:text-emerald-400",
+  },
+  flowering: {
+    icon: IconFlower,
+    label: "Flowering",
+    color: "violet",
+    bg: "bg-violet-500/10",
+    text: "text-violet-600 dark:text-violet-400",
+  },
+  harvested: {
+    icon: IconBasket,
+    label: "Harvested",
+    color: "amber",
+    bg: "bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+  },
+  completed: {
+    icon: IconCircleCheck,
+    label: "Completed",
+    color: "emerald",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-600 dark:text-emerald-400",
+  },
+  failed: {
+    icon: IconCircleX,
+    label: "Failed",
+    color: "red",
+    bg: "bg-red-500/10",
+    text: "text-red-600 dark:text-red-400",
+  },
+};
 
 function FieldRow({ field, delay = 0 }) {
-  const status = field.status ? statusMeta[field.status] : null
-  const StatusIcon = status?.icon
+  const status = field.status ? statusMeta[field.status] : null;
+  const StatusIcon = status?.icon;
 
   return (
     <Reveal delay={delay} duration={400} changeKey={field.id}>
-      <div className="group flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/50 hover:shadow-sm">
-      <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", status ? status.bg : "bg-muted")}>
-        {status ? (
-          <StatusIcon className={cn("size-4", status.text)} strokeWidth={1.75} />
-        ) : (
-          <IconCircleOff className="size-4 text-muted-foreground" strokeWidth={1.75} />
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">{field.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {field.cropName || "No active crop"}
-          {field.soilType && ` · ${field.soilType}`}
-        </p>
-      </div>
-      <div className="hidden sm:block">
-        <span className="text-sm tabular-nums">{field.area.toLocaleString()}</span>
-        <span className="ml-1 text-xs text-muted-foreground">sq ft</span>
-      </div>
-      <div>
-        {status ? (
-          <Badge variant={status.color}>
-            <StatusIcon className="size-3" strokeWidth={1.75} />
-            {status.label}
-          </Badge>
-        ) : (
-          <Badge variant="secondary" className="gap-1">
-            <IconCircleOff className="size-3" strokeWidth={1.75} />
-            Inactive
-          </Badge>
-        )}
-      </div>
-      </div>
+      <Link
+        to="/app/fields"
+        className="group flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/50 hover:shadow-sm"
+      >
+        <div
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-lg",
+            status ? status.bg : "bg-muted"
+          )}
+        >
+          {status ? (
+            <StatusIcon className={cn("size-4", status.text)} strokeWidth={1.75} />
+          ) : (
+            <IconCircleOff
+              className="size-4 text-muted-foreground"
+              strokeWidth={1.75}
+            />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium">{field.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {field.cropName || "No active crop"}
+            {field.soilType && ` · ${field.soilType}`}
+          </p>
+        </div>
+        <div className="hidden sm:block">
+          <span className="text-sm tabular-nums">
+            {field.area.toLocaleString()}
+          </span>
+          <span className="ml-1 text-xs text-muted-foreground">sq ft</span>
+        </div>
+        <div>
+          {status ? (
+            <Badge variant={status.color}>
+              <StatusIcon className="size-3" strokeWidth={1.75} />
+              {status.label}
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="gap-1">
+              <IconCircleOff className="size-3" strokeWidth={1.75} />
+              Inactive
+            </Badge>
+          )}
+        </div>
+      </Link>
     </Reveal>
-  )
+  );
 }
 
 export default function FarmDetail() {
-  const { farmId } = useParams()
-  const farm = farms.find((f) => f.id === farmId)
-  const farmFields = fields.filter((f) => f.farmId === farmId)
+  const { farmId } = useParams();
+  const navigate = useNavigate();
+  const farm = farms.find((f) => f.id === farmId);
+  const farmFields = fields.filter((f) => f.farmId === farmId);
+
+  // Local mirror so the action menu's archive toggle reflects immediately.
+  const [isActive, setIsActive] = useState(farm?.isActive !== false);
 
   if (!farm) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
-        <IconPlant
-          className="size-12 text-muted-foreground/40"
-          strokeWidth={1.5}
-        />
+        <IconPlant className="size-12 text-muted-foreground/40" strokeWidth={1.5} />
         <p className="mt-4 text-muted-foreground">Farm not found.</p>
         <Link
           to="/app/farms"
-          className="mt-2 text-sm font-medium text-emerald-500 hover:underline"
+          className="mt-2 text-sm font-medium text-leaf hover:underline"
         >
           Back to Farms
         </Link>
       </div>
-    )
+    );
   }
 
-  const meta = typeMeta[farm.farmType] || typeMeta.outdoor
-  const TypeIcon = meta.icon
-  const activeCount = farmFields.filter((f) => f.isActive).length
+  const meta = getFarmTypeMeta(farm.farmType);
+  const TypeIcon = meta.icon;
+  const activeCount = farmFields.filter((f) => f.isActive).length;
+
+  // The detail page delegates destructive actions to navigation + toast.
+  const handleDuplicate = () => {
+    toast.success("Farm duplicated", {
+      description: `${farm.name} (copy) added to your farms`,
+    });
+    navigate("/app/farms");
+  };
+  const handleToggleActive = () => {
+    setIsActive((v) => !v);
+    toast.success(isActive ? "Farm archived" : "Farm reactivated", {
+      description: isActive
+        ? `${farm.name} is now inactive`
+        : `${farm.name} is active again`,
+    });
+  };
+  const handleDelete = () => {
+    navigate("/app/farms");
+  };
 
   return (
     <div className="space-y-8">
@@ -151,36 +189,59 @@ export default function FarmDetail() {
       <Reveal delay={80} duration={500}>
         <div className="glass-card texture-paper highlight-edge relative overflow-hidden rounded-2xl py-0">
           {/* Illustrated art banner */}
-          <div className="relative h-32 overflow-hidden">
+          <div className="relative h-36 overflow-hidden">
             <div className={cn("absolute inset-0 bg-gradient-to-br", meta.gradient)} />
             <FarmTypeArt variant={farm.farmType} className="relative size-full" />
-            {/* type tag top-right */}
-            <Badge
-              variant={meta.color}
-              className="absolute right-3 top-3 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-sm"
-            >
-              {farm.farmType}
-            </Badge>
+
+            {/* top row: status + type tag + menu */}
+            <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
+              <div className="flex items-center gap-1.5">
+                <Badge
+                  variant={meta.color}
+                  className="px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-sm backdrop-blur-sm"
+                >
+                  {meta.label}
+                </Badge>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-sm backdrop-blur-sm",
+                    isActive
+                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                      : "bg-muted/70 text-muted-foreground"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      isActive ? "bg-emerald-500" : "bg-muted-foreground/60"
+                    )}
+                  />
+                  {isActive ? "Active" : "Archived"}
+                </span>
+              </div>
+
+              <FarmActionMenu
+                farm={{ ...farm, isActive }}
+                onDuplicate={handleDuplicate}
+                onToggleActive={handleToggleActive}
+                onDelete={handleDelete}
+              />
+            </div>
           </div>
 
           <div className="relative px-6 pb-6">
             {/* Overlapping type icon chip */}
             <div
               className={cn(
-                "absolute -top-7 left-6 flex size-14 items-center justify-center rounded-2xl shadow-lg ring-4 ring-card",
+                "absolute -top-8 left-6 flex size-16 items-center justify-center rounded-2xl shadow-lg ring-4 ring-card",
                 meta.bg
               )}
             >
-              <TypeIcon className={cn("size-7", meta.text)} strokeWidth={1.7} />
+              <TypeIcon className={cn("size-8", meta.text)} strokeWidth={1.7} />
             </div>
 
-            {/* Title panel — its own surface with a soft type-derived gradient
-                so it reads cleanly in both light & dark themes. */}
-            <div
-              className={cn(
-                "mt-5 rounded-2xl bg-gradient-to-br from-card via-card to-card/80 p-5 pl-20 shadow-sm ring-1 ring-inset ring-border/40 sm:mt-6 sm:p-6",
-              )}
-            >
+            {/* Title panel */}
+            <div className="mt-6 rounded-2xl bg-gradient-to-br from-card via-card to-card/80 p-5 pl-24 shadow-sm ring-1 ring-inset ring-border/40 sm:p-6 sm:pl-24">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h1 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
@@ -227,7 +288,9 @@ export default function FarmDetail() {
                       duration={900}
                       format={(n) => `${n.toFixed(1)}k`}
                     />{" "}
-                    <span className="text-xs font-medium text-muted-foreground">sq ft</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      sq ft
+                    </span>
                   </p>
                 </div>
               </div>
@@ -275,7 +338,7 @@ export default function FarmDetail() {
             <h2 className="font-heading text-lg font-semibold">Fields</h2>
             <Link
               to="/app/fields"
-              className="flex items-center gap-1 text-sm font-medium text-emerald-500 transition-colors hover:text-emerald-600"
+              className="flex items-center gap-1 text-sm font-medium text-leaf transition-colors hover:text-leaf/80"
             >
               View all fields
               <IconChevronRight className="size-4" strokeWidth={1.75} />
@@ -292,10 +355,7 @@ export default function FarmDetail() {
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <IconChartDots
-                className="size-10 text-muted-foreground/30"
-                strokeWidth={1.5}
-              />
+              <IconChartDots className="size-10 text-muted-foreground/30" strokeWidth={1.5} />
               <p className="mt-3 text-sm text-muted-foreground">
                 No fields in this farm yet.
               </p>
@@ -304,5 +364,5 @@ export default function FarmDetail() {
         </div>
       </div>
     </div>
-  )
+  );
 }

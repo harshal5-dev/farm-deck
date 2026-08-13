@@ -269,7 +269,6 @@ export default function FarmForm({
                   {farmTypes.map((type) => {
                     const isSelected = selectedTypeId === type.id;
                     const TypeIcon = typeIcons[type.name] || IconPlant;
-                    const meta = typeMeta[type.name];
                     return (
                       <button
                         key={type.id}
