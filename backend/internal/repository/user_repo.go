@@ -15,6 +15,7 @@ type UserRepo interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error)
 	UpdateUserProfile(ctx context.Context, params db.UpdateUserProfileParams) (db.User, error)
+	CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.User, error)
 }
 
 type userRepo struct {
@@ -64,6 +65,14 @@ func (r *userRepo) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfi
 		if errors.Is(err, pgx.ErrNoRows) {
 			return db.User{}, domain.ErrUserNotFound
 		}
+		return db.User{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.User, error) {
+	result, err := r.store.CreateMemberTx(ctx, params)
+	if err != nil {
 		return db.User{}, err
 	}
 	return result, nil

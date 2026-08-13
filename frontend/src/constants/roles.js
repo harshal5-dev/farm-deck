@@ -66,15 +66,15 @@ export const ROLES = {
       "Edit assigned fields",
       "View farm reports",
     ],
-    text: "text-sage-deep dark:text-sage",
-    textBright: "text-sage-deep",
-    bg: "bg-sage-deep/12 dark:bg-sage/15",
-    bgSoft: "bg-sage-deep/8",
-    ring: "ring-sage-deep/40",
-    border: "border-sage-deep/30",
-    gradient: "from-sage-deep to-leaf",
-    chip: "from-sage-deep/20 to-sage-deep/5 text-sage-deep dark:text-sage ring-sage-deep/25",
-    accent: "sage",
+    text: "text-wheat-deep dark:text-wheat",
+    textBright: "text-wheat-deep",
+    bg: "bg-wheat/15 dark:bg-wheat/15",
+    bgSoft: "bg-wheat/10",
+    ring: "ring-wheat/40",
+    border: "border-wheat/30",
+    gradient: "from-wheat to-wheat-deep",
+    chip: "from-wheat/25 to-wheat/5 text-wheat-deep dark:text-wheat ring-wheat/25",
+    accent: "wheat",
   },
   viewer: {
     id: "viewer",
@@ -98,7 +98,10 @@ export const ROLES = {
   },
 };
 
-export const ROLE_ORDER = ["owner", "manager", "grower", "viewer"];
+/** Roles assignable to / filterable for workspace members. Owner is a
+ *  workspace-creator role managed outside the member section, so it isn't
+ *  listed here (see ROLES.owner for its display metadata). */
+export const ROLE_ORDER = ["manager", "grower", "viewer"];
 
 export const STATUS_META = {
   active: {

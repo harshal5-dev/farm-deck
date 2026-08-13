@@ -43,13 +43,13 @@ export default function FieldPlot({
         <div
           key={i}
           className={cn(
-            "aspect-square rounded-[3px] transition-all duration-500",
+            "aspect-square rounded-[3px] transition-all duration-300",
             s ? "animate-in fade-in zoom-in-50" : ""
           )}
           style={{
             backgroundColor: s ? statusColor[s] : "color-mix(in oklch, var(--soil) 14%, transparent)",
             opacity: s ? 0.85 : 0.5,
-            animationDelay: `${i * 40}ms`,
+            animationDelay: `${i * 25}ms`,
             animationFillMode: "both",
           }}
         />

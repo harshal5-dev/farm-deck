@@ -2,9 +2,10 @@ package domain
 
 const (
 	// --------- User Constants ---------
-	UserStatusActive   = "active"
-	UserStatusPending  = "pending"
-	UserStatusDisabled = "disabled"
+	UserStatusActive    = "active"
+	UserStatusPending   = "pending"
+	UserStatusSuspended = "suspended"
+	UserStatusInvited   = "invited"
 
 	UserRoleOwner   = "owner"
 	UserRoleManager = "manager"

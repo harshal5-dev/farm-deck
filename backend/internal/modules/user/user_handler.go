@@ -11,6 +11,7 @@ import (
 type UserHandler interface {
 	GetCurrentProfile(ctx *gin.Context)
 	UpdateProfile(ctx *gin.Context)
+	CreateMember(ctx *gin.Context)
 }
 
 type UserHandlerImpl struct {
@@ -78,4 +79,23 @@ func (h *UserHandlerImpl) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx, "profile updated successfully")
+}
+
+func (h *UserHandlerImpl) CreateMember(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	var req CreateMemberRequest
+	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	if err := h.userService.CreateMember(ctx, tenantID, req); err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	response.OK(ctx, "member created successfully")
 }

@@ -11,7 +11,7 @@ const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3)
  */
 export default function AnimatedCounter({
   value,
-  duration = 900,
+  duration = 600,
   decimals = 0,
   format,
   className,

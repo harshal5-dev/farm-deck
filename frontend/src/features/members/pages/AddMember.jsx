@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import UserForm from "../components/UserForm";
-import { useMembers } from "../MembersContext";
+import { useMembers } from "../useMembers";
 
 /**
  * AddMember — `/app/members/new`

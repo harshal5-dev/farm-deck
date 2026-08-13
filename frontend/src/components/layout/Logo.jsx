@@ -116,12 +116,12 @@ export const Mark = ({ className }) => (
  *  - `badge` : leaf in a size-10 holder (collapsed sidebar)
  *  - `full`  : leaf + "Farmdeck" wordmark + optional tagline
  */
-export default function Logo({
+const Logo = ({
   variant = "full",
   className,
   withSubtitle = false,
   animate = false,
-}) {
+}) => {
   if (variant === "mark") {
     return (
       <div className={cn("size-9", animate && "animate-logo-pop", className)}>
@@ -176,3 +176,5 @@ export default function Logo({
     </div>
   );
 }
+
+export default Logo;

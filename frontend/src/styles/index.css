@@ -53,6 +53,7 @@
     --color-clay: var(--clay);
     --color-clay-deep: var(--clay-deep);
     --color-wheat: var(--wheat);
+    --color-wheat-deep: var(--wheat-deep);
     --color-sky-warm: var(--sky-warm);
     --color-soil: var(--soil);
     --color-leaf: var(--leaf);
@@ -99,6 +100,7 @@
     --clay: oklch(0.64 0.15 45);
     --clay-deep: oklch(0.5 0.16 40);
     --wheat: oklch(0.8 0.12 85);
+    --wheat-deep: oklch(0.55 0.14 80);
     --sky-warm: oklch(0.72 0.09 220);
     --soil: oklch(0.4 0.04 60);
     --leaf: oklch(0.58 0.16 145);
@@ -143,6 +145,7 @@
     --clay: oklch(0.7 0.14 45);
     --clay-deep: oklch(0.6 0.15 40);
     --wheat: oklch(0.82 0.12 85);
+    --wheat-deep: oklch(0.68 0.14 80);
     --sky-warm: oklch(0.72 0.09 220);
     --soil: oklch(0.5 0.04 60);
     --leaf: oklch(0.68 0.16 145);
@@ -308,21 +311,21 @@
 /* -------------------------------------------------------------------------- */
 
 @theme inline {
-  --animate-shimmer: shimmer 2.5s linear infinite;
-  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 3.5s linear infinite;
+  --animate-glow-pulse: glow-pulse 5s ease-in-out infinite;
   --animate-float-slow: float-slow 8s ease-in-out infinite;
-  --animate-logo-pop: logo-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  --animate-sun-pulse: sun-pulse 4s ease-in-out infinite;
-  --animate-sprout-sway: sprout-sway 3.5s ease-in-out infinite;
-  --animate-error-enter: error-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-alert-ring: alert-ring 2.4s ease-out infinite;
+  --animate-logo-pop: logo-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  --animate-sun-pulse: sun-pulse 6s ease-in-out infinite;
+  --animate-sprout-sway: sprout-sway 5s ease-in-out infinite;
+  --animate-error-enter: error-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-alert-ring: alert-ring 3.5s ease-out infinite;
 }
 
 /* Error card entrance — gentle fade + lift, matching the page reveal motion. */
 @keyframes error-enter {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.97);
+    transform: translateY(5px) scale(0.98);
   }
   100% {
     opacity: 1;
@@ -333,16 +336,16 @@
 /* Expanding alert ring — emanates from the icon chip to draw the eye. */
 @keyframes alert-ring {
   0% {
-    opacity: 0.55;
+    opacity: 0.4;
     transform: scale(0.85);
   }
   70% {
     opacity: 0;
-    transform: scale(1.35);
+    transform: scale(1.25);
   }
   100% {
     opacity: 0;
-    transform: scale(1.35);
+    transform: scale(1.25);
   }
 }
 
@@ -352,8 +355,8 @@
 /* -------------------------------------------------------------------------- */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(16px);
+  transition: opacity 0.45s ease-out, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 .reveal--in {
@@ -372,12 +375,12 @@
 
 @keyframes glow-pulse {
   0%, 100% {
-    opacity: 0.5;
+    opacity: 0.6;
     transform: scale(1);
     }
   50% {
-    opacity: 0.85;
-    transform: scale(1.06);
+    opacity: 0.8;
+    transform: scale(1.03);
     }
 }
 
@@ -394,10 +397,10 @@
 @keyframes logo-pop {
   0% {
     opacity: 0;
-    transform: scale(0.7) rotate(-8deg);
+    transform: scale(0.8) rotate(-5deg);
   }
   60% {
-    transform: scale(1.08) rotate(2deg);
+    transform: scale(1.04) rotate(1deg);
   }
   100% {
     opacity: 1;
@@ -408,12 +411,12 @@
 /* Idle sun behind the barn — slow opacity + scale breathing. */
 @keyframes sun-pulse {
   0%, 100% {
-    opacity: 0.5;
+    opacity: 0.6;
     transform: scale(1);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.08);
+    opacity: 0.8;
+    transform: scale(1.04);
   }
 }
 
@@ -423,10 +426,10 @@
     transform: rotate(0deg);
   }
   25% {
-    transform: rotate(-5deg);
+    transform: rotate(-3deg);
   }
   75% {
-    transform: rotate(5deg);
+    transform: rotate(3deg);
   }
 }
 

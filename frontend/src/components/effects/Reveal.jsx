@@ -15,7 +15,7 @@ export default function Reveal({
   children,
   className,
   delay = 0,
-  duration = 500,
+  duration = 350,
   as: Tag = "div",
   changeKey,
   trigger = "mount",
@@ -75,7 +75,7 @@ export default function Reveal({
         "transition-all ease-out will-change-transform",
         shown
           ? "translate-y-0 opacity-100 blur-0"
-          : "translate-y-3 opacity-0 blur-[2px]",
+          : "translate-y-2 opacity-0 blur-[1px]",
         className
       )}
       style={{

@@ -28,7 +28,7 @@ export default function AnimatedBar({ pct, color, className, trackClassName }) {
     >
       <div
         className={cn(
-          "absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out",
+          "absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out",
           color
         )}
         style={{ width: `${Math.min(Math.max(width, 0), 100)}%` }}

@@ -23,6 +23,47 @@ func (q *Queries) CheckUserExistsByEmailID(ctx context.Context, emailID string) 
 	return exists, err
 }
 
+const createMember = `-- name: CreateMember :one
+INSERT INTO users (
+    full_name, email_id, role, status, tenant_id, profile_picture
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
+`
+
+type CreateMemberParams struct {
+	FullName       string
+	EmailID        string
+	Role           string
+	Status         string
+	TenantID       uuid.UUID
+	ProfilePicture *string
+}
+
+func (q *Queries) CreateMember(ctx context.Context, arg CreateMemberParams) (User, error) {
+	row := q.db.QueryRow(ctx, createMember,
+		arg.FullName,
+		arg.EmailID,
+		arg.Role,
+		arg.Status,
+		arg.TenantID,
+		arg.ProfilePicture,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.EmailID,
+		&i.FullName,
+		&i.ProfilePicture,
+		&i.Role,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     full_name, email_id, role, status, tenant_id

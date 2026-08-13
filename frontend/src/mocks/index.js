@@ -726,7 +726,7 @@ const cropCategories = [
  * @property {string} id
  * @property {string} fullName
  * @property {string} emailId
- * @property {"owner"|"manager"|"grower"|"viewer"} role
+ * @property {"manager"|"grower"|"viewer"} role
  * @property {"active"|"invited"|"suspended"} status
  * @property {string} [avatarId]    - matches an id from /components/avatars/avatars
  * @property {string} joinedAt      - ISO timestamp
@@ -734,16 +734,6 @@ const cropCategories = [
  * @property {string} [invitedBy]   - member id (for pending invites)
  */
 const members = [
-  {
-    id: "ad10c1d3-bb68-4d00-b43b-f477ce2bd919",
-    fullName: "Harshal Ganbote",
-    emailId: "harshalganbote55@gmail.com",
-    role: "owner",
-    status: "active",
-    avatarId: "fox",
-    joinedAt: "2026-08-01T10:01:08.707834+05:30",
-    lastActive: "2026-08-04T09:12:00+05:30",
-  },
   {
     id: "3f1a2b3c-9d4e-4a7b-8c12-1a2b3c4d5e6f",
     fullName: "Priya Deshmukh",

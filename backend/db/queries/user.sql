@@ -19,3 +19,10 @@ SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.cre
 
 -- name: UpdateUserProfile :one
 UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING *;
+
+-- name: CreateMember :one
+INSERT INTO users (
+    full_name, email_id, role, status, tenant_id, profile_picture
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+) RETURNING *;

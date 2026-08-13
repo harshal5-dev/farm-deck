@@ -4,39 +4,43 @@ import { toast } from "sonner";
 import {
   IconArrowLeft,
   IconUser,
-  IconTrash,
+  IconPlayerPause,
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import UserForm from "../components/UserForm";
-import { useMembers } from "../MembersContext";
+import { useMembers } from "../useMembers";
 import { getRole, getStatus } from "@/constants/roles";
 import { useAuth } from "@/features/auth";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, checkIsOwner } from "@/lib/utils";
 
 /**
  * EditMember — `/app/members/:memberId/edit`
  *
  * Single-page form for editing an existing workspace member. Same no-scroll
- * layout as AddMember, with a danger zone (Remove) tucked into the header
- * popover for owner-only access.
+ * layout as AddMember, with a danger zone (Suspend) tucked into the header
+ * for owner-only access.
  */
 export default function EditMember() {
   const navigate = useNavigate();
   const { memberId } = useParams();
   const { user } = useAuth();
-  const { getMember, updateMember, removeMember } = useMembers();
+  const { getMember, updateMember, suspendMember } = useMembers();
   const [submitting, setSubmitting] = useState(false);
+  const [suspendOpen, setSuspendOpen] = useState(false);
 
   const member = getMember(memberId);
   const isSelf = member && user?.id === member.id;
-  const isOwnerEditing = (user?.role || "").toLowerCase() === "owner";
+  const isOwnerEditing = checkIsOwner(user?.role);
 
   if (!member) {
     return (
@@ -85,9 +89,10 @@ export default function EditMember() {
 
   const handleCancel = () => navigate("/app/members");
 
-  const handleRemove = () => {
-    removeMember(member.id);
-    toast.success("Member removed", {
+  const handleSuspend = () => {
+    suspendMember(member.id);
+    setSuspendOpen(false);
+    toast.success("Member suspended", {
       description: `${member.fullName} no longer has access.`,
     });
     navigate("/app/members", { replace: true });
@@ -185,63 +190,18 @@ export default function EditMember() {
               </div>
             </div>
 
-            {/* Owner-only danger zone */}
-            {isOwnerEditing && !isSelf && (
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 border-red-500/30 text-red-500/90 hover:border-red-500/50 hover:bg-red-500/8 hover:text-red-500"
-                    />
-                  }
-                >
-                  <IconTrash className="size-3.5" strokeWidth={1.85} />
-                  Remove
-                </PopoverTrigger>
-                <PopoverContent
-                  align="end"
-                  sideOffset={6}
-                  className="w-72 p-0"
-                >
-                  <div className="p-4">
-                    <div className="flex items-start gap-2.5">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-500/15 text-red-500">
-                        <IconTrash className="size-4" strokeWidth={1.85} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground">
-                          Remove this member?
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">
-                          {member.fullName} will lose access to the workspace
-                          immediately. This can't be undone.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end gap-2 border-t border-border/40 bg-muted/20 p-2">
-                    <Popover.Close
-                      render={
-                        <Button type="button" variant="ghost" size="sm" />
-                      }
-                    >
-                      Cancel
-                    </Popover.Close>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleRemove}
-                      className="gap-1.5 bg-red-500 text-white shadow-sm hover:bg-red-500/90"
-                    >
-                      <IconTrash className="size-3.5" strokeWidth={1.85} />
-                      Remove member
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+            {/* Danger zone — owner can suspend (not delete) a member. */}
+            {isOwnerEditing && !isSelf && member.status !== "suspended" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSuspendOpen(true)}
+                className="gap-1.5 border-red-500/30 text-red-500/90 hover:border-red-500/50 hover:bg-red-500/8 hover:text-red-500"
+              >
+                <IconPlayerPause className="size-3.5" strokeWidth={1.85} />
+                Suspend
+              </Button>
             )}
           </div>
         </div>
@@ -264,6 +224,47 @@ export default function EditMember() {
           />
         </div>
       </Reveal>
+
+      {isOwnerEditing && !isSelf && member.status !== "suspended" && (
+        <Dialog open={suspendOpen} onOpenChange={setSuspendOpen}>
+          <DialogContent showCloseButton={false} size="sm" className="p-0">
+            <DialogHeader className="p-5 pb-3">
+              <div className="flex items-start gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/15 text-red-500">
+                  <IconPlayerPause className="size-5" strokeWidth={1.85} />
+                </span>
+                <div className="min-w-0">
+                  <DialogTitle>Suspend this member?</DialogTitle>
+                  <DialogDescription className="mt-1">
+                    {member.fullName} will lose access to the workspace
+                    immediately. Their record stays so you can re-invite them
+                    anytime.
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+            <DialogFooter className="border-border/40 bg-muted/20 px-5 py-3">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setSuspendOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSuspend}
+                className="gap-1.5 bg-red-500 text-white shadow-sm hover:bg-red-500/90"
+              >
+                <IconPlayerPause className="size-3.5" strokeWidth={1.85} />
+                Suspend user
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

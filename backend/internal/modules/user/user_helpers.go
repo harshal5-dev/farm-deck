@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
 func toUserProfileResponse(user db.GetUserProfileDetailsRow) UserProfileResponse {
@@ -29,5 +30,17 @@ func toUpdateUserProfileParams(userId uuid.UUID, req UpdateUserProfileRequest) d
 		ID:             userId,
 		FullName:       req.FullName,
 		ProfilePicture: req.ProfilePicture,
+	}
+}
+
+func toCreateMemberTxParams(tenantID uuid.UUID, passwordHash string, req CreateMemberRequest) domain.CreateMemberTxParams {
+	return domain.CreateMemberTxParams{
+		FullName:       req.FullName,
+		EmailID:        req.EmailID,
+		TenantID:       tenantID,
+		Role:           req.Role,
+		Status:         domain.UserStatusInvited,
+		ProfilePicture: req.ProfilePicture,
+		PasswordHash:   passwordHash,
 	}
 }

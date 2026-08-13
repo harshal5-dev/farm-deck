@@ -31,6 +31,7 @@ func (m *mockUserRepo) UpdateUserProfile(ctx context.Context, p db.UpdateUserPro
 type fakeUserService struct {
 	updateUserProfile func(context.Context, uuid.UUID, UpdateUserProfileRequest) error
 	getMyProfile      func(context.Context, uuid.UUID) (UserProfileResponse, error)
+	createMember      func(context.Context, uuid.UUID, CreateMemberRequest) error
 }
 
 func (f *fakeUserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, r UpdateUserProfileRequest) error {
@@ -38,4 +39,7 @@ func (f *fakeUserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, r
 }
 func (f *fakeUserService) GetMyProfile(ctx context.Context, id uuid.UUID) (UserProfileResponse, error) {
 	return f.getMyProfile(ctx, id)
+}
+func (f *fakeUserService) CreateMember(ctx context.Context, tenantID uuid.UUID, req CreateMemberRequest) error {
+	return f.createMember(ctx, tenantID, req)
 }

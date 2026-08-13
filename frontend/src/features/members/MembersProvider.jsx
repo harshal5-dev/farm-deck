@@ -1,34 +1,15 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useMemo, useState } from "react";
 import { members as seedMembers } from "@/mocks";
+import { MembersContext } from "./context";
 
 /**
- * MembersContext — local source of truth for the workspace member list.
+ * MembersProvider — local source of truth for the workspace member list.
  *
- * The data is seeded from the shared mock and lives in React state so add /
+ * Data is seeded from the shared mock and lives in React state so add /
  * update / remove actions from any sub-page (Members, AddMember, EditMember)
  * stay in sync without prop-drilling. When the real API lands, swap the
  * internal `useState` for an RTK Query slice and keep the same surface.
- *
- * @typedef {Object} Member
- * @property {string} id
- * @property {string} fullName
- * @property {string} emailId
- * @property {"owner"|"manager"|"grower"|"viewer"} role
- * @property {"active"|"invited"|"suspended"} status
- * @property {string} [avatarId]
- * @property {string} joinedAt
- * @property {string} [lastActive]
- * @property {string} [invitedBy]
  */
-
-const MembersContext = createContext(null);
-
 function makeId() {
   return `local-${Date.now().toString(36)}-${Math.random()
     .toString(36)
@@ -70,8 +51,16 @@ export function MembersProvider({ children }) {
     );
   }, []);
 
-  const removeMember = useCallback((id) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
+  const suspendMember = useCallback((id) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status: "suspended" } : m))
+    );
+  }, []);
+
+  const reinviteMember = useCallback((id) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status: "invited" } : m))
+    );
   }, []);
 
   const getMember = useCallback(
@@ -80,19 +69,25 @@ export function MembersProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ members, addMember, updateMember, removeMember, getMember }),
-    [members, addMember, updateMember, removeMember, getMember]
+    () => ({
+      members,
+      addMember,
+      updateMember,
+      suspendMember,
+      reinviteMember,
+      getMember,
+    }),
+    [
+      members,
+      addMember,
+      updateMember,
+      suspendMember,
+      reinviteMember,
+      getMember,
+    ]
   );
 
   return (
     <MembersContext.Provider value={value}>{children}</MembersContext.Provider>
   );
-}
-
-export function useMembers() {
-  const ctx = useContext(MembersContext);
-  if (!ctx) {
-    throw new Error("useMembers must be used within a <MembersProvider>");
-  }
-  return ctx;
 }

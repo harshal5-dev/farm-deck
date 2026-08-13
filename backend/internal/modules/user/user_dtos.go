@@ -29,3 +29,10 @@ type UpdateUserProfileRequest struct {
 	FullName       string  `json:"fullName" binding:"required,min=2,max=100"`
 	ProfilePicture *string `json:"profilePicture"`
 }
+
+type CreateMemberRequest struct {
+	FullName       string  `json:"fullName" binding:"required,min=2,max=100"`
+	EmailID        string  `json:"emailId" binding:"required,email,max=255"`
+	Role           string  `json:"role" binding:"required"`
+	ProfilePicture *string `json:"profilePicture"`
+}

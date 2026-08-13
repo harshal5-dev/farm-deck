@@ -8,8 +8,8 @@ import {
   IconCircleX,
   IconLoader2,
   IconCheck,
+  IconChevronDown,
   IconBolt,
-  IconArrowRight,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,8 @@ import { ROLE_ORDER, getRole } from "@/constants/roles";
 /* ============================================================ */
 
 function AvatarPicker({ value, onChange, disabled }) {
-  const currentLabel = getAvatar(value || DEFAULT_AVATAR_ID).label;
+  const current = value || DEFAULT_AVATAR_ID;
+  const currentLabel = getAvatar(current).label;
   return (
     <Popover>
       <PopoverTrigger
@@ -41,31 +42,36 @@ function AvatarPicker({ value, onChange, disabled }) {
           <button
             type="button"
             disabled={disabled}
-            aria-label="Choose an avatar"
-            className="group relative inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/50 px-2.5 py-1.5 text-xs font-medium transition-all hover:border-leaf/50 hover:bg-card/80 hover:shadow-sm disabled:opacity-60"
+            aria-label={`Change avatar, currently ${currentLabel}`}
+            title={currentLabel}
+            className="group relative size-12 rounded-full bg-muted shadow-sm ring-2 ring-border transition-all hover:scale-[1.04] hover:ring-leaf/50 disabled:opacity-60"
           />
         }
       >
-        <span className="size-5 overflow-hidden rounded-full ring-1 ring-background">
-          <Avatar id={value || DEFAULT_AVATAR_ID} className="size-full" />
+        <span className="absolute inset-0 overflow-hidden rounded-full">
+          <Avatar id={current} className="size-full" />
         </span>
-        <span className="truncate max-w-[6.5rem]">{currentLabel}</span>
-        <IconArrowRight
-          className="size-3 text-muted-foreground transition-transform group-data-[popup-open]:rotate-90"
-          strokeWidth={2}
-        />
+        <span className="absolute -right-0.5 -bottom-0.5 flex size-5 items-center justify-center rounded-full bg-background text-muted-foreground shadow ring-1 ring-border transition-colors group-hover:bg-leaf group-hover:text-white">
+          <IconChevronDown className="size-3" strokeWidth={2.5} />
+        </span>
       </PopoverTrigger>
       <PopoverContent
         align="start"
         sideOffset={6}
-        className="w-[min(22rem,calc(100vw-2rem))] p-3"
+        className="w-[min(20rem,calc(100vw-2rem))] p-3"
       >
-        <p className="mb-2 text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-          Pick an avatar
-        </p>
-        <div className="grid max-h-56 grid-cols-6 gap-1.5 overflow-y-auto pr-1">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+            Pick an avatar
+          </span>
+          <span className="inline-flex items-center gap-1 truncate text-[11px] font-medium text-foreground">
+            <IconCheck className="size-3 text-leaf" strokeWidth={2.5} />
+            {currentLabel}
+          </span>
+        </div>
+        <div className="grid grid-cols-6 gap-1.5">
           {FARM_AVATARS.map((a) => {
-            const isSelected = a.id === value;
+            const isSelected = a.id === current;
             return (
               <button
                 key={a.id}
@@ -77,15 +83,15 @@ function AvatarPicker({ value, onChange, disabled }) {
                 className={cn(
                   "group/cell relative aspect-square overflow-hidden rounded-lg border-2 transition-all",
                   isSelected
-                    ? "scale-[1.04] border-leaf shadow-sm ring-2 ring-leaf/30"
-                    : "border-border/40 hover:scale-[1.04] hover:border-leaf/40"
+                    ? "border-leaf shadow-sm ring-2 ring-leaf/30"
+                    : "border-transparent hover:scale-105 hover:ring-2 hover:ring-leaf/20"
                 )}
               >
                 <a.Component />
                 {isSelected && (
-                  <div className="absolute top-0.5 right-0.5 flex size-3.5 items-center justify-center rounded-full bg-leaf text-white shadow ring-1 ring-background">
+                  <span className="absolute right-0.5 bottom-0.5 flex size-3.5 items-center justify-center rounded-full bg-leaf text-white shadow ring-1 ring-background">
                     <IconCheck className="size-2" strokeWidth={3} />
-                  </div>
+                  </span>
                 )}
               </button>
             );
@@ -348,8 +354,24 @@ export default function UserForm({
 
         {/* ===== Right — form fields ===== */}
         <div className="flex min-h-0 flex-col gap-3.5">
-          {/* Full name + avatar (single row to save vertical space) */}
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-[1fr_auto] sm:items-start sm:gap-3">
+          {/* Avatar + Full name (avatar dropdown sits left of the name input) */}
+          <div className="grid grid-cols-[auto_1fr] items-start gap-3 sm:gap-4">
+            {/* Avatar dropdown */}
+            <div>
+              <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
+                <IconBolt
+                  className="size-3.5 text-muted-foreground"
+                  strokeWidth={1.75}
+                />
+                Avatar
+              </span>
+              <AvatarPicker
+                value={avatarId}
+                onChange={(v) => setValue("avatarId", v, { shouldDirty: true })}
+              />
+            </div>
+
+            {/* Full name */}
             <div>
               <label
                 htmlFor="user-fullName"
@@ -389,22 +411,6 @@ export default function UserForm({
                   {errors.fullName.message}
                 </p>
               )}
-            </div>
-
-            <div className="sm:pt-[1.4rem]">
-              <p className="sr-only sm:not-sr-only sm:mb-1 sm:flex sm:items-center sm:gap-1.5 sm:text-xs sm:font-medium sm:text-foreground">
-                <IconBolt
-                  className="size-3.5 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
-                Avatar
-              </p>
-              <AvatarPicker
-                value={avatarId}
-                onChange={(v) =>
-                  setValue("avatarId", v, { shouldDirty: true })
-                }
-              />
             </div>
           </div>
 

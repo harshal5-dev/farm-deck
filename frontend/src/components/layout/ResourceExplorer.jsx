@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -34,13 +34,6 @@ export default function ResourceExplorer({
 }) {
   const [selectedId, setSelectedId] = useState(items[0]?.id ?? null);
   const [mobileView, setMobileView] = useState("list"); // "list" | "detail"
-
-  // Keep a valid selection when the items list changes (e.g. after fetch).
-  useEffect(() => {
-    if (items.length && !items.some((i) => i.id === selectedId)) {
-      setSelectedId(items[0].id);
-    }
-  }, [items, selectedId]);
 
   const selected = items.find((i) => i.id === selectedId) ?? null;
 

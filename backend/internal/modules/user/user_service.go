@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
 )
 
 type UserService interface {
 	UpdateUserProfile(ctx context.Context, userID uuid.UUID, req UpdateUserProfileRequest) error
 	GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error)
+	CreateMember(ctx context.Context, tenantID uuid.UUID, req CreateMemberRequest) error
 }
 
 type UserServiceImpl struct {
@@ -41,4 +44,41 @@ func (s *UserServiceImpl) UpdateUserProfile(ctx context.Context, userID uuid.UUI
 		return fmt.Errorf("update profile: update user: %w", err)
 	}
 	return nil
+}
+
+func (s *UserServiceImpl) CreateMember(ctx context.Context, tenantID uuid.UUID, req CreateMemberRequest) error {
+	if err := checkRole(req.Role); err != nil {
+		return fmt.Errorf("create member: %w", err)
+	}
+	passwordHash, err := getPasswordHash()
+	if err != nil {
+		return fmt.Errorf("create member: %w", err)
+	}
+
+	_, err = s.userRepo.CreateMember(ctx, toCreateMemberTxParams(tenantID, passwordHash, req))
+	if err != nil {
+		return fmt.Errorf("create member: %w", err)
+	}
+	return nil
+}
+
+// ---------------- Private Functions ------------------
+
+func checkRole(role string) error {
+	if role != domain.UserRoleGrower && role != domain.UserRoleManager && role != domain.UserRoleViewer {
+		return fmt.Errorf("invalid role: %s", role)
+	}
+	return nil
+}
+
+func getPasswordHash() (string, error) {
+	pass, err := password.GeneratePIN(8)
+	if err != nil {
+		return "", fmt.Errorf("create member: generate pin: %w", err)
+	}
+	passwordHash, err := password.HashPassword(pass)
+	if err != nil {
+		return "", fmt.Errorf("create member: hash password: %w", err)
+	}
+	return passwordHash, nil
 }

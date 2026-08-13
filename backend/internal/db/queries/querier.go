@@ -14,6 +14,7 @@ type Querier interface {
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
 	CreateCredential(ctx context.Context, arg CreateCredentialParams) (Credential, error)
+	CreateMember(ctx context.Context, arg CreateMemberParams) (User, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)

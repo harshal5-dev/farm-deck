@@ -9,7 +9,7 @@ export default function AnimatedNumber({
   value,
   suffix = "",
   prefix = "",
-  duration = 1200,
+  duration = 800,
   className,
 }) {
   const supportsObserver =

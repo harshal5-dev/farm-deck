@@ -1,26 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import {
   IconLayoutDashboard,
+  IconTractor,
   IconUsers,
-  IconX,
-  IconChevronLeft,
-  IconChevronRight,
-  IconCommand,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import Header from "@/components/layout/header/Header";
-import Logo from "@/components/layout/Logo";
+import BackgroundDecor from "./BackgroundDecor";
+import DesktopSidebar from "./desktop-sidebar/DesktopSidebar";
+import MobileSidebar from "./mobile-sidebar/MobileSidebar";
 
 /**
- * Sidebar navigation — two sections:
+ * Sidebar navigation — three sections:
  *   1. Overview (Dashboard)
- *   2. Team (Members)
+ *   2. Farming (Farms)
+ *   3. Team (Members)
  *
  * Members shows a small "pending invites" count chip when collapsed or
  * expanded, so the workspace owner always sees pending work at a glance.
@@ -38,6 +33,16 @@ const navGroups = [
     ],
   },
   {
+    label: "Farming",
+    items: [
+      {
+        label: "Farms",
+        href: "/app/farms",
+        icon: IconTractor,
+      },
+    ],
+  },
+  {
     label: "Team",
     items: [
       {
@@ -50,250 +55,7 @@ const navGroups = [
   },
 ];
 
-function NavItem({ item, collapsed, index, onNavigate }) {
-  const Icon = item.icon;
-  const end = item.end ?? item.href === "/app";
-
-  return (
-    <NavLink
-      to={item.href}
-      end={end}
-      viewTransition
-      onClick={onNavigate}
-      style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
-      className={({ isActive }) =>
-        cn(
-          "group/nav relative flex animate-in items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200 fade-in slide-in-from-left-2 hover:-translate-y-0.5",
-          collapsed ? "h-10 w-10 justify-center" : "px-3 py-2",
-          isActive
-            ? "text-primary-foreground"
-            : "text-sidebar-accent-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-sm hover:shadow-leaf/10"
-        )
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {/* Active pill — solid farm-green with depth. First child so it sits
-              behind the icon/label without needing a negative z-index. */}
-          {isActive && (
-            <span className="absolute inset-0 rounded-xl bg-linear-to-br from-leaf to-sage-deep shadow-md shadow-leaf/30" />
-          )}
-          {/* Hover spotlight — soft glow behind inactive items */}
-          {!isActive && (
-            <span className="absolute inset-0 rounded-xl bg-leaf/0 opacity-0 transition-all duration-200 group-hover/nav:bg-leaf/10 group-hover/nav:opacity-100" />
-          )}
-          <Icon
-            className={cn(
-              "relative shrink-0 transition-transform duration-200",
-              collapsed ? "size-4.75" : "size-4.5",
-              !isActive &&
-                "group-hover/nav:-translate-y-px group-hover/nav:scale-110",
-              isActive && "drop-shadow-sm"
-            )}
-            strokeWidth={1.85}
-          />
-          {!collapsed && (
-            <>
-              <span className="relative flex-1 truncate transition-transform duration-200 group-hover/nav:translate-x-0.5">
-                {item.label}
-              </span>
-              {item.badge ? (
-                <span
-                  className={cn(
-                    "relative inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums",
-                    isActive
-                      ? "bg-white/20 text-primary-foreground ring-1 ring-white/20"
-                      : "bg-clay/15 text-clay-deep ring-1 ring-clay/25 dark:text-clay"
-                  )}
-                >
-                  {item.badge}
-                </span>
-              ) : null}
-            </>
-          )}
-          {collapsed && item.badge ? (
-            <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-clay text-[9px] font-bold text-white shadow-sm ring-2 ring-sidebar">
-              {item.badge}
-            </span>
-          ) : null}
-        </>
-      )}
-    </NavLink>
-  );
-}
-
-function BrandLogo({ collapsed }) {
-  return (
-    <div
-      className={cn(
-        "flex h-16 items-center gap-3 overflow-hidden transition-all duration-300",
-        collapsed ? "justify-center px-2" : "px-4"
-      )}
-    >
-      {collapsed ? (
-        <Logo variant="badge" />
-      ) : (
-        <Logo variant="full" />
-      )}
-    </div>
-  );
-}
-
-/** Renders the grouped navigation with section labels + staggered entrance.
- *  `onNavigate` (optional) — called when a nav item is activated. Used by
- *  the mobile drawer so tapping a link auto-closes the sidebar. */
-function NavList({ collapsed, onNavigate }) {
-  let runningIndex = 0;
-  return (
-    <nav className="flex flex-1 flex-col gap-4 p-3">
-      {navGroups.map((group) => (
-        <div key={group.label} className="space-y-1">
-          {!collapsed && (
-            <p className="animate-in px-3 pt-2 pb-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground/50 uppercase fade-in slide-in-from-left-2">
-              {group.label}
-            </p>
-          )}
-          {group.items.map((item) => {
-            const idx = runningIndex++;
-            return collapsed ? (
-              <Tooltip key={item.href}>
-                <TooltipTrigger
-                  render={<span className="flex justify-center" />}
-                >
-                  <NavItem item={item} collapsed index={idx} onNavigate={onNavigate} />
-                </TooltipTrigger>
-                <TooltipContent side="right">{item.label}</TooltipContent>
-              </Tooltip>
-            ) : (
-              <NavItem
-                key={item.href}
-                item={item}
-                collapsed={false}
-                index={idx}
-                onNavigate={onNavigate}
-              />
-            );
-          })}
-        </div>
-      ))}
-    </nav>
-  );
-}
-
-function MobileSidebar({ open, onClose }) {
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  return (
-    <>
-      {/* Dim overlay. `backdrop-blur` was removed: combined with the
-          sidebar's transform-composited layer it was producing a blurry
-          Mark logo on some mobile browsers. The semi-transparent bg
-          alone is enough to dim the page content. */}
-      <div
-        className={cn(
-          "fixed inset-0 z-40 bg-soil/50 transition-opacity duration-300 lg:hidden",
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        )}
-        onClick={onClose}
-      />
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sidebar shadow-2xl transition-transform duration-300 lg:hidden",
-          open ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="pattern-contour pointer-events-none absolute inset-0 opacity-40" />
-        <div className="relative flex flex-1 flex-col">
-          <div className="flex h-16 items-center justify-between pr-3">
-            <BrandLogo collapsed={false} />
-            <button
-              onClick={onClose}
-              className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-sidebar-accent hover:text-foreground active:scale-95"
-              aria-label="Close menu"
-            >
-              <IconX className="size-4" strokeWidth={2} />
-            </button>
-          </div>
-          <div className="mx-3 h-px bg-linear-to-r from-transparent via-leaf/45 to-transparent" />
-          {/* onNavigate closes the drawer when a link is tapped. */}
-          <NavList collapsed={false} onNavigate={onClose} />
-        </div>
-      </aside>
-    </>
-  );
-}
-
-function DesktopSidebar({ collapsed, onToggle }) {
-  return (
-    <aside
-      className={cn(
-        "fixed inset-y-0 left-0 z-40 hidden flex-col bg-sidebar transition-all duration-300 lg:flex",
-        collapsed ? "w-19" : "w-65"
-      )}
-    >
-      <div className="pattern-contour pointer-events-none absolute inset-0 opacity-30" />
-      {/* Outer leaf-tinted glow — gives the sidebar a soft farm-green halo
-          on its right edge, sitting on the page surface. */}
-      <div className="pointer-events-none absolute inset-y-2 -right-3 w-3 bg-linear-to-b from-transparent via-leaf/20 to-transparent blur-md" />
-      {/* Themed right edge — fades at top/bottom, peaks in leaf through
-          sage-deep so the boundary reads clearly without a hard line. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-linear-to-b from-leaf/10 via-sage-deep/60 to-leaf/10" />
-      <div className="relative flex flex-1 flex-col">
-        <BrandLogo collapsed={collapsed} />
-        <div className="mx-3 h-px bg-linear-to-r from-transparent via-leaf/45 to-transparent" />
-        <NavList collapsed={collapsed} />
-        <div className="p-2">
-          <button
-            onClick={onToggle}
-            className="group flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-muted-foreground transition-colors duration-200 hover:bg-sidebar-accent hover:text-foreground"
-          >
-            {collapsed ? (
-              <IconChevronRight
-                className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                strokeWidth={1.85}
-              />
-            ) : (
-              <>
-                <IconChevronLeft
-                  className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5"
-                  strokeWidth={1.85}
-                />
-                Collapse
-                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground ring-1 ring-inset ring-leaf/40">
-                  <IconCommand className="size-2.5" strokeWidth={2.2} />
-                  <span>B</span>
-                </kbd>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-function BackgroundDecor() {
-  return (
-    <div
-      className="pointer-events-none fixed inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
-      {/* Soft sage glow — top right (sunlight on a field) */}
-      <div className="absolute -top-48 -right-40 size-150 animate-glow-pulse rounded-full bg-sage/10 blur-[100px] dark:bg-sage/12" />
-      {/* Clay/warm tint — bottom left */}
-      <div className="absolute -bottom-48 -left-44 size-140 animate-glow-pulse rounded-full bg-clay/8 blur-[100px] [animation-delay:1.2s] dark:bg-clay-deep/10" />
-      {/* Sky tint near center */}
-      <div className="absolute right-1/4 bottom-1/4 size-95 rounded-full bg-sky-warm/8 blur-[90px] dark:bg-sky-warm/6" />
-    </div>
-  );
-}
-
-export default function Layout() {
+const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -315,8 +77,9 @@ export default function Layout() {
       <DesktopSidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
+        navGroups={navGroups}
       />
-      <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} navGroups={navGroups} />
       <main
         className={cn(
           "relative flex flex-1 flex-col transition-all duration-300",
@@ -331,3 +94,5 @@ export default function Layout() {
     </div>
   );
 }
+
+export default Layout;
