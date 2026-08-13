@@ -47,10 +47,17 @@ func (f *fakeRefreshRepo) Rotate(ctx context.Context, p domain.RotateRefreshToke
 }
 
 type fakeEmailService struct {
-	sendWelcome func(to, name string) error
+	sendWelcome    func(to, name string) error
+	sendInvitation func(to, name, tenantName, acceptURL string) error
 }
 
 func (f *fakeEmailService) SendWelcomeEmail(to, name string) error { return f.sendWelcome(to, name) }
+func (f *fakeEmailService) SendInvitationEmail(to, name, tenantName, acceptURL string) error {
+	if f.sendInvitation == nil {
+		return nil
+	}
+	return f.sendInvitation(to, name, tenantName, acceptURL)
+}
 
 // ---- handler-level fake (mocks AuthService) ----
 

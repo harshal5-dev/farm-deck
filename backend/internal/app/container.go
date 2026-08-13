@@ -29,6 +29,7 @@ type Repositories struct {
 	User         repository.UserRepo
 	RefreshToken repository.RefreshTokenRepo
 	Tenant       repository.TenantRepo
+	Invitation   repository.InvitationRepo
 }
 
 type Container struct {
@@ -51,6 +52,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		User:         repository.NewUserRepo(store),
 		RefreshToken: repository.NewRefreshTokenRepo(store),
 		Tenant:       repository.NewTenantRepo(store),
+		Invitation:   repository.NewInvitationRepo(store),
 	}
 
 	container.Mailer = mailer.NewAsyncMailer(
@@ -68,7 +70,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 	container.Services = Services{
 		Auth:   auth.NewAuthService(container.Repositories.Credential, container.Repositories.RefreshToken, cfg, emailService),
 		Email:  emailService,
-		User:   user.NewUserService(container.Repositories.User),
+		User:   user.NewUserService(container.Repositories.User, emailService, cfg),
 		Tenant: tenant.NewTenantService(container.Repositories.Tenant),
 	}
 

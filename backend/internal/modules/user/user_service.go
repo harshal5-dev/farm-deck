@@ -3,26 +3,33 @@ package user
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/invitetoken"
 )
 
 type UserService interface {
 	UpdateUserProfile(ctx context.Context, userID uuid.UUID, req UpdateUserProfileRequest) error
 	GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error)
-	CreateMember(ctx context.Context, tenantID uuid.UUID, req CreateMemberRequest) error
+	CreateMember(ctx context.Context, tenantID, inviterID uuid.UUID, req CreateMemberRequest) (CreateMemberResponse, error)
 }
 
 type UserServiceImpl struct {
-	userRepo repository.UserRepo
+	userRepo     repository.UserRepo
+	emailService email.EmailService
+	cfg          config.Config
 }
 
-func NewUserService(userRepo repository.UserRepo) UserService {
+func NewUserService(userRepo repository.UserRepo, emailService email.EmailService, cfg config.Config) UserService {
 	return &UserServiceImpl{
-		userRepo: userRepo,
+		userRepo:     userRepo,
+		emailService: emailService,
+		cfg:          cfg,
 	}
 }
 
@@ -46,20 +53,54 @@ func (s *UserServiceImpl) UpdateUserProfile(ctx context.Context, userID uuid.UUI
 	return nil
 }
 
-func (s *UserServiceImpl) CreateMember(ctx context.Context, tenantID uuid.UUID, req CreateMemberRequest) error {
+// CreateMember inserts the member row + open invitation in one DB transaction,
+// then fires the invitation email asynchronously. The raw token only exists
+// in memory between token generation and the email call — it is never
+// returned in the API response and never persisted.
+func (s *UserServiceImpl) CreateMember(
+	ctx context.Context,
+	tenantID, inviterID uuid.UUID,
+	req CreateMemberRequest,
+) (CreateMemberResponse, error) {
 	if err := checkRole(req.Role); err != nil {
-		return fmt.Errorf("create member: %w", err)
-	}
-	passwordHash, err := getPasswordHash()
-	if err != nil {
-		return fmt.Errorf("create member: %w", err)
+		return CreateMemberResponse{}, fmt.Errorf("create member: %w", err)
 	}
 
-	_, err = s.userRepo.CreateMember(ctx, toCreateMemberTxParams(tenantID, passwordHash, req))
+	rawToken, tokenHash, err := invitetoken.Generate()
 	if err != nil {
-		return fmt.Errorf("create member: %w", err)
+		return CreateMemberResponse{}, fmt.Errorf("create member: generate token: %w", err)
 	}
-	return nil
+
+	expiresAt := time.Now().Add(s.cfg.InvitationTokenDuration)
+
+	result, err := s.userRepo.CreateMember(
+		ctx,
+		toCreateMemberTxParams(tenantID, inviterID, tokenHash, expiresAt, req),
+	)
+	if err != nil {
+		return CreateMemberResponse{}, fmt.Errorf("create member: %w", err)
+	}
+
+	acceptURL := buildAcceptURL(s.cfg.AppURL, rawToken)
+	tenantName := ""
+
+	// Fire-and-forget. SendInvitationEmail hands off to AsyncMailer which
+	// returns immediately and retries internally; we don't block the
+	// caller on SMTP.
+	_ = s.emailService.SendInvitationEmail(result.User.EmailID, result.User.FullName, tenantName, acceptURL)
+
+	return CreateMemberResponse{
+		UserID:       result.User.ID,
+		InvitationID: result.Invitation.ID,
+		ExpiresAt:    result.Invitation.ExpiresAt,
+	}, nil
+}
+
+// buildAcceptURL is the single source of truth for the invitation link
+// shape. Keeping it in one place makes it easy to swap the frontend route
+// later (e.g. add UTM params) without touching the email service.
+func buildAcceptURL(appURL, rawToken string) string {
+	return appURL + "/accept-invite?token=" + rawToken
 }
 
 // ---------------- Private Functions ------------------
@@ -69,16 +110,4 @@ func checkRole(role string) error {
 		return fmt.Errorf("invalid role: %s", role)
 	}
 	return nil
-}
-
-func getPasswordHash() (string, error) {
-	pass, err := password.GeneratePIN(8)
-	if err != nil {
-		return "", fmt.Errorf("create member: generate pin: %w", err)
-	}
-	passwordHash, err := password.HashPassword(pass)
-	if err != nil {
-		return "", fmt.Errorf("create member: hash password: %w", err)
-	}
-	return passwordHash, nil
 }

@@ -23,4 +23,10 @@ var (
 
 	// Role Access errors
 	ErrRoleAccessDenied = errors.New("role access denied")
+
+	// Invitation errors
+	ErrInvitationInvalid  = errors.New("invitation is invalid")
+	ErrInvitationExpired  = errors.New("invitation has expired")
+	ErrInvitationRevoked  = errors.New("invitation has been revoked")
+	ErrInvitationAccepted = errors.New("invitation already accepted")
 )

@@ -47,6 +47,11 @@ type Config struct {
 
 	AccessTokenDuration  time.Duration `env:"ACCESS_TOKEN_DURATION,required"`
 	RefreshTokenDuration time.Duration `env:"REFRESH_TOKEN_DURATION,required"`
+
+	// InvitationTokenDuration controls how long a freshly created invitation
+	// stays valid before the accept endpoint starts rejecting it. Defaults
+	// to 168h (7 days) to match the user_invitations migration comment.
+	InvitationTokenDuration time.Duration `env:"INVITATION_TOKEN_DURATION" envDefault:"168h"`
 }
 
 func Load() (Config, error) {

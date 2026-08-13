@@ -171,3 +171,30 @@ func TestUserHandler_UpdateProfile_ServiceErrorMapped(t *testing.T) {
 		t.Fatalf("status: got %d want 404", w.Code)
 	}
 }
+
+func TestUserHandler_CreateMember_Success(t *testing.T) {
+	tenantID := uuid.MustParse("66666666-6666-6666-6666-666666666666")
+	inviterID := uuid.MustParse("77777777-7777-7777-7777-777777777777")
+	userID := uuid.MustParse("88888888-8888-8888-8888-888888888888")
+	invID := uuid.MustParse("99999999-9999-9999-9999-999999999999")
+
+	svc := &fakeUserService{createMember: func(_ context.Context, tID, iID uuid.UUID, r CreateMemberRequest) (CreateMemberResponse, error) {
+		if tID != tenantID {
+			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
+		}
+		if iID != inviterID {
+			t.Errorf("inviterID forwarded: got %v want %v", iID, inviterID)
+		}
+		return CreateMemberResponse{UserID: userID, InvitationID: invID}, nil
+	}}
+	h := NewUserHandler(svc)
+
+	ctx, w := newJSONCtx(`{"fullName":"Bob","emailId":"bob@farmdeck.app","role":"grower"}`)
+	withUserID(ctx, inviterID)
+	ctx.Set(ctxutil.TenantIDKey, tenantID)
+	h.CreateMember(ctx)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
+	}
+}

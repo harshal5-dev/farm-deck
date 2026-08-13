@@ -1,0 +1,17 @@
+You're invited to Farmdeck, {{.Name}}!
+
+{{if .TenantName}}{{.TenantName}} has invited you to join their team on{{else}}You've been invited to join a team on{{end}} Farmdeck — the calm, modern dashboard for fields, crops, harvests, pH, and EC.
+
+Accept the invitation here:
+{{.AcceptURL}}
+
+This invitation expires in 7 days. If it expires before you accept it, ask the person who invited you to send a new one.
+
+Happy farming,
+The Farmdeck team
+
+—
+Farmdeck · {{appURL .AppURL}}
+Smart farming, beautifully managed.
+
+You're receiving this email because someone invited you to a Farmdeck team.

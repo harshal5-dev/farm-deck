@@ -16,22 +16,22 @@ func TestLogoContentID(t *testing.T) {
 	}
 }
 
-// LogoPNG must return an independent copy each call, so a caller mutating its
+// LogoSVG must return an independent copy each call, so a caller mutating its
 // result cannot corrupt the embedded asset for subsequent callers.
-func TestLogoPNG_ReturnsIndependentCopy(t *testing.T) {
-	a := LogoPNG()
-	b := LogoPNG()
+func TestLogoSVG_ReturnsIndependentCopy(t *testing.T) {
+	a := LogoSVG()
+	b := LogoSVG()
 	if len(a) == 0 || len(b) == 0 {
-		t.Fatal("expected non-empty PNG bytes")
+		t.Fatal("expected non-empty SVG bytes")
 	}
 
 	// Corrupt the first copy.
 	a[0] ^= 0xFF
 
 	// The second copy must be unaffected.
-	again := LogoPNG()
+	again := LogoSVG()
 	if again[0] == a[0] {
-		t.Errorf("mutating one LogoPNG() result affected a later call — copies are not independent")
+		t.Errorf("mutating one LogoSVG() result affected a later call — copies are not independent")
 	}
 }
 

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>You're invited to Farmdeck</title>
+  <style>
+    html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+    * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; border-collapse: collapse !important; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    a { text-decoration: none; }
+    @media (prefers-color-scheme: dark) {
+      .bg-canvas { background-color: #161d18 !important; }
+    }
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .px { padding-left: 22px !important; padding-right: 22px !important; }
+      .hero { font-size: 26px !important; line-height: 34px !important; }
+      .lead { font-size: 15px !important; line-height: 25px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f1ea;color:#1a2e1f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div role="article" aria-label="You're invited to Farmdeck">
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg-canvas" style="background-color:#f4f1ea;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+
+          <!--[if mso]><table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" class="email-container" style="width:560px;max-width:560px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(26,46,31,0.06);">
+
+            <!-- Brand banner -->
+            <tr>
+              <td class="px" align="center" style="background:#1a2e1f;background:linear-gradient(135deg,#22341f 0%,#1a2e1f 60%,#2E7D52 140%);padding:34px 24px 30px 24px;">
+                <img src="cid:farmdeck-logo" width="168" height="40" alt="Farmdeck"
+                     style="display:block;border:0;outline:none;text-decoration:none;max-width:168px;width:168px;height:40px;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:22px;font-weight:700;">
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td class="px" style="padding:40px 48px 8px 48px;">
+                <h1 class="hero" style="margin:0 0 16px 0;font-size:30px;line-height:38px;letter-spacing:-0.5px;font-weight:700;color:#16241a;">
+                  You're invited, {{.Name}} 🌱
+                </h1>
+                <p class="lead" style="margin:0 0 24px 0;font-size:16px;line-height:26px;color:#3d4f44;">
+                  {{if .TenantName}}
+                  <strong style="color:#16241a;">{{.TenantName}}</strong> has invited you to join their team on Farmdeck.
+                  {{else}}
+                  You've been invited to join a team on Farmdeck.
+                  {{end}}
+                  Farmdeck brings your fields, crops, harvests, pH, and EC
+                  into one calm, modern dashboard — so the whole team can
+                  grow more with less effort.
+                </p>
+
+                <!-- CTA -->
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 28px 0;">
+                  <tr>
+                    <td align="center" bgcolor="#4CAF50" style="border-radius:12px;background:#4CAF50;">
+                      <a href="{{.AcceptURL}}" target="_blank" rel="noopener"
+                         style="display:inline-block;padding:15px 34px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:15px;font-weight:600;color:#ffffff;background:#4CAF50;border-radius:12px;">
+                        Accept invitation →
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0 0 24px 0;font-size:13px;line-height:20px;color:#8a9789;">
+                  Or copy and paste this link into your browser:<br>
+                  <a href="{{.AcceptURL}}" style="color:#4a5a4f;word-break:break-all;">{{.AcceptURL}}</a>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Expiry strip -->
+            <tr>
+              <td class="px" style="padding:0 48px 36px 48px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f8f3;border-radius:14px;border:1px solid #e6efe1;">
+                  <tr>
+                    <td style="padding:20px 22px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:14px;line-height:22px;color:#3d4f44;">
+                      <strong style="color:#16241a;">This invitation expires in 7 days.</strong><br>
+                      If it expires before you accept, ask the person who
+                      invited you to send a new one from the Farmdeck
+                      dashboard.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Sign-off -->
+            <tr>
+              <td class="px" style="padding:0 48px 40px 48px;">
+                <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:15px;line-height:24px;color:#3d4f44;">
+                  Happy farming,<br>
+                  <strong style="color:#16241a;">The Farmdeck team</strong>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td class="px" style="padding:24px 48px 32px 48px;border-top:1px solid #ecefe8;background:#fbfcfa;border-radius:0 0 20px 20px;">
+                <p style="margin:0 0 6px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:13px;line-height:20px;color:#8a9789;">
+                  <strong style="color:#4a5a4f;">Farmdeck</strong> · <a href="{{appURL .AppURL}}" style="color:#4a5a4f;text-decoration:none;">{{appURL .AppURL}}</a><br>
+                  Smart farming, beautifully managed.
+                </p>
+                <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:12px;line-height:18px;color:#a8b3a8;">
+                  You're receiving this email because someone invited you to a Farmdeck team.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+          <!--[if mso]></td></tr></table><![endif]-->
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
 func TestToUserProfileResponse(t *testing.T) {
@@ -103,3 +104,53 @@ func TestToUpdateUserProfileParams(t *testing.T) {
 }
 
 func uuidMust(s string) uuid.UUID { return uuid.MustParse(s) }
+
+func TestToCreateMemberTxParams(t *testing.T) {
+	tenantID := uuidMust("11111111-1111-1111-1111-111111111111")
+	inviterID := uuidMust("22222222-2222-2222-2222-222222222222")
+	expiresAt := time.Date(2026, 1, 8, 0, 0, 0, 0, time.UTC)
+	pic := "pic.png"
+
+	got := toCreateMemberTxParams(tenantID, inviterID, "tok-hash", expiresAt, CreateMemberRequest{
+		FullName:       "Bob",
+		EmailID:        "bob@farmdeck.app",
+		Role:           "grower",
+		ProfilePicture: &pic,
+	})
+
+	if got.FullName != "Bob" {
+		t.Errorf("FullName: got %q", got.FullName)
+	}
+	if got.EmailID != "bob@farmdeck.app" {
+		t.Errorf("EmailID: got %q", got.EmailID)
+	}
+	if got.TenantID != tenantID {
+		t.Errorf("TenantID: got %v", got.TenantID)
+	}
+	if got.Role != "grower" {
+		t.Errorf("Role: got %q", got.Role)
+	}
+	if got.Status != domain.UserStatusInvited {
+		t.Errorf("Status: got %q want %q", got.Status, domain.UserStatusInvited)
+	}
+	if got.ProfilePicture == nil || *got.ProfilePicture != "pic.png" {
+		t.Errorf("ProfilePicture: got %v", got.ProfilePicture)
+	}
+	if got.TokenHash != "tok-hash" {
+		t.Errorf("TokenHash: got %q", got.TokenHash)
+	}
+	if !got.ExpiresAt.Equal(expiresAt) {
+		t.Errorf("ExpiresAt: got %v want %v", got.ExpiresAt, expiresAt)
+	}
+	if got.CreatedBy != inviterID {
+		t.Errorf("CreatedBy: got %v want %v", got.CreatedBy, inviterID)
+	}
+}
+
+func TestBuildAcceptURL(t *testing.T) {
+	got := buildAcceptURL("http://localhost:5173", "raw-token-value")
+	want := "http://localhost:5173/accept-invite?token=raw-token-value"
+	if got != want {
+		t.Errorf("buildAcceptURL = %q want %q", got, want)
+	}
+}

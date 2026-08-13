@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
@@ -33,7 +35,7 @@ func toUpdateUserProfileParams(userId uuid.UUID, req UpdateUserProfileRequest) d
 	}
 }
 
-func toCreateMemberTxParams(tenantID uuid.UUID, passwordHash string, req CreateMemberRequest) domain.CreateMemberTxParams {
+func toCreateMemberTxParams(tenantID, inviterID uuid.UUID, tokenHash string, expiresAt time.Time, req CreateMemberRequest) domain.CreateMemberTxParams {
 	return domain.CreateMemberTxParams{
 		FullName:       req.FullName,
 		EmailID:        req.EmailID,
@@ -41,6 +43,8 @@ func toCreateMemberTxParams(tenantID uuid.UUID, passwordHash string, req CreateM
 		Role:           req.Role,
 		Status:         domain.UserStatusInvited,
 		ProfilePicture: req.ProfilePicture,
-		PasswordHash:   passwordHash,
+		TokenHash:      tokenHash,
+		ExpiresAt:      expiresAt,
+		CreatedBy:      inviterID,
 	}
 }

@@ -88,14 +88,21 @@ func (h *UserHandlerImpl) CreateMember(ctx *gin.Context) {
 		return
 	}
 
+	inviterID, err := ctxutil.GetUserID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
 	var req CreateMemberRequest
 	if !validate.Bind(ctx, &req) {
 		return
 	}
 
-	if err := h.userService.CreateMember(ctx, tenantID, req); err != nil {
+	result, err := h.userService.CreateMember(ctx, tenantID, inviterID, req)
+	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
 	}
-	response.OK(ctx, "member created successfully")
+	response.OK(ctx, result)
 }

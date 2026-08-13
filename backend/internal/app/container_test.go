@@ -32,6 +32,7 @@ func testConfig() config.Config {
 		SMTPPassword:          "p",
 		AccessTokenDuration:   time.Hour,
 		RefreshTokenDuration:  720 * time.Hour,
+		InvitationTokenDuration: 168 * time.Hour,
 	}
 }
 
@@ -58,6 +59,9 @@ func TestNewContainer_WiresAllLayers(t *testing.T) {
 	}
 	if container.Repositories.Tenant == nil {
 		t.Error("expected Tenant repo to be wired")
+	}
+	if container.Repositories.Invitation == nil {
+		t.Error("expected Invitation repo to be wired")
 	}
 
 	// Services.

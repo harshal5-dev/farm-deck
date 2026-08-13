@@ -26,3 +26,6 @@ INSERT INTO users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6
 ) RETURNING *;
+
+-- name: UpdateUserStatus :one
+UPDATE users SET status = $2 WHERE id = $1 RETURNING *;

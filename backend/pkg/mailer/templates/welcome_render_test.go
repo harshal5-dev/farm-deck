@@ -72,22 +72,16 @@ func TestWelcomeHTMLReferencesCIDLogo(t *testing.T) {
 	}
 }
 
-func TestLogoPNGNonEmpty(t *testing.T) {
-	if len(LogoPNG()) == 0 {
-		t.Fatal("LogoPNG() returned empty bytes")
+func TestLogoSVGNonEmpty(t *testing.T) {
+	if len(LogoSVG()) == 0 {
+		t.Fatal("LogoSVG() returned empty bytes")
 	}
-	// PNG signature check.
-	b := LogoPNG()
-	want := []byte{0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A}
-	if len(b) < len(want) {
-		t.Fatalf("LogoPNG() too short: %d bytes", len(b))
+	// SVG signature check: starts with an XML/SVG declaration.
+	b := LogoSVG()
+	if !strings.HasPrefix(string(b), "<svg") {
+		t.Fatalf("LogoSVG() does not start with <svg, got prefix %q", string(b[:min(8, len(b))]))
 	}
-	for i := range want {
-		if b[i] != want[i] {
-			t.Fatalf("LogoPNG() is not a valid PNG (bad signature at byte %d)", i)
-		}
-	}
-	t.Logf("LogoPNG OK: %d bytes", len(b))
+	t.Logf("LogoSVG OK: %d bytes", len(b))
 }
 
 func TestWelcomeMessageAttachesLogo(t *testing.T) {
@@ -105,8 +99,8 @@ func TestWelcomeMessageAttachesLogo(t *testing.T) {
 	if a.ContentID != "farmdeck-logo" {
 		t.Errorf("attachment ContentID = %q, want farmdeck-logo", a.ContentID)
 	}
-	if a.ContentType != "image/png" {
-		t.Errorf("attachment ContentType = %q, want image/png", a.ContentType)
+	if a.ContentType != "image/svg+xml" {
+		t.Errorf("attachment ContentType = %q, want image/svg+xml", a.ContentType)
 	}
 	if !strings.HasPrefix(msg.HTML, "<!DOCTYPE html>") {
 		t.Errorf("HTML body does not look like a full document")
