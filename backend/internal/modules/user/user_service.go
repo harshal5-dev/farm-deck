@@ -18,6 +18,8 @@ type UserService interface {
 	GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error)
 	CreateMember(ctx context.Context, tenantID, inviterID uuid.UUID, req CreateMemberRequest) (CreateMemberResponse, error)
 	ListMember(ctx context.Context, tenantId uuid.UUID, excludeID uuid.UUID) (ListMembersResponse, error)
+	UpdateMember(ctx context.Context, memberID uuid.UUID, req UpdateMemberRequest) error
+	DeleteMember(ctx context.Context, memberID uuid.UUID) error
 }
 
 type UserServiceImpl struct {
@@ -97,6 +99,22 @@ func (s *UserServiceImpl) ListMember(ctx context.Context, tenantId uuid.UUID, ex
 	}
 
 	return mapToListMemberResponse(users), nil
+}
+
+func (s *UserServiceImpl) UpdateMember(ctx context.Context, memberID uuid.UUID, req UpdateMemberRequest) error {
+	_, err := s.userRepo.UpdateMember(ctx, toUpdateMemberParams(memberID, req))
+	if err != nil {
+		return fmt.Errorf("update member: %w", err)
+	}
+	return nil
+}
+
+func (s *UserServiceImpl) DeleteMember(ctx context.Context, memberID uuid.UUID) error {
+	err := s.userRepo.DeleteMember(ctx, memberID)
+	if err != nil {
+		return fmt.Errorf("delete member: %w", err)
+	}
+	return nil
 }
 
 // ---------------- Private Functions ------------------

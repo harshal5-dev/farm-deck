@@ -20,8 +20,9 @@ CREATE TABLE users (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_active_at TIMESTAMPTZ,
+    deleted_at   TIMESTAMPTZ,
     CONSTRAINT users_role_chk   CHECK (role   IN ('owner','manager','grower', 'viewer')),
-    CONSTRAINT users_status_chk CHECK (status IN ('invited','pending','active','suspended'))
+    CONSTRAINT users_status_chk CHECK (status IN ('invited','active'))
 );
 CREATE INDEX idx_users_tenant ON users(tenant_id);
 CREATE INDEX idx_users_email_id_lower ON users(LOWER(email_id));

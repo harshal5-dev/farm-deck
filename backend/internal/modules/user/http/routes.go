@@ -12,4 +12,6 @@ func Register(public, protected *gin.RouterGroup, h user.UserHandler) {
 	protectedRoutes.PATCH("/me", h.UpdateProfile)
 	protectedRoutes.POST("/members", h.IsCreateMemberAllowed, h.CreateMember)
 	protectedRoutes.GET("/members", h.IsListMembersAllowed, h.ListMember)
+	protectedRoutes.PATCH("/members/:memberId", h.IsUpdateMemberAllowed, h.UpdateMember)
+	protectedRoutes.DELETE("/members/:memberId", h.IsDeleteMemberAllowed, h.DeleteMember)
 }

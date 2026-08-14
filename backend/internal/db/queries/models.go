@@ -49,6 +49,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	LastActiveAt   *time.Time
+	DeletedAt      *time.Time
 }
 
 type UserInvitation struct {

@@ -46,7 +46,7 @@ func (q *Queries) CreateTenant(ctx context.Context, arg CreateTenantParams) (Ten
 }
 
 const updateTenant = `-- name: UpdateTenant :one
-UPDATE tenants SET name = $2, subdomain = $3, description = $4 WHERE id = $1 RETURNING id, name, subdomain, description, created_at, updated_at
+UPDATE tenants SET name = $2, subdomain = $3, description = $4, updated_at = now() WHERE id = $1 RETURNING id, name, subdomain, description, created_at, updated_at
 `
 
 type UpdateTenantParams struct {

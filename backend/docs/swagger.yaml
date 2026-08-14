@@ -71,8 +71,6 @@ definitions:
         items:
           $ref: '#/definitions/MemberResponse'
         type: array
-      suspendedCount:
-        type: integer
       total:
         type: integer
     type: object
@@ -148,6 +146,20 @@ definitions:
         type: string
       subdomain:
         type: string
+    type: object
+  UpdateMemberRequest:
+    properties:
+      fullName:
+        maxLength: 100
+        minLength: 2
+        type: string
+      profilePicture:
+        type: string
+      role:
+        type: string
+    required:
+    - fullName
+    - role
     type: object
   UpdateTenantRequest:
     properties:
@@ -487,6 +499,95 @@ paths:
       security:
       - CookieAuth: []
       summary: Invite a new member to the tenant
+      tags:
+      - user
+  /users/members/{memberId}:
+    delete:
+      description: Soft-deletes a member (owner only).
+      parameters:
+      - description: Member ID
+        in: path
+        name: memberId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: member deleted successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid member id
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: only owner can delete member
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: member not found
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Delete a tenant member
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      description: Updates a member's profile (owner only).
+      parameters:
+      - description: Member ID
+        in: path
+        name: memberId
+        required: true
+        type: string
+      - description: Member update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: member updated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid member id or validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: only owner can update member
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: member not found
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Update a tenant member
       tags:
       - user
 schemes:

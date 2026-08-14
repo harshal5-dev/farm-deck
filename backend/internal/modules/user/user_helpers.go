@@ -63,7 +63,7 @@ func toMemberResponse(user db.User) MemberResponse {
 }
 
 func mapToListMemberResponse(users []db.User) ListMembersResponse {
-	activeCount, invitedCount, suspendedCount := 0, 0, 0
+	activeCount, invitedCount := 0, 0
 	total := len(users)
 	members := make([]MemberResponse, total)
 
@@ -73,17 +73,23 @@ func mapToListMemberResponse(users []db.User) ListMembersResponse {
 			activeCount++
 		case domain.UserStatusInvited:
 			invitedCount++
-		case domain.UserStatusSuspended:
-			suspendedCount++
 		}
 		members[index] = toMemberResponse(user)
 	}
 
 	return ListMembersResponse{
-		Members:        members,
-		Total:          total,
-		ActiveCount:    activeCount,
-		InvitedCount:   invitedCount,
-		SuspendedCount: suspendedCount,
+		Members:      members,
+		Total:        total,
+		ActiveCount:  activeCount,
+		InvitedCount: invitedCount,
+	}
+}
+
+func toUpdateMemberParams(id uuid.UUID, req UpdateMemberRequest) db.UpdateMemberParams {
+	return db.UpdateMemberParams{
+		ID:             id,
+		FullName:       req.FullName,
+		Role:           req.Role,
+		ProfilePicture: req.ProfilePicture,
 	}
 }

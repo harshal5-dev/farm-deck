@@ -19,6 +19,7 @@ type Querier interface {
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserInvitation(ctx context.Context, arg CreateUserInvitationParams) (UserInvitation, error)
+	DeleteMember(ctx context.Context, id uuid.UUID) error
 	GetCredentialByEmail(ctx context.Context, emailID string) (GetCredentialByEmailRow, error)
 	GetCredentialByUserID(ctx context.Context, userID uuid.UUID) (GetCredentialByUserIDRow, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
@@ -33,6 +34,7 @@ type Querier interface {
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
 	RevokeUserInvitationByID(ctx context.Context, id uuid.UUID) error
 	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
+	UpdateMember(ctx context.Context, arg UpdateMemberParams) (User, error)
 	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)
 	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)
 	UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) (User, error)

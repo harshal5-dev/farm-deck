@@ -18,7 +18,7 @@ SELECT * FROM users WHERE id = $1;
 SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.created_at, u.last_active_at, t.id as tenant_id, t.name as tenant_name, t.subdomain, t.description, t.created_at as tenant_created_at FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.id = $1;
 
 -- name: UpdateUserProfile :one
-UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING *;
+UPDATE users SET full_name = $2, profile_picture = $3, updated_at = now() WHERE id = $1 RETURNING *;
 
 -- name: CreateMember :one
 INSERT INTO users (
@@ -32,8 +32,14 @@ UPDATE users SET status = $2 WHERE id = $1 RETURNING *;
 
 -- name: ListMembers :many
 SELECT * FROM users
-WHERE tenant_id = $1 AND id != $2
+WHERE tenant_id = $1 AND id != $2 AND deleted_at IS NULL
 ORDER BY last_active_at DESC NULLS LAST, full_name;
 
 -- name: TouchUserLastActive :exec
 UPDATE users SET last_active_at = now() WHERE id = $1;
+
+-- name: UpdateMember :one
+UPDATE users SET full_name = $2, profile_picture = $3, role = $4, updated_at = now() WHERE id = $1 RETURNING *;
+
+-- name: DeleteMember :exec
+UPDATE users SET deleted_at = now() WHERE id = $1;

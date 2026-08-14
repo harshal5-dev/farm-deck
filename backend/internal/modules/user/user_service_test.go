@@ -279,8 +279,8 @@ func TestUserService_ListMember_SuccessMapsAndCounts(t *testing.T) {
 	if got.Total != 3 {
 		t.Errorf("Total: got %d want 3", got.Total)
 	}
-	if got.ActiveCount != 1 || got.InvitedCount != 1 || got.SuspendedCount != 1 {
-		t.Errorf("counts: active=%d invited=%d suspended=%d, want 1/1/1", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	if got.ActiveCount != 1 || got.InvitedCount != 1 {
+		t.Errorf("counts: active=%d invited=%d, want 1/1", got.ActiveCount, got.InvitedCount)
 	}
 	if len(got.Members) != 3 {
 		t.Fatalf("Members len: got %d want 3", len(got.Members))
@@ -299,5 +299,87 @@ func TestUserService_ListMember_RepoErrorPropagates(t *testing.T) {
 	_, err := svc.ListMember(context.Background(), uuid.Nil, uuid.Nil)
 	if err == nil {
 		t.Fatal("expected the repo error to propagate, got nil")
+	}
+}
+
+func TestUserService_UpdateMember_Success(t *testing.T) {
+	memberID := uuid.MustParse("55555555-5555-5555-5555-555555555555")
+	pic := "updated.png"
+
+	repo := &mockUserRepo{
+		updateMember: func(_ context.Context, p db.UpdateMemberParams) (db.User, error) {
+			if p.ID != memberID {
+				t.Errorf("ID: got %v want %v", p.ID, memberID)
+			}
+			if p.FullName != "Bob Updated" {
+				t.Errorf("FullName: got %q", p.FullName)
+			}
+			if p.Role != domain.UserRoleGrower {
+				t.Errorf("Role: got %q want %q", p.Role, domain.UserRoleGrower)
+			}
+			if p.ProfilePicture == nil || *p.ProfilePicture != "updated.png" {
+				t.Errorf("ProfilePicture: got %v", p.ProfilePicture)
+			}
+			return db.User{ID: p.ID, FullName: p.FullName, Role: p.Role}, nil
+		},
+	}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	err := svc.UpdateMember(context.Background(), memberID, UpdateMemberRequest{
+		FullName:       "Bob Updated",
+		Role:           domain.UserRoleGrower,
+		ProfilePicture: &pic,
+	})
+	if err != nil {
+		t.Fatalf("UpdateMember: %v", err)
+	}
+}
+
+func TestUserService_UpdateMember_RepoErrorPropagates(t *testing.T) {
+	repo := &mockUserRepo{
+		updateMember: func(context.Context, db.UpdateMemberParams) (db.User, error) {
+			return db.User{}, domain.ErrUserNotFound
+		},
+	}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	err := svc.UpdateMember(context.Background(), uuid.Nil, UpdateMemberRequest{
+		FullName: "Bob",
+		Role:     domain.UserRoleGrower,
+	})
+	if !errors.Is(err, domain.ErrUserNotFound) {
+		t.Fatalf("expected ErrUserNotFound, got %v", err)
+	}
+}
+
+func TestUserService_DeleteMember_Success(t *testing.T) {
+	memberID := uuid.MustParse("66666666-6666-6666-6666-666666666666")
+
+	repo := &mockUserRepo{
+		deleteMember: func(_ context.Context, id uuid.UUID) error {
+			if id != memberID {
+				t.Errorf("id forwarded: got %v want %v", id, memberID)
+			}
+			return nil
+		},
+	}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	if err := svc.DeleteMember(context.Background(), memberID); err != nil {
+		t.Fatalf("DeleteMember: %v", err)
+	}
+}
+
+func TestUserService_DeleteMember_RepoErrorPropagates(t *testing.T) {
+	repo := &mockUserRepo{
+		deleteMember: func(context.Context, uuid.UUID) error {
+			return domain.ErrUserNotFound
+		},
+	}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	err := svc.DeleteMember(context.Background(), uuid.Nil)
+	if !errors.Is(err, domain.ErrUserNotFound) {
+		t.Fatalf("expected ErrUserNotFound, got %v", err)
 	}
 }

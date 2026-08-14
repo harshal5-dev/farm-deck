@@ -55,9 +55,14 @@ type MemberResponse struct {
 }
 
 type ListMembersResponse struct {
-	Members        []MemberResponse `json:"members"`
-	Total          int              `json:"total"`
-	ActiveCount    int              `json:"activeCount"`
-	InvitedCount   int              `json:"invitedCount"`
-	SuspendedCount int              `json:"suspendedCount"`
+	Members      []MemberResponse `json:"members"`
+	Total        int              `json:"total"`
+	ActiveCount  int              `json:"activeCount"`
+	InvitedCount int              `json:"invitedCount"`
+}
+
+type UpdateMemberRequest struct {
+	FullName       string  `json:"fullName" binding:"required,min=2,max=100"`
+	Role           string  `json:"role" binding:"required"`
+	ProfilePicture *string `json:"profilePicture"`
 }

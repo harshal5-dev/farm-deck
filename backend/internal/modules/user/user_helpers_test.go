@@ -18,17 +18,17 @@ func TestToUserProfileResponse(t *testing.T) {
 	pic := "pic.png"
 
 	row := db.GetUserProfileDetailsRow{
-		ID:             uid,
-		FullName:       "Alice",
-		EmailID:        "alice@farmdeck.app",
-		Role:           "owner",
-		Status:         "active",
-		ProfilePicture: &pic,
-		CreatedAt:      created,
-		TenantID:       tid,
-		TenantName:     "Alice's Farm",
-		Subdomain:      "alice.farmdeck.app",
-		Description:    &desc,
+		ID:              uid,
+		FullName:        "Alice",
+		EmailID:         "alice@farmdeck.app",
+		Role:            "owner",
+		Status:          "active",
+		ProfilePicture:  &pic,
+		CreatedAt:       created,
+		TenantID:        tid,
+		TenantName:      "Alice's Farm",
+		Subdomain:       "alice.farmdeck.app",
+		Description:     &desc,
 		TenantCreatedAt: tenantCreated,
 	}
 
@@ -170,8 +170,8 @@ func TestMapToListMemberResponse(t *testing.T) {
 	if got.Total != 3 {
 		t.Errorf("Total: got %d want 3", got.Total)
 	}
-	if got.ActiveCount != 1 || got.InvitedCount != 1 || got.SuspendedCount != 1 {
-		t.Errorf("counts: active=%d invited=%d suspended=%d, want 1/1/1", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	if got.ActiveCount != 1 || got.InvitedCount != 1 {
+		t.Errorf("counts: active=%d invited=%d, want 1/1", got.ActiveCount, got.InvitedCount)
 	}
 	if len(got.Members) != 3 {
 		t.Fatalf("Members len: got %d want 3", len(got.Members))
@@ -197,7 +197,7 @@ func TestMapToListMemberResponse_Empty(t *testing.T) {
 	if got.Total != 0 || len(got.Members) != 0 {
 		t.Errorf("empty input: got Total=%d Members=%d, want 0/0", got.Total, len(got.Members))
 	}
-	if got.ActiveCount != 0 || got.InvitedCount != 0 || got.SuspendedCount != 0 {
-		t.Errorf("empty counts: got %d/%d/%d, want 0/0/0", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	if got.ActiveCount != 0 || got.InvitedCount != 0 {
+		t.Errorf("empty counts: got %d/%d, want 0/0", got.ActiveCount, got.InvitedCount)
 	}
 }

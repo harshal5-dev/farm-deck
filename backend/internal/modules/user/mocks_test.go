@@ -20,6 +20,8 @@ type mockUserRepo struct {
 	updateUserProfile     func(context.Context, db.UpdateUserProfileParams) (db.User, error)
 	createMember          func(context.Context, domain.CreateMemberTxParams) (db.CreateMemberTxResult, error)
 	listMembers           func(context.Context, uuid.UUID, uuid.UUID) ([]db.User, error)
+	updateMember          func(context.Context, db.UpdateMemberParams) (db.User, error)
+	deleteMember          func(context.Context, uuid.UUID) error
 }
 
 func (m *mockUserRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error) {
@@ -36,6 +38,12 @@ func (m *mockUserRepo) CreateMember(ctx context.Context, p domain.CreateMemberTx
 }
 func (m *mockUserRepo) ListMembers(ctx context.Context, tenantID, excludeID uuid.UUID) ([]db.User, error) {
 	return m.listMembers(ctx, tenantID, excludeID)
+}
+func (m *mockUserRepo) UpdateMember(ctx context.Context, p db.UpdateMemberParams) (db.User, error) {
+	return m.updateMember(ctx, p)
+}
+func (m *mockUserRepo) DeleteMember(ctx context.Context, id uuid.UUID) error {
+	return m.deleteMember(ctx, id)
 }
 
 // fakeEmailService stubs email.EmailService for service-level tests.
@@ -71,6 +79,8 @@ type fakeUserService struct {
 	getMyProfile      func(context.Context, uuid.UUID) (UserProfileResponse, error)
 	createMember      func(context.Context, uuid.UUID, uuid.UUID, CreateMemberRequest) (CreateMemberResponse, error)
 	listMember        func(context.Context, uuid.UUID, uuid.UUID) (ListMembersResponse, error)
+	updateMember      func(context.Context, uuid.UUID, UpdateMemberRequest) error
+	deleteMember      func(context.Context, uuid.UUID) error
 }
 
 func (f *fakeUserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, r UpdateUserProfileRequest) error {
@@ -84,6 +94,12 @@ func (f *fakeUserService) CreateMember(ctx context.Context, tenantID, inviterID 
 }
 func (f *fakeUserService) ListMember(ctx context.Context, tenantID, excludeID uuid.UUID) (ListMembersResponse, error) {
 	return f.listMember(ctx, tenantID, excludeID)
+}
+func (f *fakeUserService) UpdateMember(ctx context.Context, id uuid.UUID, req UpdateMemberRequest) error {
+	return f.updateMember(ctx, id, req)
+}
+func (f *fakeUserService) DeleteMember(ctx context.Context, id uuid.UUID) error {
+	return f.deleteMember(ctx, id)
 }
 
 // testServiceCfg returns a Config sufficient for the user service to compute

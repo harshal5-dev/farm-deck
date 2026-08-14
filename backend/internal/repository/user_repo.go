@@ -19,6 +19,8 @@ type UserRepo interface {
 	UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) (db.User, error)
 	ListMembers(ctx context.Context, tenantID uuid.UUID, excludeID uuid.UUID) ([]db.User, error)
 	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
+	UpdateMember(ctx context.Context, params db.UpdateMemberParams) (db.User, error)
+	DeleteMember(ctx context.Context, id uuid.UUID) error
 }
 
 type userRepo struct {
@@ -108,4 +110,19 @@ func (r *userRepo) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeI
 
 func (r *userRepo) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
 	return r.store.TouchUserLastActive(ctx, id)
+}
+
+func (r *userRepo) UpdateMember(ctx context.Context, params db.UpdateMemberParams) (db.User, error) {
+	result, err := r.store.UpdateMember(ctx, params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.User{}, domain.ErrUserNotFound
+		}
+		return db.User{}, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) DeleteMember(ctx context.Context, id uuid.UUID) error {
+	return r.store.DeleteMember(ctx, id)
 }
