@@ -23,7 +23,7 @@ func NewRefreshTokenRepo(store db.Store) RefreshTokenRepo {
 }
 
 func (r *RefreshTokenRepoImpl) CreateRefreshToken(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error) {
-	return r.store.CreateRefreshToken(ctx, arg)
+	return r.store.CreateRefreshTokenTx(ctx, arg)
 }
 
 func (r *RefreshTokenRepoImpl) GetByHash(ctx context.Context, tokenHash string) (db.RefreshToken, error) {

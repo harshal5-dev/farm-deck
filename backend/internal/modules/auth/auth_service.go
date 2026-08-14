@@ -24,14 +24,16 @@ type AuthService interface {
 type AuthServiceImpl struct {
 	credentialRepo repository.CredentialRepo
 	refreshRepo    repository.RefreshTokenRepo
+	userRepo       repository.UserRepo
 	cfg            config.Config
 	emailService   email.EmailService
 }
 
-func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, cfg config.Config, emailService email.EmailService) AuthService {
+func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, userRepo repository.UserRepo, cfg config.Config, emailService email.EmailService) AuthService {
 	return &AuthServiceImpl{
 		credentialRepo: credentialRepo,
 		refreshRepo:    refreshRepo,
+		userRepo:       userRepo,
 		cfg:            cfg,
 		emailService:   emailService,
 	}
@@ -87,6 +89,11 @@ func (s *AuthServiceImpl) RefreshTokens(ctx context.Context, rawRefreshToken str
 		return TokenPair{}, fmt.Errorf("refresh: rotate: %w", err)
 	}
 
+	// A successful refresh means the user is active; stamp their last-active time.
+	if err := s.userRepo.TouchUserLastActive(ctx, result.GetCredentialByUserIDRow.UserID); err != nil {
+		return TokenPair{}, fmt.Errorf("refresh: touch last active: %w", err)
+	}
+
 	accessToken, err := s.generateAccessToken(toJwtUserDetailsFromUserID(result.GetCredentialByUserIDRow))
 	if err != nil {
 		return TokenPair{}, fmt.Errorf("refresh: access token: %w", err)
@@ -124,6 +131,11 @@ func (s *AuthServiceImpl) issueTokens(ctx context.Context, userDetails jwt.UserD
 	ua, ip := stringPtr(meta.UserAgent), stringPtr(meta.IP)
 	if _, err := s.refreshRepo.CreateRefreshToken(ctx, toCreateRefreshTokenParams(userDetails.UserId, hash, s.cfg.RefreshTokenDuration, ua, ip)); err != nil {
 		return TokenPair{}, fmt.Errorf("issue refresh: %w", err)
+	}
+
+	// A fresh login means the user is active; stamp their last-active time.
+	if err := s.userRepo.TouchUserLastActive(ctx, userDetails.UserId); err != nil {
+		return TokenPair{}, fmt.Errorf("issue: touch last active: %w", err)
 	}
 
 	return TokenPair{AccessToken: accessToken, RefreshToken: raw}, nil

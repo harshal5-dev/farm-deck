@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -197,4 +198,175 @@ func TestUserHandler_CreateMember_Success(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
 	}
+}
+
+func TestUserHandler_ListMember_NoUserIDRejected(t *testing.T) {
+	svc := &fakeUserService{listMember: func(context.Context, uuid.UUID, uuid.UUID) (ListMembersResponse, error) {
+		t.Fatal("service must not be called without a user id")
+		return ListMembersResponse{}, nil
+	}}
+	h := NewUserHandler(svc)
+
+	ctx, w := newJSONCtx("")
+	h.ListMember(ctx)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status: got %d want 401", w.Code)
+	}
+}
+
+func TestUserHandler_ListMember_NoTenantIDRejected(t *testing.T) {
+	svc := &fakeUserService{listMember: func(context.Context, uuid.UUID, uuid.UUID) (ListMembersResponse, error) {
+		t.Fatal("service must not be called without a tenant id")
+		return ListMembersResponse{}, nil
+	}}
+	h := NewUserHandler(svc)
+
+	ctx, w := newJSONCtx("")
+	withUserID(ctx, uuid.MustParse("11111111-1111-1111-1111-111111111111"))
+	h.ListMember(ctx)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status: got %d want 401", w.Code)
+	}
+}
+
+func TestUserHandler_ListMember_Success(t *testing.T) {
+	tenantID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+	userID := uuid.MustParse("33333333-3333-3333-3333-333333333333")
+
+	svc := &fakeUserService{listMember: func(_ context.Context, tID, eID uuid.UUID) (ListMembersResponse, error) {
+		if tID != tenantID {
+			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
+		}
+		if eID != userID {
+			t.Errorf("excludeID (userID) forwarded: got %v want %v", eID, userID)
+		}
+		return ListMembersResponse{Total: 1, ActiveCount: 1, Members: []MemberResponse{{FullName: "Bob"}}}, nil
+	}}
+	h := NewUserHandler(svc)
+
+	ctx, w := newJSONCtx("")
+	withUserID(ctx, userID)
+	ctx.Set(ctxutil.TenantIDKey, tenantID)
+	h.ListMember(ctx)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
+	}
+	var resp struct {
+		Success bool                `json:"success"`
+		Data    ListMembersResponse `json:"data"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if resp.Data.Total != 1 {
+		t.Errorf("Total: got %d want 1", resp.Data.Total)
+	}
+	if len(resp.Data.Members) != 1 || resp.Data.Members[0].FullName != "Bob" {
+		t.Errorf("Members: got %+v", resp.Data.Members)
+	}
+}
+
+func TestUserHandler_ListMember_ServiceErrorMapped(t *testing.T) {
+	svc := &fakeUserService{listMember: func(context.Context, uuid.UUID, uuid.UUID) (ListMembersResponse, error) {
+		return ListMembersResponse{}, errors.New("db down")
+	}}
+	h := NewUserHandler(svc)
+
+	ctx, w := newJSONCtx("")
+	withUserID(ctx, uuid.MustParse("44444444-4444-4444-4444-444444444444"))
+	ctx.Set(ctxutil.TenantIDKey, uuid.MustParse("55555555-5555-5555-5555-555555555555"))
+	h.ListMember(ctx)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("status: got %d want 500 (body=%s)", w.Code, w.Body.String())
+	}
+}
+
+func TestUserHandler_IsCreateMemberAllowed(t *testing.T) {
+	t.Run("owner proceeds", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		ctx.Set(ctxutil.RoleKey, domain.UserRoleOwner)
+		h.IsCreateMemberAllowed(ctx)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("owner should proceed: got %d want 200", w.Code)
+		}
+		if ctx.IsAborted() {
+			t.Error("owner request must not be aborted")
+		}
+	})
+
+	t.Run("non-owner forbidden", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		ctx.Set(ctxutil.RoleKey, domain.UserRoleGrower)
+		h.IsCreateMemberAllowed(ctx)
+
+		if w.Code != http.StatusForbidden {
+			t.Errorf("non-owner: got %d want 403", w.Code)
+		}
+		if !ctx.IsAborted() {
+			t.Error("non-owner request must be aborted")
+		}
+	})
+
+	t.Run("missing role unauthorized", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		h.IsCreateMemberAllowed(ctx)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("missing role: got %d want 401", w.Code)
+		}
+		if !ctx.IsAborted() {
+			t.Error("missing-role request must be aborted")
+		}
+	})
+}
+
+func TestUserHandler_IsListMembersAllowed(t *testing.T) {
+	t.Run("owner proceeds", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		ctx.Set(ctxutil.RoleKey, domain.UserRoleOwner)
+		h.IsListMembersAllowed(ctx)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("owner should proceed: got %d want 200", w.Code)
+		}
+		if ctx.IsAborted() {
+			t.Error("owner request must not be aborted")
+		}
+	})
+
+	t.Run("non-owner forbidden", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		ctx.Set(ctxutil.RoleKey, domain.UserRoleManager)
+		h.IsListMembersAllowed(ctx)
+
+		if w.Code != http.StatusForbidden {
+			t.Errorf("non-owner: got %d want 403", w.Code)
+		}
+		if !ctx.IsAborted() {
+			t.Error("non-owner request must be aborted")
+		}
+	})
+
+	t.Run("missing role unauthorized", func(t *testing.T) {
+		h := NewUserHandler(&fakeUserService{})
+		ctx, w := newJSONCtx("")
+		h.IsListMembersAllowed(ctx)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("missing role: got %d want 401", w.Code)
+		}
+		if !ctx.IsAborted() {
+			t.Error("missing-role request must be aborted")
+		}
+	})
 }

@@ -1,21 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "@/lib/api";
 
-/**
- * authApi — RTK Query API for authentication.
- *
- * Endpoints:
- *  - login        POST /auth/login    { emailId, password } -> { accessToken }
- *  - logout       POST /auth/logout                         -> { message }
- *  - refresh      POST /auth/refresh                        -> { accessToken }  (internal; called by baseQuery on 401)
- *  - getProfile   GET  /auth/profile                        -> UserProfileResponse
- *
- * The backend wraps every success response in a { success, data, timestamp }
- * envelope; transformResponse unwraps `.data` so consumers get the inner
- * payload directly. Error envelopes are passed through unchanged — the existing
- * `normalizeError` helper in `lib/api-errors.js` already extracts the message
- * from `{ error: { code, message, details } }`.
- */
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery,

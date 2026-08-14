@@ -17,6 +17,33 @@ definitions:
       timestamp:
         type: string
     type: object
+  CreateMemberRequest:
+    properties:
+      emailId:
+        maxLength: 255
+        type: string
+      fullName:
+        maxLength: 100
+        minLength: 2
+        type: string
+      profilePicture:
+        type: string
+      role:
+        type: string
+    required:
+    - emailId
+    - fullName
+    - role
+    type: object
+  CreateMemberResponse:
+    properties:
+      expiresAt:
+        type: string
+      invitationId:
+        type: string
+      userId:
+        type: string
+    type: object
   ErrorDetail:
     properties:
       code:
@@ -34,6 +61,21 @@ definitions:
         example: ok
         type: string
     type: object
+  ListMembersResponse:
+    properties:
+      activeCount:
+        type: integer
+      invitedCount:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/MemberResponse'
+        type: array
+      suspendedCount:
+        type: integer
+      total:
+        type: integer
+    type: object
   LoginRequest:
     properties:
       emailId:
@@ -47,6 +89,23 @@ definitions:
   LoginResponse:
     properties:
       accessToken:
+        type: string
+    type: object
+  MemberResponse:
+    properties:
+      createdAt:
+        type: string
+      emailId:
+        type: string
+      fullName:
+        type: string
+      lastActiveAt:
+        type: string
+      profilePicture:
+        type: string
+      role:
+        type: string
+      status:
         type: string
     type: object
   RegisterResponse:
@@ -121,6 +180,8 @@ definitions:
       fullName:
         type: string
       id:
+        type: string
+      lastActiveAt:
         type: string
       profilePicture:
         type: string
@@ -358,6 +419,74 @@ paths:
       security:
       - CookieAuth: []
       summary: Update current user profile
+      tags:
+      - user
+  /users/members:
+    get:
+      description: Returns all members of the caller's tenant except the caller (owner
+        only), with status counts and last-active time.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tenant members with status counts
+          schema:
+            $ref: '#/definitions/ListMembersResponse'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: only owner can list members
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List tenant members
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Creates an invited user (owner only) and sends an invitation email
+        with an accept-invite link.
+      parameters:
+      - description: New member payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: created member + invitation details
+          schema:
+            $ref: '#/definitions/CreateMemberResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: only owner can create member
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Invite a new member to the tenant
       tags:
       - user
 schemes:

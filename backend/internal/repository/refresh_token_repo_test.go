@@ -27,7 +27,7 @@ func TestRefreshTokenRepo_CreateRefreshToken(t *testing.T) {
 
 	t.Run("forwards args and returns the store result", func(t *testing.T) {
 		var gotArg db.CreateRefreshTokenParams
-		store := &mockStore{createRefreshToken: func(_ context.Context, a db.CreateRefreshTokenParams) (db.RefreshToken, error) {
+		store := &mockStore{createRefreshTokenTx: func(_ context.Context, a db.CreateRefreshTokenParams) (db.RefreshToken, error) {
 			gotArg = a
 			return want, nil
 		}}
@@ -47,7 +47,7 @@ func TestRefreshTokenRepo_CreateRefreshToken(t *testing.T) {
 
 	t.Run("forwards the store error unchanged", func(t *testing.T) {
 		storeErr := errors.New("constraint violation")
-		store := &mockStore{createRefreshToken: func(context.Context, db.CreateRefreshTokenParams) (db.RefreshToken, error) {
+		store := &mockStore{createRefreshTokenTx: func(context.Context, db.CreateRefreshTokenParams) (db.RefreshToken, error) {
 			return db.RefreshToken{}, storeErr
 		}}
 		repo := NewRefreshTokenRepo(store)

@@ -278,3 +278,81 @@ func ptrStringEqual(a, b *string) bool {
 	}
 	return *a == *b
 }
+
+func TestUserRepo_ListMembers(t *testing.T) {
+	ctx := context.Background()
+	tenantID := uuidMust("55555555-5555-5555-5555-555555555555")
+	excludeID := uuidMust("66666666-6666-6666-6666-666666666666")
+	want := []db.User{
+		{ID: uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), EmailID: "alice@farmdeck.app", FullName: "Alice", Role: domain.UserRoleGrower, Status: domain.UserStatusActive},
+	}
+
+	t.Run("forwards tenantID/excludeID and returns the store result", func(t *testing.T) {
+		var gotArg db.ListMembersParams
+		store := &mockStore{listMembers: func(_ context.Context, a db.ListMembersParams) ([]db.User, error) {
+			gotArg = a
+			return want, nil
+		}}
+		repo := NewUserRepo(store)
+
+		got, err := repo.ListMembers(ctx, tenantID, excludeID)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(got) != 1 || got[0].ID != want[0].ID {
+			t.Errorf("members: got %+v want %+v", got, want)
+		}
+		if gotArg.TenantID != tenantID || gotArg.ID != excludeID {
+			t.Errorf("params: got %+v, want {TenantID:%v ID:%v}", gotArg, tenantID, excludeID)
+		}
+	})
+
+	t.Run("forwards the store error unchanged", func(t *testing.T) {
+		storeErr := errors.New("connection reset")
+		store := &mockStore{listMembers: func(context.Context, db.ListMembersParams) ([]db.User, error) {
+			return nil, storeErr
+		}}
+		repo := NewUserRepo(store)
+
+		got, err := repo.ListMembers(ctx, tenantID, excludeID)
+		if !errors.Is(err, storeErr) {
+			t.Fatalf("expected %v, got %v", storeErr, err)
+		}
+		if got != nil {
+			t.Errorf("expected nil members on error, got %+v", got)
+		}
+	})
+}
+
+func TestUserRepo_TouchUserLastActive(t *testing.T) {
+	ctx := context.Background()
+	id := uuidMust("77777777-7777-7777-7777-777777777777")
+
+	t.Run("forwards the id and returns nil on success", func(t *testing.T) {
+		var gotID uuid.UUID
+		store := &mockStore{touchUserLastActive: func(_ context.Context, uid uuid.UUID) error {
+			gotID = uid
+			return nil
+		}}
+		repo := NewUserRepo(store)
+
+		if err := repo.TouchUserLastActive(ctx, id); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if gotID != id {
+			t.Errorf("id not forwarded: got %v want %v", gotID, id)
+		}
+	})
+
+	t.Run("forwards the store error unchanged", func(t *testing.T) {
+		storeErr := errors.New("connection refused")
+		store := &mockStore{touchUserLastActive: func(context.Context, uuid.UUID) error {
+			return storeErr
+		}}
+		repo := NewUserRepo(store)
+
+		if err := repo.TouchUserLastActive(ctx, id); !errors.Is(err, storeErr) {
+			t.Fatalf("expected %v, got %v", storeErr, err)
+		}
+	})
+}

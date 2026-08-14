@@ -154,3 +154,50 @@ func TestBuildAcceptURL(t *testing.T) {
 		t.Errorf("buildAcceptURL = %q want %q", got, want)
 	}
 }
+
+func TestMapToListMemberResponse(t *testing.T) {
+	created := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	active := time.Date(2026, 2, 2, 0, 0, 0, 0, time.UTC)
+
+	users := []db.User{
+		{FullName: "Alice", EmailID: "alice@farmdeck.app", Role: domain.UserRoleOwner, Status: domain.UserStatusActive, CreatedAt: created, LastActiveAt: &active},
+		{FullName: "Bob", EmailID: "bob@farmdeck.app", Role: domain.UserRoleGrower, Status: domain.UserStatusInvited, CreatedAt: created},
+		{FullName: "Eve", EmailID: "eve@farmdeck.app", Role: domain.UserRoleViewer, Status: domain.UserStatusSuspended, CreatedAt: created},
+	}
+
+	got := mapToListMemberResponse(users)
+
+	if got.Total != 3 {
+		t.Errorf("Total: got %d want 3", got.Total)
+	}
+	if got.ActiveCount != 1 || got.InvitedCount != 1 || got.SuspendedCount != 1 {
+		t.Errorf("counts: active=%d invited=%d suspended=%d, want 1/1/1", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	}
+	if len(got.Members) != 3 {
+		t.Fatalf("Members len: got %d want 3", len(got.Members))
+	}
+	if got.Members[0].FullName != "Alice" {
+		t.Errorf("Members[0].FullName: got %q", got.Members[0].FullName)
+	}
+	// An active user carries last_active_at; an invited user does not (nil).
+	if got.Members[0].LastActiveAt == nil || !got.Members[0].LastActiveAt.Equal(active) {
+		t.Errorf("Members[0].LastActiveAt: got %v want %v", got.Members[0].LastActiveAt, active)
+	}
+	if got.Members[1].LastActiveAt != nil {
+		t.Errorf("Members[1].LastActiveAt: got %v want nil", got.Members[1].LastActiveAt)
+	}
+	if got.Members[1].Status != domain.UserStatusInvited {
+		t.Errorf("Members[1].Status: got %q want %q", got.Members[1].Status, domain.UserStatusInvited)
+	}
+}
+
+func TestMapToListMemberResponse_Empty(t *testing.T) {
+	got := mapToListMemberResponse(nil)
+
+	if got.Total != 0 || len(got.Members) != 0 {
+		t.Errorf("empty input: got Total=%d Members=%d, want 0/0", got.Total, len(got.Members))
+	}
+	if got.ActiveCount != 0 || got.InvitedCount != 0 || got.SuspendedCount != 0 {
+		t.Errorf("empty counts: got %d/%d/%d, want 0/0/0", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	}
+}

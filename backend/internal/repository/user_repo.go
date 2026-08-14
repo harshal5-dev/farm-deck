@@ -15,8 +15,10 @@ type UserRepo interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error)
 	UpdateUserProfile(ctx context.Context, params db.UpdateUserProfileParams) (db.User, error)
-	CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error)
+	CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.CreateMemberTxResult, error)
 	UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) (db.User, error)
+	ListMembers(ctx context.Context, tenantID uuid.UUID, excludeID uuid.UUID) ([]db.User, error)
+	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
 }
 
 type userRepo struct {
@@ -71,10 +73,10 @@ func (r *userRepo) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfi
 	return result, nil
 }
 
-func (r *userRepo) CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
+func (r *userRepo) CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
 	result, err := r.store.CreateMemberTx(ctx, params)
 	if err != nil {
-		return domain.CreateMemberTxResult{}, err
+		return db.CreateMemberTxResult{}, err
 	}
 	return result, nil
 }
@@ -91,4 +93,19 @@ func (r *userRepo) UpdateUserStatus(ctx context.Context, id uuid.UUID, status st
 		return db.User{}, err
 	}
 	return result, nil
+}
+
+func (r *userRepo) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeID uuid.UUID) ([]db.User, error) {
+	result, err := r.store.ListMembers(ctx, db.ListMembersParams{
+		TenantID: tenantID,
+		ID:       excludeID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (r *userRepo) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
+	return r.store.TouchUserLastActive(ctx, id)
 }

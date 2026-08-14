@@ -352,6 +352,110 @@
                     }
                 }
             }
+        },
+        "/users/members": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns all members of the caller's tenant except the caller (owner only), with status counts and last-active time.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "List tenant members",
+                "responses": {
+                    "200": {
+                        "description": "tenant members with status counts",
+                        "schema": {
+                            "$ref": "#/definitions/ListMembersResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "only owner can list members",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Creates an invited user (owner only) and sends an invitation email with an accept-invite link.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Invite a new member to the tenant",
+                "parameters": [
+                    {
+                        "description": "New member payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateMemberRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "created member + invitation details",
+                        "schema": {
+                            "$ref": "#/definitions/CreateMemberResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "validation error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "only owner can create member",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -381,6 +485,45 @@
                 }
             }
         },
+        "CreateMemberRequest": {
+            "type": "object",
+            "required": [
+                "emailId",
+                "fullName",
+                "role"
+            ],
+            "properties": {
+                "emailId": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "fullName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "profilePicture": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateMemberResponse": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "type": "string"
+                },
+                "invitationId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "ErrorDetail": {
             "type": "object",
             "properties": {
@@ -406,6 +549,29 @@
                 }
             }
         },
+        "ListMembersResponse": {
+            "type": "object",
+            "properties": {
+                "activeCount": {
+                    "type": "integer"
+                },
+                "invitedCount": {
+                    "type": "integer"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MemberResponse"
+                    }
+                },
+                "suspendedCount": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "LoginRequest": {
             "type": "object",
             "required": [
@@ -425,6 +591,32 @@
             "type": "object",
             "properties": {
                 "accessToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "MemberResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "emailId": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "lastActiveAt": {
+                    "type": "string"
+                },
+                "profilePicture": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -532,6 +724,9 @@
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "lastActiveAt": {
                     "type": "string"
                 },
                 "profilePicture": {

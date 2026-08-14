@@ -28,7 +28,7 @@ INSERT INTO users (
     full_name, email_id, role, status, tenant_id, profile_picture
 ) VALUES (
     $1, $2, $3, $4, $5, $6
-) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
+) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at
 `
 
 type CreateMemberParams struct {
@@ -60,6 +60,7 @@ func (q *Queries) CreateMember(ctx context.Context, arg CreateMemberParams) (Use
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }
@@ -69,7 +70,7 @@ INSERT INTO users (
     full_name, email_id, role, status, tenant_id
 ) VALUES (
     $1, $2, $3, $4, $5
-) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
+) RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at
 `
 
 type CreateUserParams struct {
@@ -99,12 +100,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }
 
 const getUserByEmailID = `-- name: GetUserByEmailID :one
-SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE email_id = $1
+SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at FROM users WHERE email_id = $1
 `
 
 func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, error) {
@@ -120,12 +122,13 @@ func (q *Queries) GetUserByEmailID(ctx context.Context, emailID string) (User, e
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at FROM users WHERE id = $1
+SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -141,12 +144,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }
 
 const getUserProfileDetails = `-- name: GetUserProfileDetails :one
-SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.created_at, t.id as tenant_id, t.name as tenant_name, t.subdomain, t.description, t.created_at as tenant_created_at FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.id = $1
+SELECT u.id, u.full_name, u.email_id, u.role, u.profile_picture, u.status, u.created_at, u.last_active_at, t.id as tenant_id, t.name as tenant_name, t.subdomain, t.description, t.created_at as tenant_created_at FROM users u JOIN tenants t ON u.tenant_id = t.id WHERE u.id = $1
 `
 
 type GetUserProfileDetailsRow struct {
@@ -157,6 +161,7 @@ type GetUserProfileDetailsRow struct {
 	ProfilePicture  *string
 	Status          string
 	CreatedAt       time.Time
+	LastActiveAt    *time.Time
 	TenantID        uuid.UUID
 	TenantName      string
 	Subdomain       string
@@ -175,6 +180,7 @@ func (q *Queries) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetU
 		&i.ProfilePicture,
 		&i.Status,
 		&i.CreatedAt,
+		&i.LastActiveAt,
 		&i.TenantID,
 		&i.TenantName,
 		&i.Subdomain,
@@ -184,8 +190,59 @@ func (q *Queries) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetU
 	return i, err
 }
 
+const listMembers = `-- name: ListMembers :many
+SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at FROM users
+WHERE tenant_id = $1 AND id != $2
+ORDER BY last_active_at DESC NULLS LAST, full_name
+`
+
+type ListMembersParams struct {
+	TenantID uuid.UUID
+	ID       uuid.UUID
+}
+
+func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listMembers, arg.TenantID, arg.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.TenantID,
+			&i.EmailID,
+			&i.FullName,
+			&i.ProfilePicture,
+			&i.Role,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.LastActiveAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const touchUserLastActive = `-- name: TouchUserLastActive :exec
+UPDATE users SET last_active_at = now() WHERE id = $1
+`
+
+func (q *Queries) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, touchUserLastActive, id)
+	return err
+}
+
 const updateUserProfile = `-- name: UpdateUserProfile :one
-UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
+UPDATE users SET full_name = $2, profile_picture = $3 WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at
 `
 
 type UpdateUserProfileParams struct {
@@ -207,12 +264,13 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }
 
 const updateUserStatus = `-- name: UpdateUserStatus :one
-UPDATE users SET status = $2 WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at
+UPDATE users SET status = $2 WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at
 `
 
 type UpdateUserStatusParams struct {
@@ -233,6 +291,7 @@ func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusPara
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LastActiveAt,
 	)
 	return i, err
 }

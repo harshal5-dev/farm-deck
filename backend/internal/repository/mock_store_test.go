@@ -26,7 +26,9 @@ type mockStore struct {
 	getUserByID              func(ctx context.Context, id uuid.UUID) (db.User, error)
 	getUserProfileDetails    func(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error)
 	updateUserProfile        func(ctx context.Context, arg db.UpdateUserProfileParams) (db.User, error)
-	createRefreshToken       func(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error)
+	listMembers              func(ctx context.Context, arg db.ListMembersParams) ([]db.User, error)
+	touchUserLastActive      func(ctx context.Context, id uuid.UUID) error
+	createRefreshTokenTx     func(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error)
 	getRefreshTokenByHash    func(ctx context.Context, tokenHash string) (db.RefreshToken, error)
 	revokeRefreshTokenByHash func(ctx context.Context, tokenHash string) error
 	rotateRefreshTokenTx     func(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error)
@@ -64,8 +66,16 @@ func (m *mockStore) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProf
 	return m.updateUserProfile(ctx, arg)
 }
 
-func (m *mockStore) CreateRefreshToken(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error) {
-	return m.createRefreshToken(ctx, arg)
+func (m *mockStore) ListMembers(ctx context.Context, arg db.ListMembersParams) ([]db.User, error) {
+	return m.listMembers(ctx, arg)
+}
+
+func (m *mockStore) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
+	return m.touchUserLastActive(ctx, id)
+}
+
+func (m *mockStore) CreateRefreshTokenTx(ctx context.Context, arg db.CreateRefreshTokenParams) (db.RefreshToken, error) {
+	return m.createRefreshTokenTx(ctx, arg)
 }
 
 func (m *mockStore) GetRefreshTokenByHash(ctx context.Context, tokenHash string) (db.RefreshToken, error) {

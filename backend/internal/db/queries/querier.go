@@ -27,10 +27,12 @@ type Querier interface {
 	GetUserInvitationByID(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
+	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
 	MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	RevokeOpenUserInvitationsByUserID(ctx context.Context, userID uuid.UUID) error
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
 	RevokeUserInvitationByID(ctx context.Context, id uuid.UUID) error
+	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
 	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)
 	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)
 	UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) (User, error)

@@ -17,6 +17,7 @@ func toUserProfileResponse(user db.GetUserProfileDetailsRow) UserProfileResponse
 		Status:         user.Status,
 		ProfilePicture: user.ProfilePicture,
 		CreatedAt:      user.CreatedAt,
+		LastActiveAt:   user.LastActiveAt,
 		TenantDetails: TenantDetails{
 			Name:        user.TenantName,
 			Subdomain:   user.Subdomain,
@@ -46,5 +47,43 @@ func toCreateMemberTxParams(tenantID, inviterID uuid.UUID, tokenHash string, exp
 		TokenHash:      tokenHash,
 		ExpiresAt:      expiresAt,
 		CreatedBy:      inviterID,
+	}
+}
+
+func toMemberResponse(user db.User) MemberResponse {
+	return MemberResponse{
+		FullName:       user.FullName,
+		EmailID:        user.EmailID,
+		Role:           user.Role,
+		ProfilePicture: user.ProfilePicture,
+		CreatedAt:      user.CreatedAt,
+		Status:         user.Status,
+		LastActiveAt:   user.LastActiveAt,
+	}
+}
+
+func mapToListMemberResponse(users []db.User) ListMembersResponse {
+	activeCount, invitedCount, suspendedCount := 0, 0, 0
+	total := len(users)
+	members := make([]MemberResponse, total)
+
+	for index, user := range users {
+		switch user.Status {
+		case domain.UserStatusActive:
+			activeCount++
+		case domain.UserStatusInvited:
+			invitedCount++
+		case domain.UserStatusSuspended:
+			suspendedCount++
+		}
+		members[index] = toMemberResponse(user)
+	}
+
+	return ListMembersResponse{
+		Members:        members,
+		Total:          total,
+		ActiveCount:    activeCount,
+		InvitedCount:   invitedCount,
+		SuspendedCount: suspendedCount,
 	}
 }

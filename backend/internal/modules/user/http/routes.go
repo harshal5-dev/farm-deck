@@ -10,5 +10,6 @@ func Register(public, protected *gin.RouterGroup, h user.UserHandler) {
 	protectedRoutes := protected.Group("/users")
 	protectedRoutes.GET("/me", h.GetCurrentProfile)
 	protectedRoutes.PATCH("/me", h.UpdateProfile)
-	protectedRoutes.POST("/members", h.CreateMember)
+	protectedRoutes.POST("/members", h.IsCreateMemberAllowed, h.CreateMember)
+	protectedRoutes.GET("/members", h.IsListMembersAllowed, h.ListMember)
 }

@@ -7,28 +7,22 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
-// CreateMemberTx inserts a member row plus the matching open invitation in a
-// single transaction. No credential row is created — the invitee doesn't have
-// a password yet and gets one only when they accept the invitation.
-//
-// On a re-invite of the same email, the prior user's open invitation (if any)
-// is revoked inside the same tx so the partial unique index
-// (idx_invite_user_live) doesn't block the new insert. The users.email_id
-// UNIQUE constraint still requires the prior user to be removed or merged if
-// the same email is invited again later — callers should handle that.
-func (store *SQLStore) CreateMemberTx(ctx context.Context, arg domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
+type CreateMemberTxResult struct {
+	User       User
+	Invitation UserInvitation
+}
 
-	var result domain.CreateMemberTxResult
+func (store *SQLStore) CreateMemberTx(ctx context.Context, arg domain.CreateMemberTxParams) (CreateMemberTxResult, error) {
+
+	var result CreateMemberTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		var createdUser User
-		createdUser, err = saveMember(ctx, q, arg)
+		result.User, err = saveMember(ctx, q, arg)
 		if err != nil {
 			return err
 		}
-		result.User = toDomainUser(createdUser)
 
 		result.Invitation, err = saveUserInvitation(ctx, q, result.User.ID, arg)
 		if err != nil {
@@ -61,7 +55,7 @@ func saveMember(ctx context.Context, q *Queries, arg domain.CreateMemberTxParams
 	return user, err
 }
 
-func saveUserInvitation(ctx context.Context, q *Queries, userID uuid.UUID, arg domain.CreateMemberTxParams) (domain.UserInvitation, error) {
+func saveUserInvitation(ctx context.Context, q *Queries, userID uuid.UUID, arg domain.CreateMemberTxParams) (UserInvitation, error) {
 	inv, err := q.CreateUserInvitation(ctx, CreateUserInvitationParams{
 		UserID:    userID,
 		TenantID:  arg.TenantID,
@@ -70,7 +64,7 @@ func saveUserInvitation(ctx context.Context, q *Queries, userID uuid.UUID, arg d
 		CreatedBy: arg.CreatedBy,
 	})
 	if err != nil {
-		return domain.UserInvitation{}, err
+		return UserInvitation{}, err
 	}
-	return toDomainUserInvitation(inv), nil
+	return inv, nil
 }

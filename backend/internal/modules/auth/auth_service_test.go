@@ -28,7 +28,7 @@ func TestAuthService_RegisterUser_Success(t *testing.T) {
 		return nil
 	}}
 
-	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, testServiceCfg(), emailSvc)
+	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, noopUserRepo(), testServiceCfg(), emailSvc)
 
 	err := svc.RegisterUser(ctx, RegisterUserRequest{
 		FullName:   "Alice",
@@ -69,7 +69,7 @@ func TestAuthService_RegisterUser_RepoErrorSuppressesEmail(t *testing.T) {
 		emailCalled = true
 		return nil
 	}}
-	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, testServiceCfg(), emailSvc)
+	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, noopUserRepo(), testServiceCfg(), emailSvc)
 
 	err := svc.RegisterUser(context.Background(), RegisterUserRequest{
 		FullName: "Alice", EmailID: "a@b.com", Password: "supersecret", TenantName: "Acme",
@@ -91,7 +91,7 @@ func TestAuthService_RegisterUser_EmailErrorPropagates(t *testing.T) {
 	emailSvc := &fakeEmailService{sendWelcome: func(string, string) error {
 		return errors.New("smtp down")
 	}}
-	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, testServiceCfg(), emailSvc)
+	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, noopUserRepo(), testServiceCfg(), emailSvc)
 
 	if err := svc.RegisterUser(context.Background(), RegisterUserRequest{
 		FullName: "Alice", EmailID: "a@b.com", Password: "supersecret", TenantName: "Acme",
@@ -124,7 +124,7 @@ func TestAuthService_LoginUser_Success(t *testing.T) {
 			return db.RefreshToken{}, nil
 		},
 	}
-	svc := NewAuthService(credRepo, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(credRepo, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	pair, err := svc.LoginUser(ctx, LoginRequest{
 		EmailID:  "ALICE@FarmDeck.App", // normalized internally
@@ -166,7 +166,7 @@ func TestAuthService_LoginUser_WrongPasswordReturnsInvalidCredentials(t *testing
 			return db.RefreshToken{}, nil
 		},
 	}
-	svc := NewAuthService(credRepo, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(credRepo, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	_, err := svc.LoginUser(context.Background(), LoginRequest{EmailID: "a@b.com", Password: "wrong"}, SessionMeta{})
 	if !errors.Is(err, domain.ErrInvalidCredentials) {
@@ -183,7 +183,7 @@ func TestAuthService_LoginUser_CredentialLookupErrorPropagates(t *testing.T) {
 			return db.GetCredentialByEmailRow{}, domain.ErrCredentialNotFound
 		},
 	}
-	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(credRepo, &fakeRefreshRepo{}, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	_, err := svc.LoginUser(context.Background(), LoginRequest{EmailID: "x@y.com", Password: "whatever"}, SessionMeta{})
 	if !errors.Is(err, domain.ErrCredentialNotFound) {
@@ -199,7 +199,7 @@ func TestAuthService_RefreshTokens_EmptyTokenRejected(t *testing.T) {
 			return db.RotateRefreshTokenTxResult{}, nil
 		},
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	_, err := svc.RefreshTokens(context.Background(), "", SessionMeta{})
 	if !errors.Is(err, domain.ErrRefreshTokenInvalid) {
@@ -225,7 +225,7 @@ func TestAuthService_RefreshTokens_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	pair, err := svc.RefreshTokens(context.Background(), "raw-old-token", SessionMeta{UserAgent: "curl"})
 	if err != nil {
@@ -254,7 +254,7 @@ func TestAuthService_RefreshTokens_RotateErrorPropagates(t *testing.T) {
 			return db.RotateRefreshTokenTxResult{}, domain.ErrRefreshTokenInvalid
 		},
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	_, err := svc.RefreshTokens(context.Background(), "raw-old-token", SessionMeta{})
 	if !errors.Is(err, domain.ErrRefreshTokenInvalid) {
@@ -270,7 +270,7 @@ func TestAuthService_Logout_EmptyTokenIsNoop(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	if err := svc.Logout(context.Background(), ""); err != nil {
 		t.Fatalf("Logout empty: %v", err)
@@ -288,7 +288,7 @@ func TestAuthService_Logout_SuccessHashesAndRevokes(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	if err := svc.Logout(context.Background(), "raw-logout-token"); err != nil {
 		t.Fatalf("Logout: %v", err)
@@ -302,9 +302,109 @@ func TestAuthService_Logout_RevokeErrorPropagates(t *testing.T) {
 	refreshRepo := &fakeRefreshRepo{
 		revokeByHash: func(context.Context, string) error { return errors.New("db down") },
 	}
-	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, testServiceCfg(), &fakeEmailService{})
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, noopUserRepo(), testServiceCfg(), &fakeEmailService{})
 
 	if err := svc.Logout(context.Background(), "raw"); err == nil {
 		t.Fatal("expected the revoke error to propagate, got nil")
+	}
+}
+
+func TestAuthService_LoginUser_TouchesLastActive(t *testing.T) {
+	ctx := context.Background()
+	uid := uuid.MustParse("12121212-1212-1212-1212-121212121212")
+	tid := uuid.MustParse("13131313-1313-1313-1313-131313131313")
+
+	credRepo := &fakeCredentialRepo{
+		getCredentialByEmail: func(context.Context, string) (db.GetCredentialByEmailRow, error) {
+			return db.GetCredentialByEmailRow{
+				UserID: uid, TenantID: tid, Role: domain.UserRoleOwner,
+				PasswordHash: mustHash(t, "secret123"), FullName: "Alice", EmailID: "alice@farmdeck.app",
+			}, nil
+		},
+	}
+	refreshRepo := &fakeRefreshRepo{
+		createRefreshToken: func(context.Context, db.CreateRefreshTokenParams) (db.RefreshToken, error) {
+			return db.RefreshToken{}, nil
+		},
+	}
+	userRepo := &fakeUserRepo{touchLastActive: func(context.Context, uuid.UUID) error { return nil }}
+	svc := NewAuthService(credRepo, refreshRepo, userRepo, testServiceCfg(), &fakeEmailService{})
+
+	if _, err := svc.LoginUser(ctx, LoginRequest{EmailID: "alice@farmdeck.app", Password: "secret123"}, SessionMeta{}); err != nil {
+		t.Fatalf("LoginUser: %v", err)
+	}
+	if userRepo.touchCalls != 1 {
+		t.Errorf("TouchUserLastActive calls = %d, want 1", userRepo.touchCalls)
+	}
+	if userRepo.touchedID != uid {
+		t.Errorf("touched id = %v, want %v", userRepo.touchedID, uid)
+	}
+}
+
+func TestAuthService_LoginUser_TouchErrorPropagates(t *testing.T) {
+	uid := uuid.MustParse("14141414-1414-1414-1414-141414141414")
+	credRepo := &fakeCredentialRepo{
+		getCredentialByEmail: func(context.Context, string) (db.GetCredentialByEmailRow, error) {
+			return db.GetCredentialByEmailRow{UserID: uid, PasswordHash: mustHash(t, "secret123")}, nil
+		},
+	}
+	refreshRepo := &fakeRefreshRepo{
+		createRefreshToken: func(context.Context, db.CreateRefreshTokenParams) (db.RefreshToken, error) {
+			return db.RefreshToken{}, nil
+		},
+	}
+	touchErr := errors.New("db down")
+	userRepo := &fakeUserRepo{touchLastActive: func(context.Context, uuid.UUID) error { return touchErr }}
+	svc := NewAuthService(credRepo, refreshRepo, userRepo, testServiceCfg(), &fakeEmailService{})
+
+	_, err := svc.LoginUser(context.Background(), LoginRequest{EmailID: "x@y.com", Password: "secret123"}, SessionMeta{})
+	if !errors.Is(err, touchErr) {
+		t.Fatalf("expected the touch error to propagate, got %v", err)
+	}
+}
+
+func TestAuthService_RefreshTokens_TouchesLastActive(t *testing.T) {
+	uid := uuid.MustParse("15151515-1515-1515-1515-151515151515")
+	tid := uuid.MustParse("16161616-1616-1616-1616-161616161616")
+
+	refreshRepo := &fakeRefreshRepo{
+		rotate: func(context.Context, domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error) {
+			return db.RotateRefreshTokenTxResult{
+				GetCredentialByUserIDRow: db.GetCredentialByUserIDRow{
+					UserID: uid, TenantID: tid, Role: domain.UserRoleManager,
+				},
+			}, nil
+		},
+	}
+	userRepo := &fakeUserRepo{touchLastActive: func(context.Context, uuid.UUID) error { return nil }}
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, userRepo, testServiceCfg(), &fakeEmailService{})
+
+	if _, err := svc.RefreshTokens(context.Background(), "raw-old-token", SessionMeta{}); err != nil {
+		t.Fatalf("RefreshTokens: %v", err)
+	}
+	if userRepo.touchCalls != 1 {
+		t.Errorf("TouchUserLastActive calls = %d, want 1", userRepo.touchCalls)
+	}
+	if userRepo.touchedID != uid {
+		t.Errorf("touched id = %v, want %v", userRepo.touchedID, uid)
+	}
+}
+
+func TestAuthService_RefreshTokens_TouchErrorPropagates(t *testing.T) {
+	uid := uuid.MustParse("17171717-1717-1717-1717-171717171717")
+	refreshRepo := &fakeRefreshRepo{
+		rotate: func(context.Context, domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error) {
+			return db.RotateRefreshTokenTxResult{
+				GetCredentialByUserIDRow: db.GetCredentialByUserIDRow{UserID: uid},
+			}, nil
+		},
+	}
+	touchErr := errors.New("db down")
+	userRepo := &fakeUserRepo{touchLastActive: func(context.Context, uuid.UUID) error { return touchErr }}
+	svc := NewAuthService(&fakeCredentialRepo{}, refreshRepo, userRepo, testServiceCfg(), &fakeEmailService{})
+
+	_, err := svc.RefreshTokens(context.Background(), "raw-old-token", SessionMeta{})
+	if !errors.Is(err, touchErr) {
+		t.Fatalf("expected the touch error to propagate, got %v", err)
 	}
 }

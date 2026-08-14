@@ -18,7 +18,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import UserForm from "../components/UserForm";
+import UserForm from "../components/user-form/UserForm";
 import { updateMember, suspendMember, selectMemberById } from "../membersSlice";
 import { getRole, getStatus } from "@/constants/roles";
 import { useAuth } from "@/features/auth";

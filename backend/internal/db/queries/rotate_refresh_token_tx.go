@@ -57,6 +57,10 @@ func (store *SQLStore) RotateRefreshTokenTx(ctx context.Context, arg domain.Rota
 			return err
 		}
 
+		if err := q.TouchUserLastActive(ctx, old.UserID); err != nil {
+			return err
+		}
+
 		return nil
 	})
 

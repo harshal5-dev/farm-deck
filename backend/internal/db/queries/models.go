@@ -48,6 +48,7 @@ type User struct {
 	Status         string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+	LastActiveAt   *time.Time
 }
 
 type UserInvitation struct {

@@ -18,7 +18,8 @@ type mockUserRepo struct {
 	getUserProfileDetails func(context.Context, uuid.UUID) (db.GetUserProfileDetailsRow, error)
 	getUserByID           func(context.Context, uuid.UUID) (db.User, error)
 	updateUserProfile     func(context.Context, db.UpdateUserProfileParams) (db.User, error)
-	createMember          func(context.Context, domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error)
+	createMember          func(context.Context, domain.CreateMemberTxParams) (db.CreateMemberTxResult, error)
+	listMembers           func(context.Context, uuid.UUID, uuid.UUID) ([]db.User, error)
 }
 
 func (m *mockUserRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error) {
@@ -30,8 +31,11 @@ func (m *mockUserRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, 
 func (m *mockUserRepo) UpdateUserProfile(ctx context.Context, p db.UpdateUserProfileParams) (db.User, error) {
 	return m.updateUserProfile(ctx, p)
 }
-func (m *mockUserRepo) CreateMember(ctx context.Context, p domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
+func (m *mockUserRepo) CreateMember(ctx context.Context, p domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
 	return m.createMember(ctx, p)
+}
+func (m *mockUserRepo) ListMembers(ctx context.Context, tenantID, excludeID uuid.UUID) ([]db.User, error) {
+	return m.listMembers(ctx, tenantID, excludeID)
 }
 
 // fakeEmailService stubs email.EmailService for service-level tests.
@@ -66,6 +70,7 @@ type fakeUserService struct {
 	updateUserProfile func(context.Context, uuid.UUID, UpdateUserProfileRequest) error
 	getMyProfile      func(context.Context, uuid.UUID) (UserProfileResponse, error)
 	createMember      func(context.Context, uuid.UUID, uuid.UUID, CreateMemberRequest) (CreateMemberResponse, error)
+	listMember        func(context.Context, uuid.UUID, uuid.UUID) (ListMembersResponse, error)
 }
 
 func (f *fakeUserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, r UpdateUserProfileRequest) error {
@@ -77,12 +82,15 @@ func (f *fakeUserService) GetMyProfile(ctx context.Context, id uuid.UUID) (UserP
 func (f *fakeUserService) CreateMember(ctx context.Context, tenantID, inviterID uuid.UUID, req CreateMemberRequest) (CreateMemberResponse, error) {
 	return f.createMember(ctx, tenantID, inviterID, req)
 }
+func (f *fakeUserService) ListMember(ctx context.Context, tenantID, excludeID uuid.UUID) (ListMembersResponse, error) {
+	return f.listMember(ctx, tenantID, excludeID)
+}
 
 // testServiceCfg returns a Config sufficient for the user service to compute
 // invitation URLs and durations.
 func testServiceCfg() config.Config {
 	return config.Config{
-		AppURL:                   "http://localhost:5173",
-		InvitationTokenDuration:  168 * time.Hour,
+		AppURL:                  "http://localhost:5173",
+		InvitationTokenDuration: 168 * time.Hour,
 	}
 }

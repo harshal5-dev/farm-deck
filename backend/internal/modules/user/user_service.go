@@ -17,6 +17,7 @@ type UserService interface {
 	UpdateUserProfile(ctx context.Context, userID uuid.UUID, req UpdateUserProfileRequest) error
 	GetMyProfile(ctx context.Context, userID uuid.UUID) (UserProfileResponse, error)
 	CreateMember(ctx context.Context, tenantID, inviterID uuid.UUID, req CreateMemberRequest) (CreateMemberResponse, error)
+	ListMember(ctx context.Context, tenantId uuid.UUID, excludeID uuid.UUID) (ListMembersResponse, error)
 }
 
 type UserServiceImpl struct {
@@ -53,10 +54,6 @@ func (s *UserServiceImpl) UpdateUserProfile(ctx context.Context, userID uuid.UUI
 	return nil
 }
 
-// CreateMember inserts the member row + open invitation in one DB transaction,
-// then fires the invitation email asynchronously. The raw token only exists
-// in memory between token generation and the email call — it is never
-// returned in the API response and never persisted.
 func (s *UserServiceImpl) CreateMember(
 	ctx context.Context,
 	tenantID, inviterID uuid.UUID,
@@ -93,11 +90,20 @@ func (s *UserServiceImpl) CreateMember(
 	}, nil
 }
 
-func buildAcceptURL(appURL, rawToken string) string {
-	return appURL + "/accept-invite?token=" + rawToken
+func (s *UserServiceImpl) ListMember(ctx context.Context, tenantId uuid.UUID, excludeID uuid.UUID) (ListMembersResponse, error) {
+	users, err := s.userRepo.ListMembers(ctx, tenantId, excludeID)
+	if err != nil {
+		return ListMembersResponse{}, fmt.Errorf("list member: %w", err)
+	}
+
+	return mapToListMemberResponse(users), nil
 }
 
 // ---------------- Private Functions ------------------
+
+func buildAcceptURL(appURL, rawToken string) string {
+	return appURL + "/accept-invite?token=" + rawToken
+}
 
 func checkRole(role string) error {
 	if role != domain.UserRoleGrower && role != domain.UserRoleManager && role != domain.UserRoleViewer {

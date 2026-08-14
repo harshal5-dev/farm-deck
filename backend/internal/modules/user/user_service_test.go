@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 )
 
 func TestUserService_GetMyProfile_SuccessMapsRow(t *testing.T) {
@@ -143,7 +143,7 @@ func TestUserService_CreateMember_Success(t *testing.T) {
 	expiresAt := time.Date(2026, 1, 8, 0, 0, 0, 0, time.UTC)
 
 	repo := &mockUserRepo{
-		createMember: func(_ context.Context, p domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
+		createMember: func(_ context.Context, p domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
 			if p.TenantID != tenantID {
 				t.Errorf("TenantID: got %v", p.TenantID)
 			}
@@ -156,14 +156,14 @@ func TestUserService_CreateMember_Success(t *testing.T) {
 			if len(p.TokenHash) != 64 {
 				t.Errorf("TokenHash should be 64 hex chars (sha256), got %d", len(p.TokenHash))
 			}
-			return domain.CreateMemberTxResult{
-				User: domain.User{
+			return db.CreateMemberTxResult{
+				User: db.User{
 					ID:       userID,
 					EmailID:  p.EmailID,
 					FullName: p.FullName,
 					Status:   p.Status,
 				},
-				Invitation: domain.UserInvitation{
+				Invitation: db.UserInvitation{
 					ID:        invID,
 					ExpiresAt: expiresAt,
 				},
@@ -206,9 +206,9 @@ func TestUserService_CreateMember_Success(t *testing.T) {
 
 func TestUserService_CreateMember_InvalidRoleRejected(t *testing.T) {
 	repo := &mockUserRepo{
-		createMember: func(context.Context, domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
+		createMember: func(context.Context, domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
 			t.Fatal("CreateMember must not run when role is invalid")
-			return domain.CreateMemberTxResult{}, nil
+			return db.CreateMemberTxResult{}, nil
 		},
 	}
 	email := &fakeEmailService{
@@ -230,8 +230,8 @@ func TestUserService_CreateMember_InvalidRoleRejected(t *testing.T) {
 
 func TestUserService_CreateMember_RepoErrorPropagates(t *testing.T) {
 	repo := &mockUserRepo{
-		createMember: func(context.Context, domain.CreateMemberTxParams) (domain.CreateMemberTxResult, error) {
-			return domain.CreateMemberTxResult{}, domain.ErrUserExists
+		createMember: func(context.Context, domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
+			return db.CreateMemberTxResult{}, domain.ErrUserExists
 		},
 	}
 	email := &fakeEmailService{
@@ -248,5 +248,56 @@ func TestUserService_CreateMember_RepoErrorPropagates(t *testing.T) {
 	}
 	if email.invitationCalls != 0 {
 		t.Errorf("email must not be called when the tx fails")
+	}
+}
+
+func TestUserService_ListMember_SuccessMapsAndCounts(t *testing.T) {
+	tenantID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
+	excludeID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+
+	users := []db.User{
+		{ID: uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Status: domain.UserStatusActive, FullName: "Active User", EmailID: "a@farmdeck.app", Role: domain.UserRoleGrower},
+		{ID: uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), Status: domain.UserStatusInvited, FullName: "Invited User", EmailID: "i@farmdeck.app", Role: domain.UserRoleManager},
+		{ID: uuid.MustParse("cccccccc-cccc-cccc-cccc-cccccccccccc"), Status: domain.UserStatusSuspended, FullName: "Suspended User", EmailID: "s@farmdeck.app", Role: domain.UserRoleViewer},
+	}
+
+	repo := &mockUserRepo{listMembers: func(_ context.Context, tID, eID uuid.UUID) ([]db.User, error) {
+		if tID != tenantID {
+			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
+		}
+		if eID != excludeID {
+			t.Errorf("excludeID forwarded: got %v want %v", eID, excludeID)
+		}
+		return users, nil
+	}}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	got, err := svc.ListMember(context.Background(), tenantID, excludeID)
+	if err != nil {
+		t.Fatalf("ListMember: %v", err)
+	}
+	if got.Total != 3 {
+		t.Errorf("Total: got %d want 3", got.Total)
+	}
+	if got.ActiveCount != 1 || got.InvitedCount != 1 || got.SuspendedCount != 1 {
+		t.Errorf("counts: active=%d invited=%d suspended=%d, want 1/1/1", got.ActiveCount, got.InvitedCount, got.SuspendedCount)
+	}
+	if len(got.Members) != 3 {
+		t.Fatalf("Members len: got %d want 3", len(got.Members))
+	}
+	if got.Members[0].FullName != "Active User" {
+		t.Errorf("Members[0].FullName: got %q", got.Members[0].FullName)
+	}
+}
+
+func TestUserService_ListMember_RepoErrorPropagates(t *testing.T) {
+	repo := &mockUserRepo{listMembers: func(context.Context, uuid.UUID, uuid.UUID) ([]db.User, error) {
+		return nil, errors.New("db down")
+	}}
+	svc := NewUserService(repo, &fakeEmailService{}, testServiceCfg())
+
+	_, err := svc.ListMember(context.Background(), uuid.Nil, uuid.Nil)
+	if err == nil {
+		t.Fatal("expected the repo error to propagate, got nil")
 	}
 }

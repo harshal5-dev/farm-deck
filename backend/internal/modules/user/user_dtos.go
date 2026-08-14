@@ -14,6 +14,7 @@ type UserProfileResponse struct {
 	ProfilePicture *string       `json:"profilePicture"`
 	ID             uuid.UUID     `json:"id"`
 	CreatedAt      time.Time     `json:"createdAt"`
+	LastActiveAt   *time.Time    `json:"lastActiveAt"`
 	TenantDetails  TenantDetails `json:"tenantDetails"`
 }
 
@@ -41,4 +42,22 @@ type CreateMemberResponse struct {
 	UserID       uuid.UUID `json:"userId"`
 	InvitationID uuid.UUID `json:"invitationId"`
 	ExpiresAt    time.Time `json:"expiresAt"`
+}
+
+type MemberResponse struct {
+	FullName       string     `json:"fullName"`
+	EmailID        string     `json:"emailId"`
+	Role           string     `json:"role"`
+	ProfilePicture *string    `json:"profilePicture"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	Status         string     `json:"status"`
+	LastActiveAt   *time.Time `json:"lastActiveAt"`
+}
+
+type ListMembersResponse struct {
+	Members        []MemberResponse `json:"members"`
+	Total          int              `json:"total"`
+	ActiveCount    int              `json:"activeCount"`
+	InvitedCount   int              `json:"invitedCount"`
+	SuspendedCount int              `json:"suspendedCount"`
 }

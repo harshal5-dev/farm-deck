@@ -233,11 +233,12 @@ func TestQueries_GetUserProfileDetails(t *testing.T) {
 	tid := uuidMust("88888888-8888-8888-8888-888888888888")
 	userCreated := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	tenantCreated := time.Date(2025, 12, 1, 0, 0, 0, 0, time.UTC)
+	lastActive := time.Date(2026, 2, 3, 4, 5, 6, 0, time.UTC)
 
 	t.Run("maps joined user+tenant columns", func(t *testing.T) {
 		m := &mockDBTX{nextRows: []pgx.Row{rowFrom(
 			uid, "Dave", "dave@farmdeck.app", domain.UserRoleOwner, strPtr("dave.png"),
-			domain.UserStatusActive, userCreated,
+			domain.UserStatusActive, userCreated, timePtr(lastActive),
 			tid, "Dave's Farm", "daves", strPtr("A nice farm"), tenantCreated,
 		)}}
 		q := New(m)
@@ -267,6 +268,9 @@ func TestQueries_GetUserProfileDetails(t *testing.T) {
 		if !got.CreatedAt.Equal(userCreated) {
 			t.Errorf("CreatedAt: got %v want %v", got.CreatedAt, userCreated)
 		}
+		if got.LastActiveAt == nil || !got.LastActiveAt.Equal(lastActive) {
+			t.Errorf("LastActiveAt: got %v want %v", got.LastActiveAt, lastActive)
+		}
 		if got.TenantID != tid {
 			t.Errorf("TenantID: got %v want %v", got.TenantID, tid)
 		}
@@ -290,7 +294,7 @@ func TestQueries_GetUserProfileDetails(t *testing.T) {
 	t.Run("nullable columns stay nil", func(t *testing.T) {
 		m := &mockDBTX{nextRows: []pgx.Row{rowFrom(
 			uid, "Eve", "eve@farmdeck.app", domain.UserRoleViewer, nil,
-			domain.UserStatusActive, userCreated,
+			domain.UserStatusActive, userCreated, nil,
 			tid, "Eve Co", "eve", nil, tenantCreated,
 		)}}
 		q := New(m)
@@ -304,6 +308,9 @@ func TestQueries_GetUserProfileDetails(t *testing.T) {
 		}
 		if got.Description != nil {
 			t.Errorf("expected nil Description, got %v", *got.Description)
+		}
+		if got.LastActiveAt != nil {
+			t.Errorf("expected nil LastActiveAt, got %v", *got.LastActiveAt)
 		}
 	})
 

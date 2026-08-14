@@ -16,15 +16,18 @@ CREATE TABLE users (
     full_name     VARCHAR(255) NOT NULL,
     profile_picture VARCHAR(55),
     role          VARCHAR(20) NOT NULL DEFAULT 'grower',
-    status        VARCHAR(20) NOT NULL DEFAULT 'active', -- pending | active | disabled
+    status        VARCHAR(20) NOT NULL DEFAULT 'active',
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_active_at TIMESTAMPTZ,
     CONSTRAINT users_role_chk   CHECK (role   IN ('owner','manager','grower', 'viewer')),
     CONSTRAINT users_status_chk CHECK (status IN ('invited','pending','active','suspended'))
 );
 CREATE INDEX idx_users_tenant ON users(tenant_id);
 CREATE INDEX idx_users_email_id_lower ON users(LOWER(email_id));
 CREATE INDEX idx_users_tenant_status ON users(tenant_id, status);
+CREATE INDEX idx_users_tenant_last_active
+    ON users (tenant_id, last_active_at DESC NULLS LAST);
 
 CREATE TABLE credentials (
   user_id       UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
