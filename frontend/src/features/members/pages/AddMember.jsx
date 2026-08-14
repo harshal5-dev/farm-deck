@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import {
   IconArrowLeft,
@@ -9,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import UserForm from "../components/UserForm";
-import { useMembers } from "../useMembers";
+import { addMember } from "../membersSlice";
 
 /**
  * AddMember — `/app/members/new`
@@ -20,14 +21,14 @@ import { useMembers } from "../useMembers";
  */
 export default function AddMember() {
   const navigate = useNavigate();
-  const { addMember } = useMembers();
+  const dispatch = useDispatch();
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
     // Simulate a tiny network round-trip so the spinner is visible.
     await new Promise((r) => setTimeout(r, 550));
-    addMember(values);
+    dispatch(addMember(values));
     setSubmitting(false);
     toast.success("Member added", {
       description: `${values.fullName} is now part of the workspace.`,

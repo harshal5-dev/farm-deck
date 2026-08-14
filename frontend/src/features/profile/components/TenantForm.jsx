@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import FieldWrapper from "@/components/ui/field-wrapper";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { IconBuilding, IconBuildingWarehouse, IconCheck, IconLoader2, IconNote } from "@tabler/icons-react";
 import { useForm, useWatch } from "react-hook-form";
+
+/** Uppercase tracking label style — matches the form labels app-wide. */
+const fieldLabel =
+  "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
 const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
 
@@ -113,28 +118,21 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                         message: "Too long",
                       },
                     }}
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-1.5">
-                          <IconBuildingWarehouse
-                            className="size-3.5 text-muted-foreground"
-                            strokeWidth={1.75}
-                          />
-                          Company name
-                        </FormLabel>
+                        <FormLabel className={fieldLabel}>Company name</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <IconBuildingWarehouse
-                              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                              strokeWidth={1.75}
-                            />
+                          <FieldWrapper
+                            icon={IconBuildingWarehouse}
+                            hasError={fieldState.invalid}
+                          >
                             <Input
                               placeholder="Your farm organization name"
                               autoComplete="organization"
-                              className="pl-9"
+                              className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               {...field}
                             />
-                          </div>
+                          </FieldWrapper>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -150,33 +148,27 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                         message: "Description is too long",
                       },
                     }}
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <div className="flex items-center justify-between gap-2">
-                          <FormLabel className="flex items-center gap-1.5">
-                            <IconNote
-                              className="size-3.5 text-muted-foreground"
-                              strokeWidth={1.75}
-                            />
-                            Description
-                          </FormLabel>
+                          <FormLabel className={fieldLabel}>Description</FormLabel>
                           <span className="text-[10px] text-muted-foreground/70 tabular-nums">
                             {field.value?.length ?? 0}/500
                           </span>
                         </div>
                         <FormControl>
-                          <div className="relative">
-                            <IconNote
-                              className="pointer-events-none absolute top-3 left-3 size-4 text-muted-foreground"
-                              strokeWidth={1.75}
-                            />
+                          <FieldWrapper
+                            icon={IconNote}
+                            align="start"
+                            hasError={fieldState.invalid}
+                          >
                             <Textarea
                               placeholder="Tell members what this workspace is for…"
-                              className="resize-y pl-9"
+                              className="resize-y border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               {...field}
                               value={field.value ?? ""}
                             />
-                          </div>
+                          </FieldWrapper>
                         </FormControl>
                         <FormDescription>
                           A short blurb about your farm organization.

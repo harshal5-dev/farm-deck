@@ -84,9 +84,6 @@ func (s *UserServiceImpl) CreateMember(
 	acceptURL := buildAcceptURL(s.cfg.AppURL, rawToken)
 	tenantName := ""
 
-	// Fire-and-forget. SendInvitationEmail hands off to AsyncMailer which
-	// returns immediately and retries internally; we don't block the
-	// caller on SMTP.
 	_ = s.emailService.SendInvitationEmail(result.User.EmailID, result.User.FullName, tenantName, acceptURL)
 
 	return CreateMemberResponse{
@@ -96,9 +93,6 @@ func (s *UserServiceImpl) CreateMember(
 	}, nil
 }
 
-// buildAcceptURL is the single source of truth for the invitation link
-// shape. Keeping it in one place makes it easy to swap the frontend route
-// later (e.g. add UTM params) without touching the email service.
 func buildAcceptURL(appURL, rawToken string) string {
 	return appURL + "/accept-invite?token=" + rawToken
 }

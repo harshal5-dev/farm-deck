@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Reveal } from "@/components/effects";
 import ErrorState from "@/components/ui/error-state";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import FieldWrapper from "./FieldWrapper";
+import FieldWrapper from "@/components/ui/field-wrapper";
 import { IconArrowRight, IconEye, IconEyeOff, IconKey, IconLoader2, IconLock, IconMail } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";

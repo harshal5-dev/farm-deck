@@ -1,11 +1,9 @@
-import { useId } from "react";
 import { useForm } from "react-hook-form";
 import {
   IconUser,
   IconMail,
   IconShieldCheck,
   IconCircleCheckFilled,
-  IconCircleX,
   IconLoader2,
   IconCheck,
   IconChevronDown,
@@ -14,6 +12,15 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import FieldWrapper from "@/components/ui/field-wrapper";
 import { Avatar } from "@/components/avatars/avatars";
 import { DEFAULT_AVATAR_ID, FARM_AVATARS, getAvatar } from "@/components/avatars/avatars-data";
 import {
@@ -275,22 +282,10 @@ function RolePermissionsPreview({ roleId }) {
   );
 }
 
-/* ============================================================ */
-/*  UserForm — shared by Add & Edit pages                       */
-/* ============================================================ */
+/** Shared label styling — matches FormLabel's uppercase tracking look. */
+const fieldLabel =
+  "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
-/**
- * UserForm — fullName + email + role. Designed to fit a typical viewport
- * without scrolling: single row avatar preview on the left, two-column form
- * on the right, sticky footer with Cancel + Save.
- *
- * Props:
- *   mode:        "create" | "edit"
- *   defaultValues: { fullName, emailId, role, avatarId? }
- *   onSubmit:    async (values) => void
- *   onCancel:    () => void
- *   submitting:  bool — external loading flag (optional)
- */
 export default function UserForm({
   mode = "create",
   defaultValues,
@@ -298,18 +293,9 @@ export default function UserForm({
   onCancel,
   submitting = false,
 }) {
-  const titleId = useId();
-  const descId = useId();
   const isEdit = mode === "edit";
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-    watch,
-    setValue,
-    reset,
-  } = useForm({
+  const form = useForm({
     defaultValues: {
       fullName: defaultValues?.fullName || "",
       emailId: defaultValues?.emailId || "",
@@ -318,12 +304,12 @@ export default function UserForm({
     },
   });
 
-  const fullName = watch("fullName");
-  const email = watch("emailId");
-  const role = watch("role");
-  const avatarId = watch("avatarId");
-
-  // const roleMeta = useMemo(() => getRole(role), [role]);
+  // Live values drive the identity preview.
+  const fullName = form.watch("fullName");
+  const email = form.watch("emailId");
+  const role = form.watch("role");
+  const avatarId = form.watch("avatarId");
+  const { isDirty } = form.formState;
 
   const submit = async (values) => {
     await onSubmit({
@@ -335,223 +321,201 @@ export default function UserForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(submit)}
-      className="flex h-full min-h-0 flex-col"
-      aria-labelledby={titleId}
-      aria-describedby={descId}
-    >
-      <div className="grid h-full min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
-        {/* ===== Left — identity preview ===== */}
-        <div className="flex min-h-0 flex-col">
-          <IdentityPreview
-            fullName={fullName}
-            email={email}
-            role={role}
-            avatarId={avatarId}
-          />
-        </div>
-
-        {/* ===== Right — form fields ===== */}
-        <div className="flex min-h-0 flex-col gap-3.5">
-          {/* Avatar + Full name (avatar dropdown sits left of the name input) */}
-          <div className="grid grid-cols-[auto_1fr] items-start gap-3 sm:gap-4">
-            {/* Avatar dropdown */}
-            <div>
-              <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <IconBolt
-                  className="size-3.5 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
-                Avatar
-              </span>
-              <AvatarPicker
-                value={avatarId}
-                onChange={(v) => setValue("avatarId", v, { shouldDirty: true })}
-              />
-            </div>
-
-            {/* Full name */}
-            <div>
-              <label
-                htmlFor="user-fullName"
-                className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground"
-              >
-                <IconUser
-                  className="size-3.5 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
-                Full name
-              </label>
-              <div className="relative">
-                <IconUser
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
-                <Input
-                  id="user-fullName"
-                  placeholder="e.g. Priya Deshmukh"
-                  autoComplete="name"
-                  className={cn(
-                    "pl-9",
-                    errors.fullName &&
-                      "border-destructive focus-visible:ring-destructive/20"
-                  )}
-                  aria-invalid={!!errors.fullName}
-                  {...register("fullName", {
-                    required: "Full name is required",
-                    minLength: { value: 2, message: "At least 2 characters" },
-                    maxLength: { value: 100, message: "Too long" },
-                  })}
-                />
-              </div>
-              {errors.fullName && (
-                <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive">
-                  <IconCircleX className="size-3" strokeWidth={2} />
-                  {errors.fullName.message}
-                </p>
-              )}
-            </div>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(submit)}
+        noValidate
+        className="flex h-full min-h-0 flex-col"
+      >
+        <div className="grid h-full min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+          {/* ===== Left — identity preview ===== */}
+          <div className="flex min-h-0 flex-col">
+            <IdentityPreview
+              fullName={fullName}
+              email={email}
+              role={role}
+              avatarId={avatarId}
+            />
           </div>
 
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="user-email"
-              className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground"
-            >
-              <IconMail
-                className="size-3.5 text-muted-foreground"
-                strokeWidth={1.75}
-              />
-              Email address
-            </label>
-            <div className="relative">
-              <IconMail
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                strokeWidth={1.75}
-              />
-              <Input
-                id="user-email"
-                type="email"
-                placeholder="grower@yourfarm.com"
-                autoComplete="email"
-                className={cn(
-                  "pl-9",
-                  errors.emailId &&
-                    "border-destructive focus-visible:ring-destructive/20"
+          {/* ===== Right — form fields ===== */}
+          <div className="flex min-h-0 flex-col gap-3.5">
+            {/* Avatar + Full name (avatar dropdown sits left of the name input) */}
+            <div className="grid grid-cols-[auto_1fr] items-start gap-3 sm:gap-4">
+              {/* Avatar — bound via FormField but rendered with its own layout */}
+              <FormField
+                control={form.control}
+                name="avatarId"
+                render={({ field }) => (
+                  <div>
+                    <span className={cn("mb-1 flex items-center gap-1.5", fieldLabel)}>
+                      <IconBolt className="size-3.5" strokeWidth={1.75} />
+                      Avatar
+                    </span>
+                    <AvatarPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={submitting}
+                    />
+                  </div>
                 )}
-                aria-invalid={!!errors.emailId}
-                {...register("emailId", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Enter a valid email address",
-                  },
-                })}
+              />
+
+              {/* Full name */}
+              <FormField
+                control={form.control}
+                name="fullName"
+                rules={{
+                  required: "Full name is required",
+                  minLength: { value: 2, message: "At least 2 characters" },
+                  maxLength: { value: 100, message: "Too long" },
+                }}
+                render={({ field, fieldState }) => (
+                  <FormItem className="gap-1.5">
+                    <FormLabel className={fieldLabel}>Full name</FormLabel>
+                    <FormControl>
+                      <FieldWrapper icon={IconUser} hasError={fieldState.invalid}>
+                        <Input
+                          placeholder="e.g. Priya Deshmukh"
+                          autoComplete="name"
+                          className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                          {...field}
+                        />
+                      </FieldWrapper>
+                    </FormControl>
+                    <FormMessage className="text-[11px]" />
+                  </FormItem>
+                )}
               />
             </div>
-            {errors.emailId && (
-              <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive">
-                <IconCircleX className="size-3" strokeWidth={2} />
-                {errors.emailId.message}
-              </p>
-            )}
-          </div>
 
-          {/* Role — 4 cards inline + permission preview */}
-          <div>
-            <div className="mb-1.5 flex items-center justify-between gap-2">
-              <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <IconShieldCheck
-                  className="size-3.5 text-muted-foreground"
-                  strokeWidth={1.75}
-                />
-                Role
-              </label>
-              <Tooltip>
-                <TooltipTrigger className="text-[10px] font-medium text-muted-foreground hover:text-foreground">
-                  What can each role do?
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <ul className="space-y-1 text-[11px]">
-                    {ROLE_ORDER.map((id) => {
-                      const r = getRole(id);
-                      return (
-                        <li key={id}>
-                          <span className={cn("font-semibold", r.text)}>
-                            {r.label}:
-                          </span>{" "}
-                          {r.description}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {ROLE_ORDER.map((id) => (
-                <RoleCard
-                  key={id}
-                  roleId={id}
-                  selected={role === id}
-                  onSelect={(r) => setValue("role", r, { shouldDirty: true })}
-                />
-              ))}
-            </div>
-            <RolePermissionsPreview roleId={role} />
+            {/* Email */}
+            <FormField
+              control={form.control}
+              name="emailId"
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Enter a valid email address",
+                },
+              }}
+              render={({ field, fieldState }) => (
+                <FormItem className="gap-1.5">
+                  <FormLabel className={fieldLabel}>Email address</FormLabel>
+                  <FormControl>
+                    <FieldWrapper icon={IconMail} hasError={fieldState.invalid}>
+                      <Input
+                        type="email"
+                        placeholder="grower@yourfarm.com"
+                        autoComplete="email"
+                        className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        {...field}
+                      />
+                    </FieldWrapper>
+                  </FormControl>
+                  <FormMessage className="text-[11px]" />
+                </FormItem>
+              )}
+            />
+
+            {/* Role — 4 cards inline + permission preview */}
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <span className={cn("flex items-center gap-1.5", fieldLabel)}>
+                      <IconShieldCheck className="size-3.5" strokeWidth={1.75} />
+                      Role
+                    </span>
+                    <Tooltip>
+                      <TooltipTrigger className="text-[10px] font-medium text-muted-foreground hover:text-foreground">
+                        What can each role do?
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <ul className="space-y-1 text-[11px]">
+                          {ROLE_ORDER.map((id) => {
+                            const r = getRole(id);
+                            return (
+                              <li key={id}>
+                                <span className={cn("font-semibold", r.text)}>
+                                  {r.label}:
+                                </span>{" "}
+                                {r.description}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {ROLE_ORDER.map((id) => (
+                      <RoleCard
+                        key={id}
+                        roleId={id}
+                        selected={field.value === id}
+                        onSelect={field.onChange}
+                      />
+                    ))}
+                  </div>
+                  <RolePermissionsPreview roleId={field.value} />
+                </div>
+              )}
+            />
           </div>
         </div>
-      </div>
 
-      {/* ===== Footer (sticky to the bottom of the page column) ===== */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3">
-        <p className="text-[11px] text-muted-foreground">
-          {isDirty ? (
-            <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-              <span className="size-1.5 rounded-full bg-amber-500" />
-              Unsaved changes
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
-              <IconCircleCheckFilled className="size-3 text-leaf" />
-              {isEdit ? "All changes saved" : "Ready to add"}
-            </span>
-          )}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              reset();
-              onCancel?.();
-            }}
-            disabled={submitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={submitting || (isEdit && !isDirty)}
-            className="gap-2 shadow-md shadow-leaf/20"
-          >
-            {submitting ? (
-              <IconLoader2 className="size-4 animate-spin" strokeWidth={2} />
+        {/* ===== Footer (sticky to the bottom of the page column) ===== */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3">
+          <p className="text-[11px] text-muted-foreground">
+            {isDirty ? (
+              <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                <span className="size-1.5 rounded-full bg-amber-500" />
+                Unsaved changes
+              </span>
             ) : (
-              <IconCheck className="size-4" strokeWidth={2} />
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                <IconCircleCheckFilled className="size-3 text-leaf" />
+                {isEdit ? "All changes saved" : "Ready to add"}
+              </span>
             )}
-            {submitting
-              ? isEdit
-                ? "Saving…"
-                : "Adding…"
-              : isEdit
-                ? "Save changes"
-                : "Add member"}
-          </Button>
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                form.reset();
+                onCancel?.();
+              }}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting || (isEdit && !isDirty)}
+              className="gap-2 shadow-md shadow-leaf/20"
+            >
+              {submitting ? (
+                <IconLoader2 className="size-4 animate-spin" strokeWidth={2} />
+              ) : (
+                <IconCheck className="size-4" strokeWidth={2} />
+              )}
+              {submitting
+                ? isEdit
+                  ? "Saving…"
+                  : "Adding…"
+                : isEdit
+                  ? "Save changes"
+                  : "Add member"}
+            </Button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

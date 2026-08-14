@@ -37,10 +37,6 @@ type CreateMemberRequest struct {
 	ProfilePicture *string `json:"profilePicture"`
 }
 
-// CreateMemberResponse is what the create-member endpoint returns. We surface
-// the new user id, the invitation id and the expiry so the caller (and
-// tests) can verify the row was created. The raw invitation token never
-// leaves the server — it's only embedded in the email.
 type CreateMemberResponse struct {
 	UserID       uuid.UUID `json:"userId"`
 	InvitationID uuid.UUID `json:"invitationId"`

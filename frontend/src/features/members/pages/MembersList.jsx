@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   IconUserPlus,
@@ -31,7 +32,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { ROLE_ORDER } from "@/constants/roles";
-import { useMembers } from "../useMembers";
+import { suspendMember, reinviteMember, selectMembers } from "../membersSlice";
 import { buildPageList } from "../lib/format";
 import { RoleFilterChip } from "../components/RoleFilterChip";
 import { EmptyMembers } from "../components/EmptyMembers";
@@ -50,7 +51,8 @@ const STATUS_OPTIONS = [
 export default function Members() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { members, suspendMember, reinviteMember } = useMembers();
+  const dispatch = useDispatch();
+  const members = useSelector(selectMembers);
   const currentUserId = user?.id;
   const isOwner = checkIsOwner(user?.role);
 
@@ -122,14 +124,14 @@ export default function Members() {
   const handleEdit = (m) => navigate(`/app/members/${m.id}/edit`);
 
   const handleSuspend = (member) => {
-    suspendMember(member.id);
+    dispatch(suspendMember(member.id));
     toast.success("Member suspended", {
       description: `${member.fullName} no longer has access.`,
     });
   };
 
   const handleReinvite = (member) => {
-    reinviteMember(member.id);
+    dispatch(reinviteMember(member.id));
   };
 
   return (

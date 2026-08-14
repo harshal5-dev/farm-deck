@@ -9,9 +9,11 @@
       <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
+    <!-- Brighter green gradient so the wordmark reads on the dark email banner
+         (#1a2e1f → #2E7D52). Stops are lighter than the leaf gradient. -->
     <linearGradient id="lgDeck" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#43A047"/>
-      <stop offset="100%" stop-color="#2E7D32"/>
+      <stop offset="0%" stop-color="#A5D6A7"/>
+      <stop offset="100%" stop-color="#66BB6A"/>
     </linearGradient>
   </defs>
 
@@ -26,7 +28,8 @@
   <path d="M24 4 C 17 6, 7 16, 6 27 L 7 25 C 11 14, 17 7, 24 5 C 31 7, 37 14, 41 25 L 42 27 C 41 16, 31 6, 24 4 Z" fill="url(#lgShine)"/>
   <path d="M24 4 C 17 6, 7 16, 6 27 C 5 41, 15 46, 24 46 C 33 46, 43 41, 42 27 C 41 16, 31 6, 24 4 Z" fill="none" stroke="#FFFFFF" stroke-width="0.9" opacity="0.55"/>
 
-  <!-- Wordmark -->
-  <text x="58" y="32" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" letter-spacing="-0.5" fill="#1a2e1f">Farm</text>
-  <text x="128" y="32" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" letter-spacing="-0.5" fill="url(#lgDeck)">deck</text>
+  <!-- Wordmark — light colors for dark backgrounds (email banner).
+       Single text element with tspan so the renderer handles kerning
+       naturally instead of an absolute x gap. -->
+  <text x="58" y="32" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" letter-spacing="-0.5" fill="#ffffff">Farm<tspan dx="1" fill="url(#lgDeck)">deck</tspan></text>
 </svg>

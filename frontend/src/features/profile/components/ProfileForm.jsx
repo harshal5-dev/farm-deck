@@ -2,6 +2,7 @@ import { Avatar as ProfileAvatar } from "@/components/avatars/avatars";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import FieldWrapper from "@/components/ui/field-wrapper";
 import { IconCamera, IconCheck, IconLoader2, IconMail, IconUser } from "@tabler/icons-react";
 import AvatarPopover from "./AvatarPopover";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,12 @@ import LockedField from "@/components/ui/locked-field";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
+import { cn } from "@/lib/utils";
 import { useForm, useWatch } from "react-hook-form";
 
+/** Uppercase tracking label style — matches the form labels app-wide. */
+const fieldLabel =
+  "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
 const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
   const savedAvatarId = user.profilePicture || DEFAULT_AVATAR_ID;
@@ -63,7 +68,12 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
                   name="avatarId"
                   render={({ field }) => (
                     <FormItem className="flex flex-col items-center">
-                      <span className="flex items-center gap-1.5 text-sm leading-none font-medium select-none">
+                      <span
+                        className={cn(
+                          "flex items-center gap-1.5 leading-none select-none",
+                          fieldLabel
+                        )}
+                      >
                         <IconCamera
                           className="size-3.5 text-muted-foreground"
                           strokeWidth={1.75}
@@ -106,28 +116,21 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
                         message: "Too long",
                       },
                     }}
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-1.5">
-                          <IconUser
-                            className="size-3.5 text-muted-foreground"
-                            strokeWidth={1.75}
-                          />
-                          Full name
-                        </FormLabel>
+                        <FormLabel className={fieldLabel}>Full name</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <IconUser
-                              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                              strokeWidth={1.75}
-                            />
+                          <FieldWrapper
+                            icon={IconUser}
+                            hasError={fieldState.invalid}
+                          >
                             <Input
                               placeholder="Your full name"
                               autoComplete="name"
-                              className="pl-9"
+                              className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               {...field}
                             />
-                          </div>
+                          </FieldWrapper>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

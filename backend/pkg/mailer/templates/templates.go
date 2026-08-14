@@ -10,11 +10,11 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/pkg/mailer"
 )
 
-//go:embed welcome.html welcome.txt invitation.html invitation.txt logo.svg
+//go:embed welcome.html welcome.txt invitation.html invitation.txt logo.png
 var files embed.FS
 
-//go:embed logo.svg
-var logoSVG []byte
+//go:embed logo.png
+var logoPNG []byte
 
 const logoContentID = "farmdeck-logo"
 
@@ -69,13 +69,15 @@ func RenderText(name string, data any) (string, error) {
 	return buf.String(), nil
 }
 
-// LogoSVG returns the branded logo as SVG bytes for use as an inline email
-// attachment. The bytes are the same file the frontend serves at /logo.svg,
-// so the brand stays consistent between app and email.
-func LogoSVG() []byte {
+// LogoPNG returns the branded logo as transparent-background PNG bytes for
+// use as an inline email attachment. The image is rendered from the same
+// logo.svg the frontend serves, but PNG is used because most email clients
+// (Outlook desktop in particular) won't render inline SVGs and instead show
+// them as paperclip attachments.
+func LogoPNG() []byte {
 	// Return a copy so callers can't mutate the embedded asset.
-	out := make([]byte, len(logoSVG))
-	copy(out, logoSVG)
+	out := make([]byte, len(logoPNG))
+	copy(out, logoPNG)
 	return out
 }
 
@@ -102,9 +104,9 @@ func WelcomeMessage(to string, data Welcome) (mailer.Message, error) {
 		Text:    text,
 		Attachments: []mailer.Attachment{
 			{
-				Content:     LogoSVG(),
-				Filename:    "farmdeck-logo.svg",
-				ContentType: "image/svg+xml",
+				Content:     LogoPNG(),
+				Filename:    "farmdeck-logo.png",
+				ContentType: "image/png",
 				ContentID:   logoContentID,
 			},
 		},
@@ -132,9 +134,9 @@ func InvitationMessage(to string, data Invitation) (mailer.Message, error) {
 		Text:    text,
 		Attachments: []mailer.Attachment{
 			{
-				Content:     LogoSVG(),
-				Filename:    "farmdeck-logo.svg",
-				ContentType: "image/svg+xml",
+				Content:     LogoPNG(),
+				Filename:    "farmdeck-logo.png",
+				ContentType: "image/png",
 				ContentID:   logoContentID,
 			},
 		},

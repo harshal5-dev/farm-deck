@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   IconArrowLeft,
@@ -18,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import UserForm from "../components/UserForm";
-import { useMembers } from "../useMembers";
+import { updateMember, suspendMember, selectMemberById } from "../membersSlice";
 import { getRole, getStatus } from "@/constants/roles";
 import { useAuth } from "@/features/auth";
 import { cn, checkIsOwner } from "@/lib/utils";
@@ -32,13 +33,13 @@ import { cn, checkIsOwner } from "@/lib/utils";
  */
 export default function EditMember() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { memberId } = useParams();
   const { user } = useAuth();
-  const { getMember, updateMember, suspendMember } = useMembers();
+  const member = useSelector((state) => selectMemberById(state, memberId));
   const [submitting, setSubmitting] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
 
-  const member = getMember(memberId);
   const isSelf = member && user?.id === member.id;
   const isOwnerEditing = checkIsOwner(user?.role);
 
@@ -79,7 +80,7 @@ export default function EditMember() {
   const handleSubmit = async (values) => {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 550));
-    updateMember(member.id, values);
+    dispatch(updateMember(member.id, values));
     setSubmitting(false);
     toast.success("Member updated", {
       description: `${values.fullName}'s details have been saved.`,
@@ -90,7 +91,7 @@ export default function EditMember() {
   const handleCancel = () => navigate("/app/members");
 
   const handleSuspend = () => {
-    suspendMember(member.id);
+    dispatch(suspendMember(member.id));
     setSuspendOpen(false);
     toast.success("Member suspended", {
       description: `${member.fullName} no longer has access.`,

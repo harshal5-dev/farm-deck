@@ -3,7 +3,6 @@ import Layout from "@/components/layout/layout";
 import {
   ProtectedRoute,
   PublicOnlyRoute,
-  MembersLayout,
 } from "@/app/router-helpers";
 
 import { Login } from "@/features/auth";
@@ -62,11 +61,9 @@ export default function App() {
             <Route path="crop-categories" element={<CropCategories />} />
             <Route path="crops" element={<Crops />} />
             <Route path="harvest" element={<Harvest />} />
-            <Route element={<MembersLayout />}>
-              <Route path="members" element={<MembersList />} />
-              <Route path="members/new" element={<AddMember />} />
-              <Route path="members/:memberId/edit" element={<EditMember />} />
-            </Route>
+            <Route path="members" element={<MembersList />} />
+            <Route path="members/new" element={<AddMember />} />
+            <Route path="members/:memberId/edit" element={<EditMember />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>

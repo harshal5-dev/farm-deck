@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Outlet } from "react-router-dom";
 import {
   IconLayoutDashboard,
-  IconTractor,
   IconUsers,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
@@ -32,16 +31,16 @@ const navGroups = [
       },
     ],
   },
-  {
-    label: "Farming",
-    items: [
-      {
-        label: "Farms",
-        href: "/app/farms",
-        icon: IconTractor,
-      },
-    ],
-  },
+  // {
+  //   label: "Farming",
+  //   items: [
+  //     {
+  //       label: "Farms",
+  //       href: "/app/farms",
+  //       icon: IconTractor,
+  //     },
+  //   ],
+  // },
   {
     label: "Team",
     items: [
@@ -58,6 +57,7 @@ const navGroups = [
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
 
   const handleKeyDown = useCallback((e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "b") {
