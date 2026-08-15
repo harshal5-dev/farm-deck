@@ -6,7 +6,6 @@ export const cn = (...inputs) => {
   return twMerge(clsx(inputs));
 }
 
-
 export const checkIsOwner = (role) => {
   return role === USER_ROLES.owner;
 }
