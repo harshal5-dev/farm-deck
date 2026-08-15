@@ -127,7 +127,7 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
                             <Input
                               placeholder="Your full name"
                               autoComplete="name"
-                              className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               {...field}
                             />
                           </FieldWrapper>

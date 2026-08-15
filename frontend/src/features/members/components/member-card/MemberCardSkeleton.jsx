@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Loading placeholder matching the clean horizontal MemberCard layout. */
-export function MemberCardSkeleton() {
+
+const MemberCardSkeleton = () => {
   return (
     <div className="glass-card texture-paper relative flex h-full flex-col overflow-hidden rounded-3xl">
       {/* Top gradient strip */}
@@ -13,7 +13,7 @@ export function MemberCardSkeleton() {
       <div className="relative flex flex-1 flex-col p-5">
         {/* Identity row */}
         <div className="flex items-start gap-3">
-          <Skeleton className="size-[64px] shrink-0 rounded-full ring-2 ring-card" />
+          <Skeleton className="size-16 shrink-0 rounded-full ring-2 ring-card" />
           <div className="min-w-0 flex-1 space-y-2">
             <Skeleton className="h-3.5 w-32" />
             <Skeleton className="h-3 w-40" />
@@ -52,3 +52,5 @@ export function MemberCardSkeleton() {
     </div>
   );
 }
+
+export default MemberCardSkeleton;

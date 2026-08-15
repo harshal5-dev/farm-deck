@@ -11,8 +11,7 @@ const SIZES = {
   "2xl": "size-20",
 };
 
-/** Member avatar wrapped in a role-tinted ring + glow, with an active dot. */
-export function MemberAvatar({ member, size = "lg" }) {
+const MemberAvatar = ({ member, size = "lg" }) => {
   const avatarId = member.profilePicture || DEFAULT_AVATAR_ID;
   const r = getRole(member.role);
   const px = SIZES[size] || SIZES.lg;
@@ -43,3 +42,5 @@ export function MemberAvatar({ member, size = "lg" }) {
     </div>
   );
 }
+
+export default MemberAvatar;

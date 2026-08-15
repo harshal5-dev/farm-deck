@@ -129,7 +129,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                             <Input
                               placeholder="Your farm organization name"
                               autoComplete="organization"
-                              className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               {...field}
                             />
                           </FieldWrapper>

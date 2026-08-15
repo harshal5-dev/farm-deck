@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
 import { getRole } from "@/constants/roles";
 
-/** Toggleable role chip used in the filter bar; shows the role's live count. */
-export function RoleFilterChip({ roleId, count, active, onClick }) {
+const RoleFilterChip = ({ roleId, count, active, onClick }) => {
   const r = getRole(roleId);
   const Icon = r.icon;
   return (
@@ -39,3 +38,5 @@ export function RoleFilterChip({ roleId, count, active, onClick }) {
     </button>
   );
 }
+
+export default RoleFilterChip;

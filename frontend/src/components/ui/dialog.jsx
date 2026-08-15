@@ -25,9 +25,10 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-soil/45 backdrop-blur-sm",
-        "data-open:animate-in data-open:fade-in-0",
-        "data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-soil/45",
+        "transition-opacity duration-200",
+        "data-open:opacity-100",
+        "data-closed:opacity-0",
         className
       )}
       {...props}
@@ -55,14 +56,15 @@ function DialogContent({
           "flex max-h-[calc(100dvh-2rem)] w-full flex-col gap-0 overflow-hidden",
           "rounded-3xl bg-card text-card-foreground shadow-2xl shadow-foreground/15",
           "ring-1 ring-foreground/10",
-          // Frosted glass to feel modern + consistent with the app surfaces
-          "glass-card",
           // Sizing
           "data-[size=default]:max-w-lg data-[size=sm]:max-w-sm data-[size=lg]:max-w-2xl data-[size=xl]:max-w-4xl",
-          // Animations
-          "duration-200 outline-none",
-          "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:slide-in-from-bottom-2",
-          "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          // Animations — use CSS transitions (not keyframe animations) so the
+          // close is smooth and doesn't flash. translate-y keeps the dialog
+          // centred while animating in/out (scale would override the -translate
+          // centering transform).
+          "transition-all duration-200 outline-none",
+          "data-open:opacity-100 data-open:translate-y-0",
+          "data-closed:opacity-0 data-closed:translate-y-2",
           className
         )}
         {...props}

@@ -24,7 +24,6 @@ const EditMember = () => {
   const member = useSelector(selectSelectedMember);
   const [updateMember, { isLoading: submitting }] = useUpdateMemberMutation();
 
-  // No selected member → bounce back to the list.
   useEffect(() => {
     if (!member) {
       navigate("/app/members", { replace: true });

@@ -1,54 +1,17 @@
 import {
   IconCalendar,
   IconClock,
-  IconChevronRight,
 } from "@tabler/icons-react";
 import { Reveal } from "@/components/effects";
 import { cn } from "@/lib/utils";
 import { getRole } from "@/constants/roles";
 import { formatDate, formatRelative } from "../../lib/format";
 import { RolePill, StatusPill } from "../pills";
-import { MemberAvatar } from "./MemberAvatar";
-import { MemberActionMenu } from "./MemberActionMenu";
+import MemberAvatar from "./MemberAvatar";
+import MemberActionMenu from "./MemberActionMenu";
+import StatTile from "./StatTile";
 
-function StatTile({ icon: Icon, label, value, accent }) {
-  return (
-    <div className="flex items-center gap-2 rounded-xl bg-muted/40 px-2.5 py-2">
-      <Icon
-        className={cn(
-          "size-3.5 shrink-0",
-          accent === "amber"
-            ? "text-amber-500"
-            : accent === "leaf"
-              ? "text-leaf"
-              : "text-muted-foreground/70"
-        )}
-        strokeWidth={1.85}
-      />
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-          {label}
-        </p>
-        <p
-          className={cn(
-            "truncate text-xs font-bold tabular-nums",
-            accent === "amber" && "text-amber-700 dark:text-amber-400"
-          )}
-        >
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * MemberCard — clean horizontal card on a role-tinted glass surface.
- * Thin gradient accent at the top, large role-icon watermark in the
- * background, avatar on the left, identity in the center, action menu on
- * the right. Everything sits on the card surface for clear contrast.
- */
-export function MemberCard({
+const MemberCard = ({
   member,
   currentUserId,
   index,
@@ -56,15 +19,29 @@ export function MemberCard({
   onView,
   onDelete,
   onEdit,
-}) {
+}) => {
   const r = getRole(member.role);
   const RoleIcon = r.icon;
   const isSelf = member.id === currentUserId;
   const isInvited = member.status === "invited";
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onView?.();
+    }
+  };
+
   return (
     <Reveal delay={Math.min(index * 50, 400)} duration={500} changeKey={member.id}>
-      <div className="group/member glass-card texture-paper highlight-edge relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-leaf/20">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${member.fullName}`}
+        onClick={onView}
+        onKeyDown={handleKeyDown}
+        className="group/member glass-card texture-paper highlight-edge relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-leaf/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
         {/* External role-tinted bloom on hover */}
         <div
           className={cn(
@@ -89,7 +66,7 @@ export function MemberCard({
 
         {/* Thin gradient accent strip at the top */}
         <div className="relative h-1 shrink-0 overflow-hidden">
-          <div className={cn("absolute inset-0 bg-linear-to-br", r.gradient)} />
+          <div className={cn("absolute inset-0 bg-linear-to-r", r.gradient)} />
         </div>
 
         {/* Body */}
@@ -117,7 +94,7 @@ export function MemberCard({
             {/* Name + email + pills — on the right of the avatar */}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                <h3 className="min-w-0 wrap-break-word font-heading text-sm font-bold tracking-tight truncate">
+                <h3 className="min-w-0 wrap-break-word font-heading text-sm font-bold tracking-tight">
                   {member.fullName}
                 </h3>
                 {isSelf && (
@@ -135,8 +112,12 @@ export function MemberCard({
               </div>
             </div>
 
-            {/* Action menu on the far right */}
-            <div className="shrink-0">
+            {/* Action menu on the far right — stops propagation so it doesn't open the dialog */}
+            <div
+              className="shrink-0"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
               <MemberActionMenu
                 member={member}
                 currentUserId={currentUserId}
@@ -148,7 +129,7 @@ export function MemberCard({
           </div>
 
           {/* Stat tiles */}
-          <div className="my-4 grid grid-cols-2 gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <StatTile
               icon={IconCalendar}
               label={isInvited ? "Invited" : "Joined"}
@@ -162,31 +143,18 @@ export function MemberCard({
             />
           </div>
 
-          {/* Footer — role description + view link (pushed to bottom) */}
-          <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/30 pt-3">
-            <span className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-              <RoleIcon
-                className={cn("size-3.5 shrink-0", r.text)}
-                strokeWidth={1.85}
-              />
-              <span className="truncate">{r.description}</span>
-            </span>
-            <button
-              type="button"
-              onClick={onView}
-              aria-label="View member"
-              className={cn(
-                "flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-semibold transition-all duration-200 group-hover/member:gap-1.5",
-                r.text,
-                "hover:bg-muted/60"
-              )}
-            >
-              View
-              <IconChevronRight className="size-4" strokeWidth={2} />
-            </button>
+          {/* Footer — role description only (card itself is clickable) */}
+          <div className="mt-auto flex items-center gap-1.5 border-t border-border/30 pt-3 text-[11px] text-muted-foreground">
+            <RoleIcon
+              className={cn("size-3.5 shrink-0", r.text)}
+              strokeWidth={1.85}
+            />
+            <span className="truncate">{r.description}</span>
           </div>
         </div>
       </div>
     </Reveal>
   );
-}
+};
+
+export default MemberCard;

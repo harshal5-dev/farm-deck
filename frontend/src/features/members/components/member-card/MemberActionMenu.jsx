@@ -21,17 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-/**
- * The "⋯" actions for a member card: edit, copy email, and (for the workspace
- * owner) delete. Delete is permanent — the member record is removed.
- */
-export function MemberActionMenu({
+const MemberActionMenu = ({
   member,
   currentUserId,
   isOwner,
   onDelete,
   onEdit,
-}) {
+}) => {
   const isSelf = member.id === currentUserId;
   const canDelete = isOwner && !isSelf;
 
@@ -180,3 +176,5 @@ export function MemberActionMenu({
     </>
   );
 }
+
+export default MemberActionMenu;

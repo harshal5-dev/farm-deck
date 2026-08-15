@@ -53,7 +53,7 @@ export default function LockedField({ icon: Icon, label, value, hint, id }) {
           value={value || ""}
           readOnly
           disabled
-          className="h-10 cursor-not-allowed border-0 bg-transparent font-mono text-sm shadow-none opacity-90 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="cursor-not-allowed border-0 bg-transparent font-mono text-sm shadow-none opacity-90 focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </FieldWrapper>
       {hint && (

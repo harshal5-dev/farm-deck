@@ -16,31 +16,25 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { RolePill, StatusPill } from "./pills";
-import { MemberAvatar } from "./member-card/MemberAvatar";
-import { getRole, getStatus } from "@/constants/roles";
+import { getRole } from "@/constants/roles";
 import { setSelectedMember } from "../selectedMemberSlice";
 import { useDispatch } from "react-redux";
 import { cn } from "@/lib/utils";
 import { formatDate, formatRelative } from "../lib/format";
+import DetailRow from "./DetailRow";
+import MemberAvatar from "./member-card/MemberAvatar";
 
-/**
- * MemberDetailsDialog — read-only member preview shown from the "View" button
- * on each card. Mirrors the card's role-tinted styling and exposes an "Edit
- * details" action that sets the selected member in Redux and navigates to the
- * edit route.
- */
-export default function MemberDetailsDialog({ member, open, onOpenChange }) {
+const MemberDetailsDialog = ({ member, open, onOpenChange }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   if (!member) return null;
 
   const roleMeta = getRole(member.role);
-  const statusMeta = getStatus(member.status);
   const isInvited = member.status === "invited";
 
   const handleEdit = () => {
-    dispatch(setSelectedMember(member.id));
+    dispatch(setSelectedMember(member));
     onOpenChange?.(false);
     navigate("/app/members/edit");
   };
@@ -54,20 +48,20 @@ export default function MemberDetailsDialog({ member, open, onOpenChange }) {
       >
         {/* Role-tinted top strip */}
         <div className="relative h-1.5 overflow-hidden">
-          <div className={cn("absolute inset-0 bg-gradient-to-r", roleMeta.gradient)} />
+          <div className={cn("absolute inset-0 bg-linear-to-r", roleMeta.gradient)} />
         </div>
 
         <div className="relative">
           {/* Subtle role-tinted background */}
           <div
             className={cn(
-              "pointer-events-none absolute inset-0 bg-gradient-to-br opacity-[0.05]",
+              "pointer-events-none absolute inset-0 bg-linear-to-r opacity-[0.05]",
               roleMeta.gradient
             )}
           />
           {/* Background watermark */}
           <roleMeta.icon
-            className="pointer-events-none absolute -right-8 -bottom-8 size-44 text-foreground/[0.04]"
+            className="pointer-events-none absolute -right-8 -bottom-8 size-44 text-foreground/4"
             strokeWidth={1}
           />
 
@@ -84,7 +78,7 @@ export default function MemberDetailsDialog({ member, open, onOpenChange }) {
                   />
                   <div
                     className={cn(
-                      "relative rounded-full bg-gradient-to-br p-0.5 shadow-md ring-2 ring-card",
+                      "relative rounded-full bg-linear-to-br p-0.5 shadow-md ring-2 ring-card",
                       roleMeta.gradient
                     )}
                   >
@@ -95,7 +89,7 @@ export default function MemberDetailsDialog({ member, open, onOpenChange }) {
                 {/* Identity */}
                 <div className="min-w-0 flex-1 pt-0.5">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <DialogTitle className="min-w-0 break-words font-heading text-lg font-bold tracking-tight">
+                    <DialogTitle className="min-w-0 wrap-break-word font-heading text-lg font-bold tracking-tight">
                       {member.fullName}
                     </DialogTitle>
                   </div>
@@ -177,30 +171,4 @@ export default function MemberDetailsDialog({ member, open, onOpenChange }) {
   );
 }
 
-function DetailRow({ icon: Icon, label, value, accent, roleMeta }) {
-  const valueClass = cn(
-    "truncate text-xs font-semibold tabular-nums",
-    accent === "amber" && "text-amber-700 dark:text-amber-400",
-    accent === "role" && roleMeta?.text
-  );
-  return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2.5">
-      <div
-        className={cn(
-          "flex size-7 shrink-0 items-center justify-center rounded-lg",
-          accent === "role"
-            ? roleMeta?.bg
-            : "bg-background/60 text-muted-foreground/80"
-        )}
-      >
-        <Icon className="size-3.5" strokeWidth={1.85} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-          {label}
-        </p>
-        <p className={valueClass}>{value}</p>
-      </div>
-    </div>
-  );
-}
+export default MemberDetailsDialog;

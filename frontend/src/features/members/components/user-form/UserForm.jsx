@@ -37,13 +37,13 @@ import RolePermissionsPreview from "./RolePermissionsPreview";
 const fieldLabel =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
-export default function UserForm({
+const UserForm = ({
   mode = "create",
   defaultValues,
   onSubmit,
   onCancel,
   submitting = false,
-}) {
+}) => {
   const isEdit = mode === "edit";
 
   const form = useForm({
@@ -129,7 +129,7 @@ export default function UserForm({
                         <Input
                           placeholder="e.g. Priya Deshmukh"
                           autoComplete="name"
-                          className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                          className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FieldWrapper>
@@ -168,7 +168,7 @@ export default function UserForm({
                           type="email"
                           placeholder="grower@yourfarm.com"
                           autoComplete="email"
-                          className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                          className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FieldWrapper>
@@ -279,3 +279,5 @@ export default function UserForm({
     </Form>
   );
 }
+
+export default UserForm;

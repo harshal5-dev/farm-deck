@@ -28,11 +28,11 @@ import { ROLE_ORDER } from "@/constants/roles";
 import { useListMembersQuery, useDeleteMemberMutation } from "../memberApi";
 import { setSelectedMember } from "../selectedMemberSlice";
 import { buildPageList } from "../lib/format";
-import { RoleFilterChip } from "../components/RoleFilterChip";
-import { EmptyMembers } from "../components/EmptyMembers";
 import MemberDetailsDialog from "../components/MemberDetailsDialog";
-import { MemberCard } from "../components/member-card/MemberCard";
-import { MemberCardSkeleton } from "../components/member-card/MemberCardSkeleton";
+import MemberCard from "../components/member-card/MemberCard";
+import MemberCardSkeleton from "../components/member-card/MemberCardSkeleton";
+import EmptyMembers from "../components/EmptyMembers";
+import RoleFilterChip from "../components/RoleFilterChip";
 
 const PAGE_SIZE = 8;
 
@@ -294,7 +294,7 @@ const Members = () => {
           ) : (
             <div
               key={`members-${activePage}-${roleFilter}-${statusFilter}-${search}`}
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-1.5"
             >
               {pagedMembers.map((m, i) => (
               <MemberCard

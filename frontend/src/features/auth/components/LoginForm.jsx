@@ -60,7 +60,7 @@ const LoginForm = ({ onSubmit, serverError, isLoading }) => {
                       type="email"
                       autoComplete="email"
                       placeholder="you@farm.app"
-                      className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FieldWrapper>
@@ -116,7 +116,7 @@ const LoginForm = ({ onSubmit, serverError, isLoading }) => {
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       placeholder="Enter your password"
-                      className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FieldWrapper>
