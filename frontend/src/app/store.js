@@ -3,12 +3,15 @@ import { farmTypeApi } from "@/features/lookups/farm-type/api/farmTypeApi";
 import { soilTypeApi } from "@/features/lookups/soil-type/api/soilTypeApi";
 import { authApi, authReducer } from "@/features/auth";
 import { ProfileApi } from "@/features/profile";
-import { membersReducer, memberApi } from "@/features/members";
+import {
+  memberApi,
+  selectedMemberReducer,
+} from "@/features/members";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    members: membersReducer,
+    selectedMember: selectedMemberReducer,
     [farmTypeApi.reducerPath]: farmTypeApi.reducer,
     [soilTypeApi.reducerPath]: soilTypeApi.reducer,
     [authApi.reducerPath]: authApi.reducer,

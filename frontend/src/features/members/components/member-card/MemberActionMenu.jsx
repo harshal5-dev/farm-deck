@@ -2,8 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   IconDots,
-  IconPlayerPause,
-  IconMailForward,
+  IconTrash,
   IconCopy,
   IconPencil,
 } from "@tabler/icons-react";
@@ -24,38 +23,39 @@ import { Button } from "@/components/ui/button";
 
 /**
  * The "⋯" actions for a member card: edit, copy email, and (for the workspace
- * owner) re-invite + suspend. Suspend replaces hard removal — the member
- * record stays, they just lose access until re-invited.
+ * owner) delete. Delete is permanent — the member record is removed.
  */
 export function MemberActionMenu({
   member,
   currentUserId,
   isOwner,
-  onSuspend,
-  onReinvite,
+  onDelete,
   onEdit,
 }) {
   const isSelf = member.id === currentUserId;
-  const isSuspended = member.status === "suspended";
-  const isInvited = member.status === "invited";
-  const canSuspend = isOwner && !isSelf && !isSuspended;
-  const canReinvite = isOwner && (isSuspended || isInvited);
+  const canDelete = isOwner && !isSelf;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const askSuspend = () => {
+  const askDelete = () => {
     setMenuOpen(false);
     setConfirmOpen(true);
   };
 
-  const handleReinvite = () => {
-    setMenuOpen(false);
-    navigator.clipboard?.writeText(window.location.origin);
-    onReinvite();
-    toast.success("Re-invite link sent", {
-      description: `Sent to ${member.emailId}`,
-    });
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete?.();
+      setConfirmOpen(false);
+    } catch {
+      toast.error("Could not delete member", {
+        description: "Please try again.",
+      });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const copyEmail = () => {
@@ -113,43 +113,23 @@ export function MemberActionMenu({
             </div>
           </button>
 
-          {canReinvite && (
-            <button
-              type="button"
-              onClick={handleReinvite}
-              className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-muted"
-            >
-              <span className="flex size-7 items-center justify-center rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                <IconMailForward className="size-3.5" strokeWidth={1.85} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">
-                  {isSuspended ? "Re-invite" : "Resend invite"}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {isSuspended ? "Reactivate & send link" : "Send a fresh invite link"}
-                </p>
-              </div>
-            </button>
-          )}
-
-          {canSuspend && (
+          {canDelete && (
             <>
               <div className="my-1 h-px bg-border/60" />
               <button
                 type="button"
-                onClick={askSuspend}
+                onClick={askDelete}
                 className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-red-500/8"
               >
                 <span className="flex size-7 items-center justify-center rounded-md bg-red-500/15 text-red-500">
-                  <IconPlayerPause className="size-3.5" strokeWidth={1.85} />
+                  <IconTrash className="size-3.5" strokeWidth={1.85} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-red-500/90">
-                    Suspend user
+                    Delete user
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    Revoke access, keep the record
+                    Permanently remove from workspace
                   </p>
                 </div>
               </button>
@@ -163,14 +143,13 @@ export function MemberActionMenu({
           <DialogHeader className="p-5 pb-3">
             <div className="flex items-start gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/15 text-red-500">
-                <IconPlayerPause className="size-5" strokeWidth={1.85} />
+                <IconTrash className="size-5" strokeWidth={1.85} />
               </span>
               <div className="min-w-0">
-                <DialogTitle>Suspend this member?</DialogTitle>
+                <DialogTitle>Delete this member?</DialogTitle>
                 <DialogDescription className="mt-1">
-                  {member.fullName} will lose access to the workspace
-                  immediately. Their record stays so you can re-invite them
-                  anytime.
+                  {member.fullName} will be permanently removed from the
+                  workspace. This action cannot be undone.
                 </DialogDescription>
               </div>
             </div>
@@ -181,20 +160,19 @@ export function MemberActionMenu({
               variant="ghost"
               size="sm"
               onClick={() => setConfirmOpen(false)}
+              disabled={deleting}
             >
               Cancel
             </Button>
             <Button
               type="button"
               size="sm"
-              onClick={() => {
-                setConfirmOpen(false);
-                onSuspend();
-              }}
+              onClick={handleDelete}
+              disabled={deleting}
               className="gap-1.5 bg-red-500 text-white shadow-sm hover:bg-red-500/90"
             >
-              <IconPlayerPause className="size-3.5" strokeWidth={1.85} />
-              Suspend user
+              <IconTrash className="size-3.5" strokeWidth={1.85} />
+              {deleting ? "Deleting…" : "Delete user"}
             </Button>
           </DialogFooter>
         </DialogContent>

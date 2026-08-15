@@ -59,7 +59,7 @@ export default function App() {
             <Route path="harvest" element={<Harvest />} />
             <Route path="members" element={<MembersList />} />
             <Route path="members/new" element={<AddMember />} />
-            <Route path="members/:memberId/edit" element={<EditMember />} />
+            <Route path="members/edit" element={<EditMember />} />
             <Route path="profile" element={<Profile />} />
           </Route>
         </Route>

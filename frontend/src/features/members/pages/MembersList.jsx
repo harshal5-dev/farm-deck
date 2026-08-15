@@ -1,27 +1,20 @@
 import { useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   IconUserPlus,
   IconSearch,
   IconX,
   IconClock,
-  IconCopy,
   IconUsers,
   IconFilter,
 } from "@tabler/icons-react";
 import { useAuth } from "@/features/auth";
-import { useMockLoading } from "@/hooks/use-mock-loading";
 import { cn, checkIsOwner } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Reveal } from "@/components/effects";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import {
   Pagination,
   PaginationContent,
@@ -32,10 +25,12 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { ROLE_ORDER } from "@/constants/roles";
-import { suspendMember, reinviteMember, selectMembers } from "../membersSlice";
+import { useListMembersQuery, useDeleteMemberMutation } from "../memberApi";
+import { setSelectedMember } from "../selectedMemberSlice";
 import { buildPageList } from "../lib/format";
 import { RoleFilterChip } from "../components/RoleFilterChip";
 import { EmptyMembers } from "../components/EmptyMembers";
+import MemberDetailsDialog from "../components/MemberDetailsDialog";
 import { MemberCard } from "../components/member-card/MemberCard";
 import { MemberCardSkeleton } from "../components/member-card/MemberCardSkeleton";
 
@@ -45,38 +40,37 @@ const STATUS_OPTIONS = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
   { id: "invited", label: "Invited" },
-  { id: "suspended", label: "Suspended" },
 ];
 
-export default function Members() {
+const Members = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const members = useSelector(selectMembers);
+  const { data, isLoading } = useListMembersQuery();
+  const { total = 0, activeCount = 0, invitedCount = 0, members = [] } = data ?? {};
+  const [deleteMember] = useDeleteMemberMutation();
   const currentUserId = user?.id;
   const isOwner = checkIsOwner(user?.role);
 
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("active");
   const [search, setSearch] = useState("");
+  const [viewingMember, setViewingMember] = useState(null);
   const [page, setPage] = useState(1);
-
-  const loading = useMockLoading(700, []);
 
   const counts = useMemo(() => {
     const c = {
-      all: members.length,
+      all: total,
       ...Object.fromEntries(ROLE_ORDER.map((r) => [r, 0])),
-      active: 0,
-      invited: 0,
-      suspended: 0,
+      active: activeCount,
+      invited: invitedCount,
     };
     for (const m of members) {
       c[m.role] = (c[m.role] || 0) + 1;
       c[m.status] = (c[m.status] || 0) + 1;
     }
     return c;
-  }, [members]);
+  }, [members, total, activeCount, invitedCount]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -92,7 +86,6 @@ export default function Members() {
   }, [members, roleFilter, statusFilter, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  // Clamp the active page to a valid range — derived, so no setState effect.
   const activePage = Math.min(page, totalPages);
 
   const pagedMembers = useMemo(() => {
@@ -105,8 +98,6 @@ export default function Members() {
     filtered.length === 0 ? 0 : (activePage - 1) * PAGE_SIZE + 1;
   const endIndex = Math.min(activePage * PAGE_SIZE, filtered.length);
 
-  // Each filter change snaps the page back to 1 so users don't strand on an
-  // empty page after narrowing the result set.
   const onRoleFilterChange = (next) => {
     setRoleFilter(next);
     setPage(1);
@@ -121,17 +112,25 @@ export default function Members() {
   };
 
   const handleAdd = () => navigate("/app/members/new");
-  const handleEdit = (m) => navigate(`/app/members/${m.id}/edit`);
 
-  const handleSuspend = (member) => {
-    dispatch(suspendMember(member.id));
-    toast.success("Member suspended", {
-      description: `${member.fullName} no longer has access.`,
-    });
+  const handleView = (m) => setViewingMember(m);
+
+  const handleEdit = (m) => {
+    dispatch(setSelectedMember(m));
+    navigate("/app/members/edit");
   };
 
-  const handleReinvite = (member) => {
-    dispatch(reinviteMember(member.id));
+  const handleDelete = async (member) => {
+    try {
+      await deleteMember(member.id).unwrap();
+      toast.success("Member deleted", {
+        description: `${member.fullName} has been removed.`,
+      });
+    } catch (err) {
+      toast.error("Could not delete member", {
+        description: err?.data?.error?.message || "Please try again.",
+      });
+    }
   };
 
   return (
@@ -139,7 +138,7 @@ export default function Members() {
       {/* ============ Compact header (title + counts + actions + filters) ==== */}
       <Reveal duration={400}>
         <div className="glass-card texture-paper highlight-edge relative shrink-0 overflow-hidden rounded-2xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-leaf/10 via-sage-deep/5 to-sky-warm/10" />
+          <div className="absolute inset-0 bg-linear-to-br from-leaf/10 via-sage-deep/5 to-sky-warm/10" />
           <div className="absolute -top-16 -right-10 size-48 rounded-full bg-wheat/15 blur-3xl" />
           <div className="absolute -bottom-20 -left-10 size-48 rounded-full bg-sky-warm/12 blur-3xl" />
           <div className="pattern-contour absolute inset-0 opacity-40 mix-blend-soft-light" />
@@ -149,8 +148,8 @@ export default function Members() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="relative shrink-0">
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-leaf/30 to-sky-warm/30 opacity-60 blur-md" />
-                  <div className="relative flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-leaf to-sage-deep text-white shadow-md ring-1 ring-white/10">
+                  <div className="absolute -inset-1 rounded-2xl bg-linear-to-br from-leaf/30 to-sky-warm/30 opacity-60 blur-md" />
+                  <div className="relative flex size-10 items-center justify-center rounded-2xl bg-linear-to-br from-leaf to-sage-deep text-white shadow-md ring-1 ring-white/10">
                     <IconUsers className="size-5" strokeWidth={1.75} />
                   </div>
                 </div>
@@ -162,7 +161,7 @@ export default function Members() {
                     <span className="inline-flex items-center gap-1">
                       <span className="size-1.5 rounded-full bg-emerald-500" />
                       <span className="font-semibold text-foreground tabular-nums">
-                        {counts.active}
+                        {activeCount}
                       </span>{" "}
                       active
                     </span>
@@ -170,26 +169,14 @@ export default function Members() {
                     <span className="inline-flex items-center gap-1">
                       <IconClock className="size-3 text-amber-500" strokeWidth={2} />
                       <span className="font-semibold text-foreground tabular-nums">
-                        {counts.invited}
+                        {invitedCount}
                       </span>{" "}
-                      pending
+                      invited
                     </span>
-                    {counts.suspended > 0 && (
-                      <>
-                        <span className="text-muted-foreground/40">·</span>
-                        <span className="inline-flex items-center gap-1">
-                          <span className="size-1.5 rounded-full bg-zinc-400" />
-                          <span className="font-semibold text-foreground tabular-nums">
-                            {counts.suspended}
-                          </span>{" "}
-                          suspended
-                        </span>
-                      </>
-                    )}
                     <span className="text-muted-foreground/40">·</span>
                     <span className="inline-flex items-center gap-1">
                       <span className="font-semibold text-foreground tabular-nums">
-                        {counts.all}
+                        {total}
                       </span>{" "}
                       total
                     </span>
@@ -198,29 +185,6 @@ export default function Members() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard?.writeText(
-                            user?.tenantDetails?.subdomain
-                              ? `${user.tenantDetails.subdomain}.farmdeck.app`
-                              : window.location.origin
-                          );
-                          toast.success("Workspace link copied");
-                        }}
-                        className="gap-1.5"
-                      />
-                    }
-                  >
-                    <IconCopy className="size-4" strokeWidth={1.85} />
-                    <span className="hidden sm:inline">Copy link</span>
-                  </TooltipTrigger>
-                  <TooltipContent>Copy workspace invite link</TooltipContent>
-                </Tooltip>
                 <Button onClick={handleAdd} size="sm" className="gap-1.5 shadow-md shadow-leaf/25">
                   <IconUserPlus className="size-4" strokeWidth={1.85} />
                   Add member
@@ -317,7 +281,7 @@ export default function Members() {
       {/* ============ Grid region — fills the rest, no page scroll ========= */}
       <div className="flex flex-col gap-3 lg:min-h-0 lg:flex-1">
         <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
-          {loading ? (
+          {isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <MemberCardSkeleton key={i} />
@@ -339,8 +303,8 @@ export default function Members() {
                 index={i}
                 currentUserId={currentUserId}
                 isOwner={isOwner}
-                onSuspend={() => handleSuspend(m)}
-                onReinvite={() => handleReinvite(m)}
+                onView={() => handleView(m)}
+                onDelete={() => handleDelete(m)}
                 onEdit={() => handleEdit(m)}
               />
               ))}
@@ -348,7 +312,7 @@ export default function Members() {
           )}
         </div>
 
-        {!loading && totalPages > 1 && (
+        {!isLoading && totalPages > 1 && (
           <div className="flex shrink-0 flex-col items-center gap-2 pt-1">
             <Pagination className="justify-center">
               <PaginationContent>
@@ -406,6 +370,14 @@ export default function Members() {
           </div>
         )}
       </div>
+
+      <MemberDetailsDialog
+        member={viewingMember}
+        open={Boolean(viewingMember)}
+        onOpenChange={(open) => !open && setViewingMember(null)}
+      />
     </div>
   );
 }
+
+export default Members;

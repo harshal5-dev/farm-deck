@@ -1,0 +1,71 @@
+-- ============================================================================
+-- 000002_seed_users.up.sql
+-- Seeds 3 tenants + 26 users (T1: 5, T2: 12, T3: 9) with a mix of Indian
+-- Hindu, US, and European names and a mix of active and invited statuses.
+-- Credentials are inserted only for active users.
+-- UUIDs are generated with gen_random_uuid() (pgcrypto) so the script is
+-- idempotent and can be re-run safely.
+-- profile_picture is randomly picked per row from the FARM_AVATARS ids used
+-- in the frontend via an inline ARRAY[...] + random() expression (no helper
+-- function is created in the schema).
+-- ============================================================================
+
+-- Capture the freshly generated tenant ids so we can reference them below.
+-- Subdomains mirror the output of pkg/slug.GenerateTenantDomain:
+--   lower(name), non [a-z0-9-] -> '-', collapse multi-hyphens, trim, append '.farmdeck.app'.
+WITH new_tenants AS (
+    INSERT INTO tenants (name, subdomain, description)
+    VALUES
+        ('Sunrise Farms',    'sunrise-farms.farmdeck.app',    'Family-run organic farm'),
+        ('Green Valley Co.', 'green-valley-co.farmdeck.app',  'Hydroponics and greenhouse operations'),
+        ('Harvest Hub',      'harvest-hub.farmdeck.app',      'Community-supported agriculture')
+    RETURNING id, subdomain
+),
+sunrise AS (SELECT id FROM new_tenants WHERE subdomain = 'sunrise-farms.farmdeck.app'   LIMIT 1),
+green   AS (SELECT id FROM new_tenants WHERE subdomain = 'green-valley-co.farmdeck.app' LIMIT 1),
+harvest AS (SELECT id FROM new_tenants WHERE subdomain = 'harvest-hub.farmdeck.app'     LIMIT 1),
+new_users AS (
+    INSERT INTO users (tenant_id, email_id, full_name, profile_picture, role, status, last_active_at, created_at, updated_at)
+    VALUES
+    -- Tenant 1: Sunrise Farms (5) -- 1 owner, 2 managers, 1 grower, 1 viewer
+    ((SELECT id FROM sunrise), 'aarav.patel@sunrise.farm',       'Aarav Patel',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'owner',   'active',  now() - interval '1 hour',   now() - interval '180 days', now() - interval '1 hour'),
+    ((SELECT id FROM sunrise), 'priya.mehta@sunrise.farm',       'Priya Mehta',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'active',  now() - interval '3 hours',  now() - interval '120 days', now() - interval '3 hours'),
+    ((SELECT id FROM sunrise), 'olivia.carter@sunrise.farm',     'Olivia Carter',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'invited', NULL,                          now() - interval '2 days',   now() - interval '2 days'),
+    ((SELECT id FROM sunrise), 'neha.gupta@sunrise.farm',        'Neha Gupta',        (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '30 min',   now() - interval '100 days', now() - interval '30 min'),
+    ((SELECT id FROM sunrise), 'greta.holzer@sunrise.farm',      'Greta Holzer',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'invited', NULL,                          now() - interval '4 days',   now() - interval '4 days'),
+
+    -- Tenant 2: Green Valley Co. (12) -- 1 owner, 2 managers, 6 growers, 3 viewers
+    ((SELECT id FROM green),   'rakesh.singh@greenvalley.co',    'Rakesh Singh',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'owner',   'active',  now() - interval '2 hours',  now() - interval '200 days', now() - interval '2 hours'),
+    ((SELECT id FROM green),   'emma.johansson@greenvalley.co',  'Emma Johansson',    (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'active',  now() - interval '4 hours',  now() - interval '150 days', now() - interval '4 hours'),
+    ((SELECT id FROM green),   'manish.iyer@greenvalley.co',     'Manish Iyer',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'active',  now() - interval '1 day',    now() - interval '130 days', now() - interval '1 day'),
+    ((SELECT id FROM green),   'henrik.hansen@greenvalley.co',   'Henrik Hansen',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '3 hours',  now() - interval '95 days',  now() - interval '3 hours'),
+    ((SELECT id FROM green),   'pallavi.ghosh@greenvalley.co',   'Pallavi Ghosh',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '5 days',   now() - interval '90 days',  now() - interval '5 days'),
+    ((SELECT id FROM green),   'michael.brennan@greenvalley.co', 'Michael Brennan',   (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '6 hours',  now() - interval '85 days',  now() - interval '6 hours'),
+    ((SELECT id FROM green),   'kavya.rao@greenvalley.co',       'Kavya Rao',         (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'invited', NULL,                          now() - interval '1 day',    now() - interval '1 day'),
+    ((SELECT id FROM green),   'ines.dubois@greenvalley.co',     'Ines Dubois',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '2 days',   now() - interval '70 days',  now() - interval '2 days'),
+    ((SELECT id FROM green),   'felix.schmidt@greenvalley.co',   'Felix Schmidt',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'invited', NULL,                          now() - interval '1 day',    now() - interval '1 day'),
+    ((SELECT id FROM green),   'robert.williams@greenvalley.co', 'Robert Williams',   (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'active',  now() - interval '20 days',  now() - interval '140 days', now() - interval '20 days'),
+    ((SELECT id FROM green),   'sigrid.holzer@greenvalley.co',   'Sigrid Holzer',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'active',  now() - interval '30 days',  now() - interval '120 days', now() - interval '30 days'),
+    ((SELECT id FROM green),   'geeta.pillai@greenvalley.co',    'Geeta Pillai',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'invited', NULL,                          now() - interval '5 days',   now() - interval '5 days'),
+
+    -- Tenant 3: Harvest Hub (9) -- 1 owner, 2 managers, 4 growers, 2 viewers
+    ((SELECT id FROM harvest), 'gaurav.bajaj@harvesthub.org',    'Gaurav Bajaj',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'owner',   'active',  now() - interval '1 hour',   now() - interval '220 days', now() - interval '1 hour'),
+    ((SELECT id FROM harvest), 'isabella.garcia@harvesthub.org', 'Isabella García',   (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'invited', NULL,                          now() - interval '1 day',    now() - interval '1 day'),
+    ((SELECT id FROM harvest), 'tanvi.kothari@harvesthub.org',   'Tanvi Kothari',     (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'manager', 'active',  now() - interval '5 hours',  now() - interval '160 days', now() - interval '5 hours'),
+    ((SELECT id FROM harvest), 'pranav.rawat@harvesthub.org',    'Pranav Rawat',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '45 min',   now() - interval '110 days', now() - interval '45 min'),
+    ((SELECT id FROM harvest), 'naina.khanna@harvesthub.org',    'Naina Khanna',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '1 day',    now() - interval '95 days',  now() - interval '1 day'),
+    ((SELECT id FROM harvest), 'andrew.mitchell@harvesthub.org', 'Andrew Mitchell',   (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '7 hours',  now() - interval '90 days',  now() - interval '7 hours'),
+    ((SELECT id FROM harvest), 'elena.rossi@harvesthub.org',     'Elena Rossi',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'grower',  'active',  now() - interval '10 hours', now() - interval '80 days',  now() - interval '10 hours'),
+    ((SELECT id FROM harvest), 'varun.ahuja@harvesthub.org',     'Varun Ahuja',       (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'active',  now() - interval '25 days',  now() - interval '150 days', now() - interval '25 days'),
+    ((SELECT id FROM harvest), 'joseph.clark@harvesthub.org',    'Joseph Clark',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'invited', NULL,                          now() - interval '7 days',   now() - interval '7 days')
+    RETURNING id, email_id, status
+)
+-- Only 'active' users get a credentials row. Invited users haven't accepted
+-- their invite yet, so they have no password set.
+INSERT INTO credentials (user_id, email_id, password_hash)
+SELECT
+    id,
+    email_id,
+    '$2y$10$2Avu25pJd/IUvYPLj8fJquGDt6.ChJAyXA0uIeb6lH/McB2O8Iati'
+FROM new_users
+WHERE status = 'active';

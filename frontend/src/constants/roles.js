@@ -117,12 +117,6 @@ export const STATUS_META = {
     text: "text-amber-700 dark:text-amber-400",
     chip: "border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-400",
   },
-  suspended: {
-    label: "Suspended",
-    dot: "bg-zinc-400",
-    text: "text-muted-foreground",
-    chip: "border-border/60 bg-muted text-muted-foreground",
-  },
 };
 
 export const USER_ROLES = {

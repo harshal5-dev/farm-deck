@@ -10,7 +10,7 @@ import { Reveal } from "@/components/effects";
 import UserForm from "../components/user-form/UserForm";
 import { useCreateMemberMutation } from "../memberApi";
 
-export default function AddMember() {
+const AddMember = () => {
   const navigate = useNavigate();
 
   const [createMember, { isLoading }] = useCreateMemberMutation();
@@ -115,3 +115,5 @@ export default function AddMember() {
     </div>
   );
 }
+
+export default AddMember;

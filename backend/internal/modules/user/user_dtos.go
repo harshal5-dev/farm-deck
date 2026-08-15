@@ -45,6 +45,7 @@ type CreateMemberResponse struct {
 }
 
 type MemberResponse struct {
+	ID             uuid.UUID  `json:"id"`
 	FullName       string     `json:"fullName"`
 	EmailID        string     `json:"emailId"`
 	Role           string     `json:"role"`

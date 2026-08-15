@@ -19,7 +19,7 @@ export function RoleFilterChip({ roleId, count, active, onClick }) {
       {active && (
         <span
           className={cn(
-            "absolute inset-0 -z-10 rounded-full bg-gradient-to-br opacity-25 blur-md",
+            "absolute inset-0 -z-10 rounded-full bg-linear-to-br opacity-25 blur-md",
             r.gradient
           )}
         />

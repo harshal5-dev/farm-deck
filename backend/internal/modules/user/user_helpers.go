@@ -52,6 +52,7 @@ func toCreateMemberTxParams(tenantID, inviterID uuid.UUID, tokenHash string, exp
 
 func toMemberResponse(user db.User) MemberResponse {
 	return MemberResponse{
+		ID:             user.ID,
 		FullName:       user.FullName,
 		EmailID:        user.EmailID,
 		Role:           user.Role,

@@ -12,11 +12,49 @@ export const memberApi = createApi({
         method: "POST",
         body: profile,
       }),
+      invalidatesTags: ["Profile"],
+    }),
+
+    listMembers: builder.query({
+      query: () => ({
+        url: "/users/members",
+        method: "GET",
+      }),
       transformResponse: (response) => response?.data,
+      providesTags: ["Profile"],
+    }),
+
+    updateMember: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        url: `/users/members/${id}`,
+        method: "PATCH",
+        body: patch,
+      }),
+      invalidatesTags: ["Profile"],
+    }),
+
+    reinviteMember: builder.mutation({
+      query: (id) => ({
+        url: `/users/members/${id}/reinvite`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Profile"],
+    }),
+
+    deleteMember: builder.mutation({
+      query: (id) => ({
+        url: `/users/members/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Profile"],
     }),
   }),
 });
 
 export const {
   useCreateMemberMutation,
+  useListMembersQuery,
+  useUpdateMemberMutation,
+  useReinviteMemberMutation,
+  useDeleteMemberMutation,
 } = memberApi;

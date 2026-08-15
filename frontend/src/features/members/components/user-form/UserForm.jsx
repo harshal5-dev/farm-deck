@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import FieldWrapper from "@/components/ui/field-wrapper";
+import LockedField from "@/components/ui/locked-field";
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import {
   Tooltip,
@@ -50,7 +51,7 @@ export default function UserForm({
       fullName: defaultValues?.fullName || "",
       emailId: defaultValues?.emailId || "",
       role: defaultValues?.role || "grower",
-      avatarId: defaultValues?.avatarId || DEFAULT_AVATAR_ID,
+      profilePicture: defaultValues?.profilePicture || DEFAULT_AVATAR_ID,
     },
   });
 
@@ -58,7 +59,7 @@ export default function UserForm({
   const fullName = useWatch({ control: form.control, name: "fullName" });
   const email = useWatch({ control: form.control, name: "emailId" });
   const role = useWatch({ control: form.control, name: "role" });
-  const avatarId = useWatch({ control: form.control, name: "avatarId" });
+  const profilePicture = useWatch({ control: form.control, name: "profilePicture" });
   const { isDirty } = form.formState;
 
   const submit = async (values) => {
@@ -66,7 +67,7 @@ export default function UserForm({
       fullName: values.fullName.trim(),
       emailId: values.emailId.trim().toLowerCase(),
       role: values.role,
-      avatarId: values.avatarId,
+      profilePicture: values.profilePicture,
     });
   };
 
@@ -84,7 +85,7 @@ export default function UserForm({
               fullName={fullName}
               email={email}
               role={role}
-              avatarId={avatarId}
+              avatarId={profilePicture}
             />
           </div>
 
@@ -95,7 +96,7 @@ export default function UserForm({
               {/* Avatar — bound via FormField but rendered with its own layout */}
               <FormField
                 control={form.control}
-                name="avatarId"
+                name="profilePicture"
                 render={({ field }) => (
                   <div>
                     <span className={cn("mb-1 flex items-center gap-1.5", fieldLabel)}>
@@ -139,35 +140,44 @@ export default function UserForm({
               />
             </div>
 
-            {/* Email */}
-            <FormField
-              control={form.control}
-              name="emailId"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address",
-                },
-              }}
-              render={({ field, fieldState }) => (
-                <FormItem className="gap-1.5">
-                  <FormLabel className={fieldLabel}>Email address</FormLabel>
-                  <FormControl>
-                    <FieldWrapper icon={IconMail} hasError={fieldState.invalid}>
-                      <Input
-                        type="email"
-                        placeholder="grower@yourfarm.com"
-                        autoComplete="email"
-                        className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                        {...field}
-                      />
-                    </FieldWrapper>
-                  </FormControl>
-                  <FormMessage className="text-[11px]" />
-                </FormItem>
-              )}
-            />
+            {/* Email — editable in create, locked in edit */}
+            {isEdit ? (
+              <LockedField
+                icon={IconMail}
+                label="Email address"
+                value={defaultValues?.emailId || email}
+                hint="Email is managed by the workspace and can't be changed here"
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="emailId"
+                rules={{
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Enter a valid email address",
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <FormItem className="gap-1.5">
+                    <FormLabel className={fieldLabel}>Email address</FormLabel>
+                    <FormControl>
+                      <FieldWrapper icon={IconMail} hasError={fieldState.invalid}>
+                        <Input
+                          type="email"
+                          placeholder="grower@yourfarm.com"
+                          autoComplete="email"
+                          className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                          {...field}
+                        />
+                      </FieldWrapper>
+                    </FormControl>
+                    <FormMessage className="text-[11px]" />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Role — 4 cards inline + permission preview */}
             <FormField
