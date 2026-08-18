@@ -40,6 +40,14 @@ func HandleError(ctx *gin.Context, err error) {
 		errors.Is(err, domain.ErrRefreshTokenExpired):
 		response.Unauthorized(ctx, "session expired, please log in again")
 
+	case errors.Is(err, domain.ErrInvitationInvalid),
+		errors.Is(err, domain.ErrInvitationExpired),
+		errors.Is(err, domain.ErrInvitationRevoked):
+		response.BadRequest(ctx, messageOf(err))
+
+	case errors.Is(err, domain.ErrInvitationAccepted):
+		response.Conflict(ctx, messageOf(err))
+
 	default:
 		log.Printf("internal error: %s %s: %v", ctx.Request.Method, ctx.Request.URL.Path, err)
 		response.InternalError(ctx, "something went wrong, please try again later")
@@ -54,6 +62,10 @@ func messageOf(err error) string {
 		domain.ErrTenantExists,
 		domain.ErrUserNotFound,
 		domain.ErrTenantNotFound,
+		domain.ErrInvitationInvalid,
+		domain.ErrInvitationExpired,
+		domain.ErrInvitationRevoked,
+		domain.ErrInvitationAccepted,
 	} {
 		if errors.Is(err, sentinel) {
 			return sentinel.Error()

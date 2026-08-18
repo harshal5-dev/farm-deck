@@ -21,6 +21,84 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/accept-invitation": {
+            "post": {
+                "description": "Accepts the invitation token, creates the invitee's credential with the chosen password, activates their user account, and logs them in (auth cookies are set).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Accept an invitation and set the account password",
+                "parameters": [
+                    {
+                        "description": "Accept invitation payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AcceptInvitationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "invitation accepted, user logged in",
+                        "schema": {
+                            "$ref": "#/definitions/LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "validation error, or token invalid/expired/revoked",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "409": {
+                        "description": "invitation already accepted",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/is-authenticated": {
+            "get": {
+                "description": "Returns true if the user is authenticated, false otherwise.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Check if user is authenticated",
+                "responses": {
+                    "200": {
+                        "description": "true if authenticated, false otherwise",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -169,6 +247,47 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "user or tenant already exists",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-invitation": {
+            "get": {
+                "description": "Checks the raw invitation token from the email link and returns the invitee and tenant details so the accept-invite page can render. The token must be valid, unexpired, and not yet accepted or revoked.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify an invitation token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Raw invitation token from the email link",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "invitation details",
+                        "schema": {
+                            "$ref": "#/definitions/VerifyInvitationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "token missing, invalid, expired, or revoked",
                         "schema": {
                             "$ref": "#/definitions/APIError"
                         }
@@ -625,6 +744,24 @@ const docTemplate = `{
                 }
             }
         },
+        "AcceptInvitationRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "token"
+            ],
+            "properties": {
+                "password": {
+                    "description": "same rules as register",
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "CreateMemberRequest": {
             "type": "object",
             "required": [
@@ -742,6 +879,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "fullName": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "lastActiveAt": {
@@ -897,6 +1037,26 @@ const docTemplate = `{
                 },
                 "tenantDetails": {
                     "$ref": "#/definitions/TenantDetails"
+                }
+            }
+        },
+        "VerifyInvitationResponse": {
+            "type": "object",
+            "properties": {
+                "emailId": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "tenantName": {
+                    "type": "string"
                 }
             }
         }

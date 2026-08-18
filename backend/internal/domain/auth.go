@@ -20,3 +20,8 @@ type RotateRefreshTokenTxParams struct {
 	Ip           *string
 	NewExpiresAt time.Time
 }
+
+type AcceptInvitationTxParams struct {
+	TokenHash    string
+	PasswordHash string
+}

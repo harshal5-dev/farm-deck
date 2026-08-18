@@ -260,3 +260,136 @@ func TestAuthHandler_Logout_ServiceErrorMapped(t *testing.T) {
 		t.Fatalf("status: got %d want 404", w.Code)
 	}
 }
+
+func newQueryCtx(target string) (*gin.Context, *httptest.ResponseRecorder) {
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(http.MethodGet, target, nil)
+	return ctx, w
+}
+
+func TestAuthHandler_VerifyInvitation_MissingTokenMappedTo400(t *testing.T) {
+	svc := &fakeAuthService{verifyInvitation: func(context.Context, string) (VerifyInvitationResponse, error) {
+		t.Fatal("service must not be called without a token")
+		return VerifyInvitationResponse{}, nil
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	ctx, w := newQueryCtx("/api/v1/auth/verify-invitation")
+	h.VerifyInvitation(ctx)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status: got %d want 400 (body=%s)", w.Code, w.Body.String())
+	}
+}
+
+func TestAuthHandler_VerifyInvitation_Success(t *testing.T) {
+	var receivedRaw string
+	svc := &fakeAuthService{verifyInvitation: func(_ context.Context, raw string) (VerifyInvitationResponse, error) {
+		receivedRaw = raw
+		return VerifyInvitationResponse{
+			FullName: "Bob", EmailID: "bob@farmdeck.app",
+			Role: domain.UserRoleGrower, TenantName: "Green Acres",
+		}, nil
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	ctx, w := newQueryCtx("/api/v1/auth/verify-invitation?token=raw-invite-token")
+	h.VerifyInvitation(ctx)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
+	}
+	if receivedRaw != "raw-invite-token" {
+		t.Errorf("service received token %q, want the raw token from the query", receivedRaw)
+	}
+	var resp struct {
+		Success bool                     `json:"success"`
+		Data    VerifyInvitationResponse `json:"data"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if resp.Data.FullName != "Bob" || resp.Data.TenantName != "Green Acres" {
+		t.Errorf("data = %+v", resp.Data)
+	}
+}
+
+func TestAuthHandler_VerifyInvitation_ExpiredMappedTo400(t *testing.T) {
+	svc := &fakeAuthService{verifyInvitation: func(context.Context, string) (VerifyInvitationResponse, error) {
+		return VerifyInvitationResponse{}, domain.ErrInvitationExpired
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	ctx, w := newQueryCtx("/api/v1/auth/verify-invitation?token=raw")
+	h.VerifyInvitation(ctx)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status: got %d want 400 (body=%s)", w.Code, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), "invitation has expired") {
+		t.Errorf("expected expiry message, got %s", w.Body.String())
+	}
+}
+
+func TestAuthHandler_AcceptInvitation_SuccessSetsCookies(t *testing.T) {
+	var receivedReq AcceptInvitationRequest
+	svc := &fakeAuthService{acceptInvitation: func(_ context.Context, r AcceptInvitationRequest, _ SessionMeta) (TokenPair, error) {
+		receivedReq = r
+		return TokenPair{AccessToken: "access-val", RefreshToken: "refresh-val"}, nil
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	ctx, w := newJSONCtx(`{"token":"raw-invite-token","password":"chosenpassword1"}`)
+	h.AcceptInvitation(ctx)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
+	}
+	if receivedReq.Token != "raw-invite-token" || receivedReq.Password != "chosenpassword1" {
+		t.Errorf("service received %+v", receivedReq)
+	}
+	if svc.acceptInviteCalls != 1 {
+		t.Errorf("expected AcceptInvitation called once, got %d", svc.acceptInviteCalls)
+	}
+	if cookieValue(t, w, "access_token") != "access-val" {
+		t.Error("expected access_token cookie to be set")
+	}
+	if cookieValue(t, w, "refresh_token") != "refresh-val" {
+		t.Error("expected refresh_token cookie to be set")
+	}
+}
+
+func TestAuthHandler_AcceptInvitation_InvalidBodyMappedTo400(t *testing.T) {
+	svc := &fakeAuthService{acceptInvitation: func(context.Context, AcceptInvitationRequest, SessionMeta) (TokenPair, error) {
+		t.Fatal("service must not be called on a validation failure")
+		return TokenPair{}, nil
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	// password too short: min=8
+	ctx, w := newJSONCtx(`{"token":"raw-invite-token","password":"short"}`)
+	h.AcceptInvitation(ctx)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status: got %d want 400", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), "VALIDATION_ERROR") {
+		t.Errorf("expected VALIDATION_ERROR, got %s", w.Body.String())
+	}
+}
+
+func TestAuthHandler_AcceptInvitation_AlreadyAcceptedMappedTo409(t *testing.T) {
+	svc := &fakeAuthService{acceptInvitation: func(context.Context, AcceptInvitationRequest, SessionMeta) (TokenPair, error) {
+		return TokenPair{}, domain.ErrInvitationAccepted
+	}}
+	h := NewAuthHandler(svc, handlerCfg())
+
+	ctx, w := newJSONCtx(`{"token":"raw-invite-token","password":"chosenpassword1"}`)
+	h.AcceptInvitation(ctx)
+
+	if w.Code != http.StatusConflict {
+		t.Fatalf("status: got %d want 409 (body=%s)", w.Code, w.Body.String())
+	}
+}

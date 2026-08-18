@@ -31,16 +31,6 @@ const navGroups = [
       },
     ],
   },
-  // {
-  //   label: "Farming",
-  //   items: [
-  //     {
-  //       label: "Farms",
-  //       href: "/app/farms",
-  //       icon: IconTractor,
-  //     },
-  //   ],
-  // },
   {
     label: "Team",
     items: [
@@ -48,7 +38,6 @@ const navGroups = [
         label: "Members",
         href: "/app/members",
         icon: IconUsers,
-        badge: 2, // pending invites (mocked)
       },
     ],
   },

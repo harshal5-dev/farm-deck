@@ -68,7 +68,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 	emailService := email.NewEmailService(cfg, container.Mailer)
 
 	container.Services = Services{
-		Auth:   auth.NewAuthService(container.Repositories.Credential, container.Repositories.RefreshToken, container.Repositories.User, cfg, emailService),
+		Auth:   auth.NewAuthService(container.Repositories.Credential, container.Repositories.RefreshToken, container.Repositories.Invitation, container.Repositories.User, cfg, emailService),
 		Email:  emailService,
 		User:   user.NewUserService(container.Repositories.User, emailService, cfg),
 		Tenant: tenant.NewTenantService(container.Repositories.Tenant),

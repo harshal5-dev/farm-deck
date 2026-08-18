@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
-	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
 )
@@ -61,6 +61,32 @@ func (f *fakeEmailService) SendInvitationEmail(to, name, tenantName, acceptURL s
 	return f.sendInvitation(to, name, tenantName, acceptURL)
 }
 
+type fakeInvitationRepo struct {
+	verifyInvitation func(context.Context, string) (db.GetInvitationDetailsByTokenHashRow, error)
+	acceptInvitation func(context.Context, domain.AcceptInvitationTxParams) (db.AcceptInvitationTxResult, error)
+}
+
+func (f *fakeInvitationRepo) VerifyInvitation(ctx context.Context, tokenHash string) (db.GetInvitationDetailsByTokenHashRow, error) {
+	return f.verifyInvitation(ctx, tokenHash)
+}
+
+func (f *fakeInvitationRepo) AcceptInvitation(ctx context.Context, p domain.AcceptInvitationTxParams) (db.AcceptInvitationTxResult, error) {
+	return f.acceptInvitation(ctx, p)
+}
+
+// noopInvitationRepo returns a fakeInvitationRepo whose methods always succeed
+// with zero values; tests override the func they exercise.
+func noopInvitationRepo() *fakeInvitationRepo {
+	return &fakeInvitationRepo{
+		verifyInvitation: func(context.Context, string) (db.GetInvitationDetailsByTokenHashRow, error) {
+			return db.GetInvitationDetailsByTokenHashRow{}, nil
+		},
+		acceptInvitation: func(context.Context, domain.AcceptInvitationTxParams) (db.AcceptInvitationTxResult, error) {
+			return db.AcceptInvitationTxResult{}, nil
+		},
+	}
+}
+
 // fakeUserRepo stubs repository.UserRepo for auth-service tests. It embeds the
 // interface so every method is satisfied by promotion (an unused promoted method
 // panics on a nil call — the desired "this was not expected" signal); only the
@@ -86,14 +112,19 @@ func noopUserRepo() *fakeUserRepo {
 // ---- handler-level fake (mocks AuthService) ----
 
 type fakeAuthService struct {
-	registerUser   func(context.Context, RegisterUserRequest) error
-	loginUser      func(context.Context, LoginRequest, SessionMeta) (TokenPair, error)
-	refreshTokens  func(context.Context, string, SessionMeta) (TokenPair, error)
-	logout         func(context.Context, string) error
-	registerCalls  int
-	loginCalls     int
-	refreshCalls   int
-	logoutCalls    int
+	registerUser      func(context.Context, RegisterUserRequest) error
+	loginUser         func(context.Context, LoginRequest, SessionMeta) (TokenPair, error)
+	refreshTokens     func(context.Context, string, SessionMeta) (TokenPair, error)
+	isAuthenticated   func(context.Context, string) (bool, error)
+	verifyInvitation  func(context.Context, string) (VerifyInvitationResponse, error)
+	acceptInvitation  func(context.Context, AcceptInvitationRequest, SessionMeta) (TokenPair, error)
+	logout            func(context.Context, string) error
+	registerCalls     int
+	loginCalls        int
+	refreshCalls      int
+	logoutCalls       int
+	verifyInviteCalls int
+	acceptInviteCalls int
 }
 
 func (f *fakeAuthService) RegisterUser(ctx context.Context, r RegisterUserRequest) error {
@@ -107,6 +138,17 @@ func (f *fakeAuthService) LoginUser(ctx context.Context, r LoginRequest, m Sessi
 func (f *fakeAuthService) RefreshTokens(ctx context.Context, raw string, m SessionMeta) (TokenPair, error) {
 	f.refreshCalls++
 	return f.refreshTokens(ctx, raw, m)
+}
+func (f *fakeAuthService) IsAuthenticated(ctx context.Context, token string) (bool, error) {
+	return f.isAuthenticated(ctx, token)
+}
+func (f *fakeAuthService) VerifyInvitation(ctx context.Context, rawToken string) (VerifyInvitationResponse, error) {
+	f.verifyInviteCalls++
+	return f.verifyInvitation(ctx, rawToken)
+}
+func (f *fakeAuthService) AcceptInvitation(ctx context.Context, r AcceptInvitationRequest, m SessionMeta) (TokenPair, error) {
+	f.acceptInviteCalls++
+	return f.acceptInvitation(ctx, r, m)
 }
 func (f *fakeAuthService) Logout(ctx context.Context, raw string) error {
 	f.logoutCalls++

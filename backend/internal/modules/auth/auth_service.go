@@ -3,13 +3,14 @@ package auth
 import (
 	"context"
 	"fmt"
-
 	"strings"
+	"time"
 
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
+	"github.com/harshal5-dev/farm-deck/backend/pkg/invitetoken"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
 )
@@ -18,21 +19,26 @@ type AuthService interface {
 	RegisterUser(ctx context.Context, req RegisterUserRequest) error
 	LoginUser(ctx context.Context, req LoginRequest, meta SessionMeta) (TokenPair, error)
 	RefreshTokens(ctx context.Context, rawRefreshToken string, meta SessionMeta) (TokenPair, error)
+	IsAuthenticated(ctx context.Context, tokenString string) (bool, error)
+	VerifyInvitation(ctx context.Context, rawToken string) (VerifyInvitationResponse, error)
+	AcceptInvitation(ctx context.Context, req AcceptInvitationRequest, meta SessionMeta) (TokenPair, error)
 	Logout(ctx context.Context, rawRefreshToken string) error
 }
 
 type AuthServiceImpl struct {
 	credentialRepo repository.CredentialRepo
 	refreshRepo    repository.RefreshTokenRepo
+	invitationRepo repository.InvitationRepo
 	userRepo       repository.UserRepo
 	cfg            config.Config
 	emailService   email.EmailService
 }
 
-func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, userRepo repository.UserRepo, cfg config.Config, emailService email.EmailService) AuthService {
+func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, invitationRepo repository.InvitationRepo, userRepo repository.UserRepo, cfg config.Config, emailService email.EmailService) AuthService {
 	return &AuthServiceImpl{
 		credentialRepo: credentialRepo,
 		refreshRepo:    refreshRepo,
+		invitationRepo: invitationRepo,
 		userRepo:       userRepo,
 		cfg:            cfg,
 		emailService:   emailService,
@@ -101,6 +107,61 @@ func (s *AuthServiceImpl) RefreshTokens(ctx context.Context, rawRefreshToken str
 	return TokenPair{AccessToken: accessToken, RefreshToken: newRaw}, nil
 }
 
+func (s *AuthServiceImpl) IsAuthenticated(ctx context.Context, tokenString string) (bool, error) {
+	_, err := jwt.VerifyToken(tokenString, s.cfg.JWTSecret)
+	if err != nil {
+		return false, fmt.Errorf("invalid or expired token: %w", err)
+	}
+
+	return true, nil
+}
+
+func (s *AuthServiceImpl) VerifyInvitation(ctx context.Context, rawToken string) (VerifyInvitationResponse, error) {
+	hash, err := invitetoken.Hash(rawToken)
+	if err != nil {
+		return VerifyInvitationResponse{}, fmt.Errorf("verify invitation: hash: %w", err)
+	}
+
+	invitation, err := s.invitationRepo.VerifyInvitation(ctx, hash)
+	if err != nil {
+		return VerifyInvitationResponse{}, fmt.Errorf("verify invitation: %w", err)
+	}
+
+	if invitation.AcceptedAt != nil {
+		return VerifyInvitationResponse{}, domain.ErrInvitationAccepted
+	}
+	if invitation.RevokedAt != nil {
+		return VerifyInvitationResponse{}, domain.ErrInvitationRevoked
+	}
+	if time.Now().After(invitation.ExpiresAt) {
+		return VerifyInvitationResponse{}, domain.ErrInvitationExpired
+	}
+
+	return toVerifyInvitationResponse(invitation), nil
+}
+
+func (s *AuthServiceImpl) AcceptInvitation(ctx context.Context, req AcceptInvitationRequest, meta SessionMeta) (TokenPair, error) {
+	hash, err := invitetoken.Hash(req.Token)
+	if err != nil {
+		return TokenPair{}, fmt.Errorf("accept invitation: hash: %w", err)
+	}
+
+	passwordHash, err := password.HashPassword(req.Password)
+	if err != nil {
+		return TokenPair{}, fmt.Errorf("accept invitation: password hash: %w", err)
+	}
+
+	result, err := s.invitationRepo.AcceptInvitation(ctx, domain.AcceptInvitationTxParams{
+		TokenHash:    hash,
+		PasswordHash: passwordHash,
+	})
+	if err != nil {
+		return TokenPair{}, fmt.Errorf("accept invitation: accept: %w", err)
+	}
+
+	return s.issueTokens(ctx, toJwtUserDetailsFromUser(result.User), meta)
+}
+
 func (s *AuthServiceImpl) Logout(ctx context.Context, rawRefreshToken string) error {
 	if rawRefreshToken == "" {
 		return nil
@@ -133,7 +194,7 @@ func (s *AuthServiceImpl) issueTokens(ctx context.Context, userDetails jwt.UserD
 		return TokenPair{}, fmt.Errorf("issue refresh: %w", err)
 	}
 
-	// A fresh login means the user is active; stamp their last-active time.
+	// A fresh session means the user is active; stamp their last-active time.
 	if err := s.userRepo.TouchUserLastActive(ctx, userDetails.UserId); err != nil {
 		return TokenPair{}, fmt.Errorf("issue: touch last active: %w", err)
 	}

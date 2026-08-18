@@ -1,18 +1,3 @@
--- ============================================================================
--- 000002_seed_users.up.sql
--- Seeds 3 tenants + 26 users (T1: 5, T2: 12, T3: 9) with a mix of Indian
--- Hindu, US, and European names and a mix of active and invited statuses.
--- Credentials are inserted only for active users.
--- UUIDs are generated with gen_random_uuid() (pgcrypto) so the script is
--- idempotent and can be re-run safely.
--- profile_picture is randomly picked per row from the FARM_AVATARS ids used
--- in the frontend via an inline ARRAY[...] + random() expression (no helper
--- function is created in the schema).
--- ============================================================================
-
--- Capture the freshly generated tenant ids so we can reference them below.
--- Subdomains mirror the output of pkg/slug.GenerateTenantDomain:
---   lower(name), non [a-z0-9-] -> '-', collapse multi-hyphens, trim, append '.farmdeck.app'.
 WITH new_tenants AS (
     INSERT INTO tenants (name, subdomain, description)
     VALUES

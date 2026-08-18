@@ -22,17 +22,15 @@ type Querier interface {
 	DeleteMember(ctx context.Context, id uuid.UUID) error
 	GetCredentialByEmail(ctx context.Context, emailID string) (GetCredentialByEmailRow, error)
 	GetCredentialByUserID(ctx context.Context, userID uuid.UUID) (GetCredentialByUserIDRow, error)
+	GetInvitationDetailsByTokenHash(ctx context.Context, tokenHash string) (GetInvitationDetailsByTokenHashRow, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetUserByEmailID(ctx context.Context, emailID string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
-	GetUserInvitationByID(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
 	MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) (UserInvitation, error)
-	RevokeOpenUserInvitationsByUserID(ctx context.Context, userID uuid.UUID) error
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
-	RevokeUserInvitationByID(ctx context.Context, id uuid.UUID) error
 	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
 	UpdateMember(ctx context.Context, arg UpdateMemberParams) (User, error)
 	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)

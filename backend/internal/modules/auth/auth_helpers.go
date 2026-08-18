@@ -47,6 +47,20 @@ func toJwtUserDetailsFromUserID(user db.GetCredentialByUserIDRow) jwt.UserDetail
 	return jwt.UserDetails{UserId: user.UserID, TenantId: user.TenantID, Role: user.Role}
 }
 
+func toJwtUserDetailsFromUser(user db.User) jwt.UserDetails {
+	return jwt.UserDetails{UserId: user.ID, TenantId: user.TenantID, Role: user.Role}
+}
+
+func toVerifyInvitationResponse(invitation db.GetInvitationDetailsByTokenHashRow) VerifyInvitationResponse {
+	return VerifyInvitationResponse{
+		FullName:   invitation.FullName,
+		EmailID:    invitation.EmailID,
+		Role:       invitation.Role,
+		TenantName: invitation.TenantName,
+		ExpiresAt:  invitation.ExpiresAt,
+	}
+}
+
 func stringPtr(s string) *string {
 	if s == "" {
 		return nil

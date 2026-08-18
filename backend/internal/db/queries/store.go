@@ -14,6 +14,7 @@ type Store interface {
 	RotateRefreshTokenTx(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (RotateRefreshTokenTxResult, error)
 	CreateMemberTx(ctx context.Context, arg domain.CreateMemberTxParams) (CreateMemberTxResult, error)
 	CreateRefreshTokenTx(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
+	AcceptInvitationTx(ctx context.Context, arg domain.AcceptInvitationTxParams) (AcceptInvitationTxResult, error)
 	Close()
 }
 

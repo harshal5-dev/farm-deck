@@ -1,5 +1,7 @@
 package auth
 
+import "time"
+
 type RegisterUserRequest struct {
 	FullName   string `json:"fullName" binding:"required,min=2,max=100"`
 	EmailID    string `json:"emailId" binding:"required,email,max=255"`
@@ -28,4 +30,17 @@ type SessionMeta struct {
 type TokenPair struct {
 	AccessToken  string
 	RefreshToken string
+}
+
+type VerifyInvitationResponse struct {
+	FullName   string    `json:"fullName"`
+	EmailID    string    `json:"emailId"`
+	Role       string    `json:"role"`
+	TenantName string    `json:"tenantName"`
+	ExpiresAt  time.Time `json:"expiresAt"`
+}
+
+type AcceptInvitationRequest struct {
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required,min=8,max=72"` // same rules as register
 }

@@ -51,13 +51,33 @@ func (q *Queries) CreateUserInvitation(ctx context.Context, arg CreateUserInvita
 	return i, err
 }
 
-const getUserInvitationByID = `-- name: GetUserInvitationByID :one
-SELECT id, user_id, tenant_id, token_hash, expires_at, accepted_at, revoked_at, created_by, created_at FROM user_invitations WHERE id = $1
+const getInvitationDetailsByTokenHash = `-- name: GetInvitationDetailsByTokenHash :one
+SELECT i.id, i.user_id, i.tenant_id, i.token_hash, i.expires_at, i.accepted_at, i.revoked_at, i.created_by, i.created_at, u.full_name, u.email_id, u.role, t.name AS tenant_name
+FROM user_invitations i
+JOIN users u ON u.id = i.user_id
+JOIN tenants t ON t.id = i.tenant_id
+WHERE i.token_hash = $1
 `
 
-func (q *Queries) GetUserInvitationByID(ctx context.Context, id uuid.UUID) (UserInvitation, error) {
-	row := q.db.QueryRow(ctx, getUserInvitationByID, id)
-	var i UserInvitation
+type GetInvitationDetailsByTokenHashRow struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TenantID   uuid.UUID
+	TokenHash  string
+	ExpiresAt  time.Time
+	AcceptedAt *time.Time
+	RevokedAt  *time.Time
+	CreatedBy  uuid.UUID
+	CreatedAt  time.Time
+	FullName   string
+	EmailID    string
+	Role       string
+	TenantName string
+}
+
+func (q *Queries) GetInvitationDetailsByTokenHash(ctx context.Context, tokenHash string) (GetInvitationDetailsByTokenHashRow, error) {
+	row := q.db.QueryRow(ctx, getInvitationDetailsByTokenHash, tokenHash)
+	var i GetInvitationDetailsByTokenHashRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -68,6 +88,10 @@ func (q *Queries) GetUserInvitationByID(ctx context.Context, id uuid.UUID) (User
 		&i.RevokedAt,
 		&i.CreatedBy,
 		&i.CreatedAt,
+		&i.FullName,
+		&i.EmailID,
+		&i.Role,
+		&i.TenantName,
 	)
 	return i, err
 }
@@ -97,6 +121,9 @@ const markUserInvitationAccepted = `-- name: MarkUserInvitationAccepted :one
 UPDATE user_invitations
 SET accepted_at = now()
 WHERE id = $1
+  AND accepted_at IS NULL
+  AND revoked_at IS NULL
+  AND expires_at > now()
 RETURNING id, user_id, tenant_id, token_hash, expires_at, accepted_at, revoked_at, created_by, created_at
 `
 
@@ -115,24 +142,4 @@ func (q *Queries) MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) 
 		&i.CreatedAt,
 	)
 	return i, err
-}
-
-const revokeOpenUserInvitationsByUserID = `-- name: RevokeOpenUserInvitationsByUserID :exec
-UPDATE user_invitations
-SET revoked_at = now()
-WHERE user_id = $1 AND accepted_at IS NULL AND revoked_at IS NULL
-`
-
-func (q *Queries) RevokeOpenUserInvitationsByUserID(ctx context.Context, userID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, revokeOpenUserInvitationsByUserID, userID)
-	return err
-}
-
-const revokeUserInvitationByID = `-- name: RevokeUserInvitationByID :exec
-UPDATE user_invitations SET revoked_at = now() WHERE id = $1
-`
-
-func (q *Queries) RevokeUserInvitationByID(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, revokeUserInvitationByID, id)
-	return err
 }

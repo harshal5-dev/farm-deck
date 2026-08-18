@@ -33,6 +33,10 @@ func TestHandleError_StatusMapping(t *testing.T) {
 		{"user not found", domain.ErrUserNotFound, http.StatusNotFound, "user not found"},
 		{"tenant not found", domain.ErrTenantNotFound, http.StatusNotFound, "tenant not found"},
 		{"invalid credentials", domain.ErrInvalidCredentials, http.StatusUnauthorized, "invalid email or password"},
+		{"invitation invalid", domain.ErrInvitationInvalid, http.StatusBadRequest, "invitation is invalid"},
+		{"invitation expired", domain.ErrInvitationExpired, http.StatusBadRequest, "invitation has expired"},
+		{"invitation revoked", domain.ErrInvitationRevoked, http.StatusBadRequest, "invitation has been revoked"},
+		{"invitation accepted", domain.ErrInvitationAccepted, http.StatusConflict, "invitation already accepted"},
 		{"unknown error", errors.New("db connection refused"), http.StatusInternalServerError, "something went wrong"},
 	}
 

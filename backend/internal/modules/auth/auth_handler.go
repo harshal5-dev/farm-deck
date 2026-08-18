@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
+	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/cookie"
@@ -13,6 +14,9 @@ type AuthHandler interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	Refresh(ctx *gin.Context)
+	IsAuthenticated(ctx *gin.Context)
+	VerifyInvitation(ctx *gin.Context)
+	AcceptInvitation(ctx *gin.Context)
 	Logout(ctx *gin.Context)
 }
 
@@ -103,6 +107,35 @@ func (h *AuthHandlerImpl) Login(ctx *gin.Context) {
 	response.OK(ctx, LoginResponse{AccessToken: pair.AccessToken})
 }
 
+// IsAuthenticated godoc
+// @Summary      Check if user is authenticated
+// @Description  Returns true if the user is authenticated, false otherwise.
+// @Tags         auth
+// @Produce      json
+// @Success      200 {object} bool "true if authenticated, false otherwise"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/is-authenticated [get]
+func (h *AuthHandlerImpl) IsAuthenticated(ctx *gin.Context) {
+	tokenString, err := ctx.Cookie(h.cfg.CookieTokenName)
+	if err != nil {
+		response.OK(ctx, gin.H{
+			"isAuthenticated": false,
+		})
+		return
+	}
+
+	isAuthenticated, err := h.authService.IsAuthenticated(ctx, tokenString)
+	if err != nil {
+		response.OK(ctx, gin.H{
+			"isAuthenticated": false,
+		})
+		return
+	}
+	response.OK(ctx, gin.H{
+		"isAuthenticated": isAuthenticated,
+	})
+}
+
 // Refresh godoc
 // @Summary      Refresh access token
 // @Description  Uses the httpOnly refresh_token cookie to issue a new access token (and rotates the refresh token).
@@ -143,4 +176,55 @@ func (h *AuthHandlerImpl) Logout(ctx *gin.Context) {
 	}
 	h.clearTokenCookies(ctx)
 	response.OK(ctx, RegisterResponse{Message: "logged out"})
+}
+
+// VerifyInvitation godoc
+// @Summary      Verify an invitation token
+// @Description  Checks the raw invitation token from the email link and returns the invitee and tenant details so the accept-invite page can render. The token must be valid, unexpired, and not yet accepted or revoked.
+// @Tags         auth
+// @Produce      json
+// @Param        token query string true "Raw invitation token from the email link"
+// @Success      200 {object} VerifyInvitationResponse "invitation details"
+// @Failure      400 {object} response.APIError "token missing, invalid, expired, or revoked"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/verify-invitation [get]
+func (h *AuthHandlerImpl) VerifyInvitation(ctx *gin.Context) {
+	rawToken := ctx.Query("token")
+	if rawToken == "" {
+		httperr.HandleError(ctx, domain.ErrInvitationInvalid)
+		return
+	}
+	res, err := h.authService.VerifyInvitation(ctx, rawToken)
+	if err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	response.OK(ctx, res)
+}
+
+// AcceptInvitation godoc
+// @Summary      Accept an invitation and set the account password
+// @Description  Accepts the invitation token, creates the invitee's credential with the chosen password, activates their user account, and logs them in (auth cookies are set).
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body AcceptInvitationRequest true "Accept invitation payload"
+// @Success      200 {object} LoginResponse "invitation accepted, user logged in"
+// @Failure      400 {object} response.APIError "validation error, or token invalid/expired/revoked"
+// @Failure      409 {object} response.APIError "invitation already accepted"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /auth/accept-invitation [post]
+func (h *AuthHandlerImpl) AcceptInvitation(ctx *gin.Context) {
+	var req AcceptInvitationRequest
+	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	pair, err := h.authService.AcceptInvitation(ctx, req, h.sessionMeta(ctx))
+	if err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	h.setTokenCookies(ctx, pair)
+	response.OK(ctx, LoginResponse{AccessToken: pair.AccessToken})
 }
