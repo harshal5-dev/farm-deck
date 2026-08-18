@@ -1,15 +1,12 @@
-import { selectIsAuthenticated } from "@/features/auth";
 import Header from "../components/Header";
 import Hero from "../components/hero/Hero";
 import Feature from "../components/feature/Feature";
 import TechStack from "../components/tech-stack/TechStack";
 import About from "../components/about/About";
 import Footer from "../components/Footer";
-import { useSelector } from "react-redux";
 
 const Home = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const appLink = isAuthenticated ? "/app" : "/login";
+  const appLink = "/login";
 
   return (
     <div className="relative min-h-svh bg-background">
@@ -32,11 +29,11 @@ const Home = () => {
       </div>
 
       {/* Nav */}
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main id="main" className="relative scroll-mt-20">
         {/* Hero */}
-        <Hero appLink={appLink} isAuthenticated={isAuthenticated} />
+        <Hero appLink={appLink} />
 
         {/* Features */}
         <Feature />
@@ -45,11 +42,11 @@ const Home = () => {
         <TechStack />
 
         {/* About / Highlights */}
-        <About appLink={appLink} isAuthenticated={isAuthenticated} />
+        <About appLink={appLink} />
       </main>
 
       {/* Footer */}
-      <Footer appLink={appLink} isAuthenticated={isAuthenticated} />
+      <Footer appLink={appLink} />
     </div>
   );
 };

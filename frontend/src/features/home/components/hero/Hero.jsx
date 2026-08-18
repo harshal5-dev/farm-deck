@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import HeroArtCard from "./HeroArtCard";
 
-const Hero = ({ appLink, isAuthenticated }) => {
+const Hero = ({ appLink }) => {
   return (
     <section className="relative mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-24">
       <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
@@ -72,7 +72,7 @@ const Hero = ({ appLink, isAuthenticated }) => {
                     className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
                   />
                   <span className="relative inline-flex items-center gap-2">
-                    {isAuthenticated ? "Open Dashboard" : "Sign in to demo"}
+                    Sign in to demo
                     <IconArrowRight
                       className="size-4 transition-transform group-hover/cta:translate-x-0.5"
                       strokeWidth={2.2}

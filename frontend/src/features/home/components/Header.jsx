@@ -1,7 +1,6 @@
 import ThemeToggle from "@/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
-  IconArrowRight,
   IconBrandGithub,
   IconMenu2,
   IconStar,
@@ -15,7 +14,7 @@ import { navLinks, REPO_URL } from "../constants";
 import { useActiveSection } from "../useActiveSection";
 
 
-const Header = ({ isAuthenticated }) => {
+const Header = () => {
   const [open, setOpen] = useState(false);
   const activeId = useActiveSection();
 
@@ -99,19 +98,11 @@ const Header = ({ isAuthenticated }) => {
             <IconBrandGithub className="size-3.5" strokeWidth={1.85} />
           </a>
           <ThemeToggle />
-          {isAuthenticated ? (
-            <Link to="/app">
-              <Button size="sm" className="gap-1.5">
-                Dashboard <IconArrowRight className="size-4" strokeWidth={2} />
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/login" className="hidden sm:block">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-          )}
+          <Link to="/login" className="hidden sm:block">
+            <Button variant="ghost" size="sm">
+              Sign in
+            </Button>
+          </Link>
           {/* Mobile menu toggle */}
           <button
             type="button"
@@ -175,19 +166,11 @@ const Header = ({ isAuthenticated }) => {
               <IconBrandGithub className="size-3.5" strokeWidth={1.85} />
             </a>
             <div className="mt-1 border-t border-border/40 pt-2">
-              {isAuthenticated ? (
-                <Link to="/app" onClick={() => setOpen(false)}>
-                  <Button size="sm" className="w-full gap-1.5">
-                    Dashboard <IconArrowRight className="size-4" strokeWidth={2} />
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/login" onClick={() => setOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full">
-                    Sign in
-                  </Button>
-                </Link>
-              )}
+              <Link to="/login" onClick={() => setOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full">
+                  Sign in
+                </Button>
+              </Link>
             </div>
           </div>
         </nav>

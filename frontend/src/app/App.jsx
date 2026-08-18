@@ -1,7 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/layout";
 
-import { Login, ProtectedRoute, PublicOnlyRoute } from "@/features/auth";
+import {
+  Login,
+  AcceptInvitation,
+  ProtectedRoute,
+  PublicOnlyRoute,
+} from "@/features/auth";
 import { Dashboard } from "@/features/dashboard";
 import { Profile } from "@/features/profile";
 import {
@@ -12,19 +17,13 @@ import {
 import { Home } from "@/features/home";
 import NotFound from "@/pages/NotFound";
 
-export default function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <Login />
-            </PublicOnlyRoute>
-          }
-        />
+        <Route path="/" element={<PublicOnlyRoute><Home /></PublicOnlyRoute>} />
+        <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+        <Route path="/accept-invite" element={<AcceptInvitation />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -38,4 +37,6 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   );
-}
+};
+
+export default App;

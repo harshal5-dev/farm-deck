@@ -10,7 +10,7 @@ import StatTile from "./StatTile";
 import { highlights, stats } from "../../constants";
 
 
-const About = ({ appLink, isAuthenticated }) => {
+const About = ({ appLink }) => {
   return (
     <>
       <section
@@ -128,7 +128,7 @@ const About = ({ appLink, isAuthenticated }) => {
                       className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
                     />
                     <span className="relative inline-flex items-center gap-2">
-                      {isAuthenticated ? "Open Dashboard" : "Explore the demo"}
+                      Explore the demo
                       <IconArrowRight
                         className="size-4 transition-transform group-hover/cta:translate-x-0.5"
                         strokeWidth={2.2}
@@ -136,17 +136,15 @@ const About = ({ appLink, isAuthenticated }) => {
                     </span>
                   </Button>
                 </Link>
-                {!isAuthenticated && (
-                  <Link to="/login">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="h-12 rounded-xl px-6 text-sm font-semibold"
-                    >
-                      Sign in
-                    </Button>
-                  </Link>
-                )}
+                <Link to="/login">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-12 rounded-xl px-6 text-sm font-semibold"
+                  >
+                    Sign in
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
