@@ -1,7 +1,5 @@
-import { useAuth } from "@/features/auth";
 
-const Greeting = () => {
-  const { user } = useAuth();
+const Greeting = ({ user }) => {
   const hour = new Date().getHours();
   let greeting = "Good evening";
   let emoji = "🌙";

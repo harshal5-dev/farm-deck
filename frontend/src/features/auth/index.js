@@ -7,18 +7,13 @@ export {
 
 export {
   default as authReducer,
-  setCredentials,
+  setUser,
   clearCredentials,
+  selectUser,
+  selectIsAuthenticated,
 } from "./authSlice";
 
 export { useSessionBootstrap } from "./useSessionBootstrap";
-
-export { AuthProvider, useAuth } from "./auth-context";
-export {
-  AUTH_STORAGE_KEY,
-  AUTH_USER_STORAGE_KEY,
-  DEMO_USER,
-} from "./constants";
 
 export { default as Login } from "./pages/Login";
 export { default as AuthLayout } from "./components/AuthLayout";

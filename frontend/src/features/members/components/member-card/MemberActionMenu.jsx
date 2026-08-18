@@ -23,14 +23,9 @@ import { Button } from "@/components/ui/button";
 
 const MemberActionMenu = ({
   member,
-  currentUserId,
-  isOwner,
   onDelete,
   onEdit,
 }) => {
-  const isSelf = member.id === currentUserId;
-  const canDelete = isOwner && !isSelf;
-
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -88,7 +83,7 @@ const MemberActionMenu = ({
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">
-                {isSelf ? "Edit my profile" : "Edit details"}
+                Edit details
               </p>
               <p className="text-[10px] text-muted-foreground">Name, email & role</p>
             </div>
@@ -109,28 +104,24 @@ const MemberActionMenu = ({
             </div>
           </button>
 
-          {canDelete && (
-            <>
-              <div className="my-1 h-px bg-border/60" />
-              <button
-                type="button"
-                onClick={askDelete}
-                className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-red-500/8"
-              >
-                <span className="flex size-7 items-center justify-center rounded-md bg-red-500/15 text-red-500">
-                  <IconTrash className="size-3.5" strokeWidth={1.85} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-red-500/90">
-                    Delete user
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Permanently remove from workspace
-                  </p>
-                </div>
-              </button>
-            </>
-          )}
+          <div className="my-1 h-px bg-border/60" />
+          <button
+            type="button"
+            onClick={askDelete}
+            className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-red-500/8"
+          >
+            <span className="flex size-7 items-center justify-center rounded-md bg-red-500/15 text-red-500">
+              <IconTrash className="size-3.5" strokeWidth={1.85} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-red-500/90">
+                Delete user
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Permanently remove from workspace
+              </p>
+            </div>
+          </button>
         </PopoverContent>
       </Popover>
 

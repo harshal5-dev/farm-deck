@@ -33,7 +33,8 @@ func HandleError(ctx *gin.Context, err error) {
 		errors.Is(err, domain.ErrTenantNotFound):
 		response.NotFound(ctx, messageOf(err))
 
-	case errors.Is(err, domain.ErrInvalidCredentials):
+	case errors.Is(err, domain.ErrInvalidCredentials),
+		errors.Is(err, domain.ErrCredentialNotFound):
 		response.Unauthorized(ctx, domain.ErrInvalidCredentials.Error())
 
 	case errors.Is(err, domain.ErrRefreshTokenInvalid),

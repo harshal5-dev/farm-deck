@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "@/lib/api";
+import { baseQuery, transformResult } from "@/lib/api";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -14,17 +14,22 @@ export const authApi = createApi({
           password: credentials.password,
         },
       }),
-      transformResponse: (response) => response?.data,
-    }),
-
-    logout: builder.mutation({
-      query: () => ({ url: "/auth/logout", method: "POST" }),
-      transformResponse: (response) => response?.data,
+      transformResponse: transformResult,
     }),
 
     refresh: builder.mutation({
       query: () => ({ url: "/auth/refresh", method: "POST" }),
-      transformResponse: (response) => response?.data,
+      transformResponse: transformResult,
+    }),
+
+    isAuthenticated: builder.query({
+      query: () => ({ url: "/auth/is-authenticated", method: "GET" }),
+      transformResponse: transformResult,
+    }),
+
+    logout: builder.mutation({
+      query: () => ({ url: "/auth/logout", method: "POST" }),
+      transformResponse: transformResult,
     }),
 
   }),
@@ -33,5 +38,6 @@ export const authApi = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
+  useIsAuthenticatedQuery,
   useRefreshMutation,
 } = authApi;

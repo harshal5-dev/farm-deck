@@ -13,16 +13,13 @@ import StatTile from "./StatTile";
 
 const MemberCard = ({
   member,
-  currentUserId,
   index,
-  isOwner,
   onView,
   onDelete,
   onEdit,
 }) => {
   const r = getRole(member.role);
   const RoleIcon = r.icon;
-  const isSelf = member.id === currentUserId;
   const isInvited = member.status === "invited";
 
   const handleKeyDown = (e) => {
@@ -97,11 +94,6 @@ const MemberCard = ({
                 <h3 className="min-w-0 wrap-break-word font-heading text-sm font-bold tracking-tight">
                   {member.fullName}
                 </h3>
-                {isSelf && (
-                  <span className="shrink-0 rounded-md bg-clay/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-clay-deep uppercase dark:text-clay">
-                    You
-                  </span>
-                )}
               </div>
               <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                 {member.emailId}
@@ -120,8 +112,6 @@ const MemberCard = ({
             >
               <MemberActionMenu
                 member={member}
-                currentUserId={currentUserId}
-                isOwner={isOwner}
                 onDelete={onDelete}
                 onEdit={onEdit}
               />

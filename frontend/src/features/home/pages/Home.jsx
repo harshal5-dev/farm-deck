@@ -1,13 +1,14 @@
-import { useAuth } from "@/features/auth";
+import { selectIsAuthenticated } from "@/features/auth";
 import Header from "../components/Header";
 import Hero from "../components/hero/Hero";
 import Feature from "../components/feature/Feature";
 import TechStack from "../components/tech-stack/TechStack";
 import About from "../components/about/About";
 import Footer from "../components/Footer";
+import { useSelector } from "react-redux";
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const appLink = isAuthenticated ? "/app" : "/login";
 
   return (

@@ -10,8 +10,7 @@ import {
   IconUsers,
   IconFilter,
 } from "@tabler/icons-react";
-import { useAuth } from "@/features/auth";
-import { cn, checkIsOwner } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Reveal } from "@/components/effects";
@@ -43,14 +42,11 @@ const STATUS_OPTIONS = [
 ];
 
 const Members = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data, isLoading } = useListMembersQuery();
   const { total = 0, activeCount = 0, invitedCount = 0, members = [] } = data ?? {};
   const [deleteMember] = useDeleteMemberMutation();
-  const currentUserId = user?.id;
-  const isOwner = checkIsOwner(user?.role);
 
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("active");
@@ -301,8 +297,6 @@ const Members = () => {
                 key={m.id}
                 member={m}
                 index={i}
-                currentUserId={currentUserId}
-                isOwner={isOwner}
                 onView={() => handleView(m)}
                 onDelete={() => handleDelete(m)}
                 onEdit={() => handleEdit(m)}

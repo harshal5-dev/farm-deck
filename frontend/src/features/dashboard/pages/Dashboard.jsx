@@ -7,7 +7,8 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Reveal, FarmScene } from "@/components/effects";
-import { useAuth } from "@/features/auth";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/features/auth";
 
 /**
  * The roadmap of dashboard modules that aren't built yet. Each becomes a
@@ -61,7 +62,7 @@ const accentMap = {
 };
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const user = useSelector(selectUser);
   const firstName = user?.fullName?.split(" ")[0] || "there";
 
   return (
@@ -71,8 +72,8 @@ export default function Dashboard() {
         <div className="relative h-60 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-lg shadow-leaf/5 sm:h-64">
           <FarmScene />
           {/* gradient scrim on the left so text reads, scene visible on right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/80 to-transparent sm:from-card/95 sm:via-card/40" />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-card via-card/80 to-transparent sm:from-card/95 sm:via-card/40" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-card to-transparent" />
           <div className="relative flex h-full flex-col justify-center gap-3 p-6 sm:p-10">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/15 px-3 py-1 text-xs font-semibold text-leaf backdrop-blur-sm">
               <span className="relative flex size-2">

@@ -2,16 +2,17 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import Logo from "@/components/layout/Logo";
-import { useAuth } from "@/features/auth";
 import {
   IconArrowLeft,
   IconHome,
   IconLeaf,
   IconMapSearch,
 } from "@tabler/icons-react";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "@/features/auth";
 
 export default function NotFound() {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useSelector(selectIsAuthenticated)
   const homeLink = isAuthenticated ? "/app" : "/";
 
   return (

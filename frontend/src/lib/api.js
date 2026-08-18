@@ -82,3 +82,7 @@ export const baseQuery = async (args, api, extraOptions) => {
 
   return result;
 };
+
+export const transformResult = (result) => {
+  return result?.data;
+};

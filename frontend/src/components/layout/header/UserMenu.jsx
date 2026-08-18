@@ -1,6 +1,6 @@
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { clearCredentials, useAuth, useLogoutMutation } from "@/features/auth";
+import { clearCredentials, useLogoutMutation } from "@/features/auth";
 import { ProfileApi } from "@/features/profile";
 import { checkIsOwner, cn } from "@/lib/utils";
 import { useState } from "react";
@@ -17,8 +17,7 @@ function displayRole(role) {
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-const UserMenu = () => {
-  const { user } = useAuth();
+const UserMenu = ({ user }) => {
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
   const dispatch = useDispatch();

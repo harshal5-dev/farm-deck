@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import ErrorState from "@/components/ui/error-state";
 import { normalizeError } from "@/lib/api-errors";
-import { useAuth } from "@/features/auth";
 
 /**
  * QueryState — handles the loading / error / empty / success lifecycle of an
@@ -35,7 +34,6 @@ export default function QueryState({
 }) {
   const { refetch } = query;
   const location = useLocation();
-  const { clearAuth } = useAuth();
   const [retrying, setRetrying] = useState(false);
 
   const handleRetry = useCallback(async () => {
@@ -64,7 +62,6 @@ export default function QueryState({
     if (norm?.isAuthError) {
       // Defer to avoid setState-during-render warnings.
       setTimeout(() => {
-        clearAuth();
         window.location.assign(`/login?from=${encodeURIComponent(location.pathname)}`);
       }, 0);
     }

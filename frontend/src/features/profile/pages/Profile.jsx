@@ -3,10 +3,9 @@ import { toast } from "sonner";
 import {
   IconArrowLeft,
   IconUser,
-  IconLoader2,
   IconBuildingWarehouse,
 } from "@tabler/icons-react";
-import { useAuth } from "@/features/auth";
+import { selectUser } from "@/features/auth";
 import { Reveal } from "@/components/effects";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useUpdateProfileMutation, useUpdateTenantMutation } from "../profileApi";
@@ -14,31 +13,32 @@ import ProfileForm from "../components/ProfileForm";
 import TenantForm from "../components/TenantForm";
 import Hero from "../components/Hero";
 import { checkIsOwner } from "@/lib/utils";
+import { useSelector } from "react-redux";
 
 
 
 /* ============================================================ */
 
 const Profile = () => {
-  const { user } = useAuth();
+  const user = useSelector(selectUser);
 
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
   const [updateTenant, { isLoading: isSavingTenant }] =
     useUpdateTenantMutation();
 
-  if (!user) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <IconLoader2
-            className="size-6 animate-spin text-muted-foreground"
-            strokeWidth={1.75}
-          />
-          <p className="text-sm text-muted-foreground">Loading profile…</p>
-        </div>
-      </div>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <div className="flex min-h-[50vh] items-center justify-center">
+  //       <div className="flex flex-col items-center gap-3">
+  //         <IconLoader2
+  //           className="size-6 animate-spin text-muted-foreground"
+  //           strokeWidth={1.75}
+  //         />
+  //         <p className="text-sm text-muted-foreground">Loading profile…</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const isOwner = checkIsOwner(user.role);
 

@@ -319,6 +319,11 @@
   --animate-sprout-sway: sprout-sway 5s ease-in-out infinite;
   --animate-error-enter: error-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-alert-ring: alert-ring 3.5s ease-out infinite;
+  --animate-spin-slow: spin 6s linear infinite;
+  --animate-spin-reverse: spin 3.5s linear infinite reverse;
+  --animate-spin-slower: spin 14s linear infinite;
+  --animate-leaf-rise: leaf-rise 8s linear infinite;
+  --animate-pulse-dot: pulse-dot 1.4s ease-in-out infinite;
 }
 
 /* Error card entrance — gentle fade + lift, matching the page reveal motion. */
@@ -346,6 +351,41 @@
   100% {
     opacity: 0;
     transform: scale(1.25);
+  }
+}
+
+/* Rising leaves — drift up + sway + fade out. The horizontal drift is set per
+   instance via the --drift custom property on the element. */
+@keyframes leaf-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(calc(var(--drift, 0px)), -55vh) rotate(180deg);
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--drift, 0px) * 1.5), -110vh) rotate(360deg);
+  }
+}
+
+/* Loading dot — gentle scale + opacity pulse, sequenced via delay. */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
   }
 }
 

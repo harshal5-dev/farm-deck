@@ -1,7 +1,6 @@
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import {
   IconShieldCheck,
@@ -9,7 +8,6 @@ import {
 } from "@tabler/icons-react";
 import {
   useLoginMutation,
-  setCredentials,
 } from "@/features/auth";
 import { normalizeError } from "@/lib/api-errors";
 import {
@@ -23,13 +21,15 @@ import AuthLayout from "../components/AuthLayout";
 import { Reveal } from "@/components/effects";
 import LoginForm from "../components/LoginForm";
 import { useLazyGetProfileQuery } from "@/features/profile";
+import { useDispatch } from "react-redux";
+import { setIsAuthenticated } from "../authSlice";
 
 const Login = () => {
   const [login, { isLoading, error }] = useLoginMutation();
   const [fetchProfile] = useLazyGetProfileQuery();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const from = location.state?.from?.pathname || "/app";
 
@@ -40,10 +40,10 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       await login({ emailId: data.emailId, password: data.password }).unwrap();
-      const profile = await fetchProfile().unwrap();
-      dispatch(setCredentials(profile));
+      await fetchProfile().unwrap();
+      dispatch(setIsAuthenticated(true))
       toast.success("Welcome back!", {
-        description: `Signed in as ${profile.emailId}`,
+        description: `Signed in as ${data.emailId}`,
       });
       navigate(from, { replace: true });
     } catch (err) {
