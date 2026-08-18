@@ -77,7 +77,7 @@ function TabsContent({ className, ...props }) {
       // at display:block through the incoming panel's entrance animation.
       keepMounted
       className={cn(
-        "animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none [&[hidden]]:hidden data-[ending-style]:hidden",
+        "animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none [[hidden]]:hidden data-ending-style:hidden",
         className
       )}
       {...props}

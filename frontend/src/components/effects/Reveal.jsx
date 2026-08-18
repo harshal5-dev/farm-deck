@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
+const HAS_INTERSECTION_OBSERVER =
+  typeof IntersectionObserver !== "undefined";
+
 /**
  * Reveal — fades + slides its children in. Two modes:
  *
@@ -11,7 +14,7 @@ import { cn } from "@/lib/utils"
  *
  * Use `delay` (ms) to stagger items in a list for a nice cascade.
  */
-export default function Reveal({
+const Reveal = ({
   children,
   className,
   delay = 0,
@@ -22,8 +25,10 @@ export default function Reveal({
   threshold = 0.15,
   once = true,
   ...props
-}) {
-  const [shown, setShown] = useState(false)
+}) => {
+  const [shown, setShown] = useState(
+    () => trigger === "scroll" && !HAS_INTERSECTION_OBSERVER
+  )
   const firstRun = useRef(true)
   const ref = useRef(null)
 
@@ -33,11 +38,9 @@ export default function Reveal({
     const node = ref.current
     if (!node) return
 
-    // Fallback: if IntersectionObserver isn't available, just show it.
-    if (typeof IntersectionObserver === "undefined") {
-      setShown(true)
-      return
-    }
+    // Fallback: without IntersectionObserver support, the element starts
+    // revealed (see the lazy initializer above) so there's nothing to sync.
+    if (!HAS_INTERSECTION_OBSERVER) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -87,4 +90,6 @@ export default function Reveal({
       {children}
     </Tag>
   )
-}
+};
+
+export default Reveal;

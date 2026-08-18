@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
  * Layers (back → front): sky wash · sun + glow · distant hills · mid hills ·
  * field rows · greenhouse · water pool · crop dots · foreground hill.
  */
-export default function FarmScene({ className }) {
+const FarmScene = ({ className }) => {
   return (
     <svg
       className={cn("pointer-events-none absolute inset-0 size-full", className)}
@@ -159,4 +159,6 @@ export default function FarmScene({ className }) {
       />
     </svg>
   )
-}
+};
+
+export default FarmScene;

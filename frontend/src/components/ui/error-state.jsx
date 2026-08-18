@@ -125,7 +125,7 @@ export default function ErrorState({
           {/* gradient-filled chip with ring + inset highlight */}
           <div
             className={cn(
-              "relative flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br ring-1 ring-inset shadow-sm",
+              "relative flex size-16 items-center justify-center rounded-2xl bg-linear-to-br ring-1 ring-inset shadow-sm",
               meta.chipGradient,
               meta.chip,
               meta.ring
@@ -133,7 +133,7 @@ export default function ErrorState({
           >
             {/* inset top highlight */}
             <div
-              className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/15 to-transparent dark:from-white/5"
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-white/15 to-transparent dark:from-white/5"
               aria-hidden="true"
             />
             <Icon
@@ -174,7 +174,7 @@ export default function ErrorState({
         {/* hairline divider between title and message */}
         <div
           className={cn(
-            "mx-auto mt-3 h-px w-10 bg-gradient-to-r from-transparent via-border to-transparent",
+            "mx-auto mt-3 h-px w-10 bg-linear-to-r from-transparent via-border to-transparent",
             compact && "w-8"
           )}
           aria-hidden="true"

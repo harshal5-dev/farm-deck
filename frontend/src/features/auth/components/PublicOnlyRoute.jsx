@@ -9,7 +9,7 @@ const PublicOnlyRoute = ({ children, redirectTo = "/app" }) => {
   const intentionalLogout = useSelector(selectIntentionalLogout);
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  const { isLoading } = useSessionBootstrap();
+  const { isLoading } = useSessionBootstrap({ skipQuery: true });
 
   if (intentionalLogout) return children;
   if (isAuthenticated) return <Navigate to={redirectTo} replace />;

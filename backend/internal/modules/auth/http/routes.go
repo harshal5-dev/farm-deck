@@ -11,7 +11,6 @@ func Register(public, protected *gin.RouterGroup, h auth.AuthHandler) {
 	publicRoutes.POST("/register", h.Register)
 	publicRoutes.POST("/login", h.Login)
 	publicRoutes.POST("/refresh", h.Refresh)
-	publicRoutes.GET("/is-authenticated", h.IsAuthenticated)
 	publicRoutes.GET("/verify-invitation", h.VerifyInvitation)
 	publicRoutes.POST("/accept-invitation", h.AcceptInvitation)
 	publicRoutes.POST("/logout", h.Logout)

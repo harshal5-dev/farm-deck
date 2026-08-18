@@ -5,11 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/config"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
-	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/password"
 )
 
@@ -85,28 +83,6 @@ func noopInvitationRepo() *fakeInvitationRepo {
 			return db.AcceptInvitationTxResult{}, nil
 		},
 	}
-}
-
-// fakeUserRepo stubs repository.UserRepo for auth-service tests. It embeds the
-// interface so every method is satisfied by promotion (an unused promoted method
-// panics on a nil call — the desired "this was not expected" signal); only the
-// method exercised by the auth flow (TouchUserLastActive) is overridden.
-type fakeUserRepo struct {
-	repository.UserRepo
-	touchLastActive func(context.Context, uuid.UUID) error
-	touchCalls      int
-	touchedID       uuid.UUID
-}
-
-func (f *fakeUserRepo) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
-	f.touchCalls++
-	f.touchedID = id
-	return f.touchLastActive(ctx, id)
-}
-
-// noopUserRepo returns a fakeUserRepo whose TouchUserLastActive always succeeds.
-func noopUserRepo() *fakeUserRepo {
-	return &fakeUserRepo{touchLastActive: func(context.Context, uuid.UUID) error { return nil }}
 }
 
 // ---- handler-level fake (mocks AuthService) ----

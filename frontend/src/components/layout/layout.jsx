@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import {
   IconLayoutDashboard,
   IconUsers,
@@ -9,20 +9,10 @@ import Header from "@/components/layout/header/Header";
 import BackgroundDecor from "./BackgroundDecor";
 import DesktopSidebar from "./desktop-sidebar/DesktopSidebar";
 import MobileSidebar from "./mobile-sidebar/MobileSidebar";
-import { useGetProfileQuery } from "@/features/profile";
 
-import { FullPageLoader, FullPageError } from "@/components/feedback";
-import { normalizeError } from "@/lib/api-errors";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/features/auth";
 
-/**
- * Sidebar navigation — three sections:
- *   1. Overview (Dashboard)
- *   2. Farming (Farms)
- *   3. Team (Members)
- *
- * Members shows a small "pending invites" count chip when collapsed or
- * expanded, so the workspace owner always sees pending work at a glance.
- */
 const navGroups = [
   {
     label: "Overview",
@@ -50,10 +40,8 @@ const navGroups = [
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [retrying, setRetrying] = useState(false);
 
-  const location = useLocation();
-  const { isLoading, isError, error, refetch, data: user } = useGetProfileQuery();
+  const user = useSelector(selectUser);
 
   const handleKeyDown = useCallback((e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "b") {
@@ -66,45 +54,6 @@ const Layout = () => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
-
-  const handleRetry = useCallback(async () => {
-    setRetrying(true);
-    try {
-      await refetch();
-    } finally {
-      setTimeout(() => setRetrying(false), 400);
-    }
-  }, [refetch]);
-
-  // While the profile is being fetched, show the themed full-page loader so the
-  // app shell (sidebar + header) only paints once we know who the user is.
-  if (isLoading) {
-    return <FullPageLoader message="Loading your workspace…" caption="Bootstrapping" />;
-  }
-
-  // If the profile fetch fails, decide whether it's a session problem (redirect
-  // to /login) or a generic failure (show themed full-page error with retry).
-  if (isError) {
-    const norm = normalizeError(error, { entity: "workspace" });
-
-    if (norm?.isAuthError) {
-      setTimeout(() => {
-        window.location.assign(
-          `/login?from=${encodeURIComponent(location.pathname)}`
-        );
-      }, 0);
-      return <FullPageLoader message="Session expired — signing you in…" />;
-    }
-
-    return (
-      <FullPageError
-        title={norm?.title}
-        message={norm?.message}
-        onRetry={handleRetry}
-        retrying={retrying}
-      />
-    );
-  }
 
   return (
     <div className="relative flex min-h-svh bg-background">

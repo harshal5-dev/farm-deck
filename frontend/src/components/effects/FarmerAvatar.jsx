@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
  *
  * Use `className` to control size, e.g. className="size-9".
  */
-export default function FarmerAvatar({ className }) {
+const FarmerAvatar = ({ className }) => {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -121,4 +121,6 @@ export default function FarmerAvatar({ className }) {
       <circle cx="32" cy="32" r="31" stroke="#fff" strokeOpacity="0.25" strokeWidth="1.5" />
     </svg>
   )
-}
+};
+
+export default FarmerAvatar;

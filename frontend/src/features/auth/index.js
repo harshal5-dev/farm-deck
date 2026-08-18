@@ -7,10 +7,11 @@ export {
 
 export {
   default as authReducer,
-  setUser,
   clearCredentials,
+  setCredentials,
   selectUser,
   selectIsAuthenticated,
+  selectIntentionalLogout
 } from "./authSlice";
 
 export { useSessionBootstrap } from "./useSessionBootstrap";

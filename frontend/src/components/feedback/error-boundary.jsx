@@ -27,7 +27,6 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     // Log so it shows in the console even when minified in prod.
-    // eslint-disable-next-line no-console
     console.error("ErrorBoundary caught:", error, info);
   }
 
@@ -88,9 +87,9 @@ function DefaultFallback({ error, onReset, fullscreen }) {
               aria-hidden="true"
             />
             {/* gradient chip */}
-            <div className="relative flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-destructive/30 to-destructive/5 bg-destructive/15 text-destructive shadow-sm ring-1 ring-inset ring-destructive/25">
+            <div className="relative flex size-16 items-center justify-center rounded-2xl bg-linear-to-br from-destructive/30 to-destructive/5 bg-destructive/15 text-destructive shadow-sm ring-1 ring-inset ring-destructive/25">
               <div
-                className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/15 to-transparent dark:from-white/5"
+                className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-b from-white/15 to-transparent dark:from-white/5"
                 aria-hidden="true"
               />
               <IconBug className="relative size-8 drop-shadow-sm" strokeWidth={1.6} />
@@ -113,7 +112,7 @@ function DefaultFallback({ error, onReset, fullscreen }) {
           </h2>
 
           <div
-            className="mx-auto mt-3 h-px w-10 bg-gradient-to-r from-transparent via-border to-transparent"
+            className="mx-auto mt-3 h-px w-10 bg-linear-to-r from-transparent via-border to-transparent"
             aria-hidden="true"
           />
 

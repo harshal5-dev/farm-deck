@@ -231,6 +231,9 @@
       color-mix(in oklch, var(--foreground) 12%, transparent),
       transparent 55%
     );
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);

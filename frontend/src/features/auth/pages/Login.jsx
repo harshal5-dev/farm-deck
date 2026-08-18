@@ -7,6 +7,7 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 import {
+  setCredentials,
   useLoginMutation,
 } from "@/features/auth";
 import { normalizeError } from "@/lib/api-errors";
@@ -22,7 +23,6 @@ import { Reveal } from "@/components/effects";
 import LoginForm from "../components/LoginForm";
 import { useLazyGetProfileQuery } from "@/features/profile";
 import { useDispatch } from "react-redux";
-import { setIsAuthenticated } from "../authSlice";
 
 const Login = () => {
   const [login, { isLoading, error }] = useLoginMutation();
@@ -40,8 +40,8 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       await login({ emailId: data.emailId, password: data.password }).unwrap();
-      await fetchProfile().unwrap();
-      dispatch(setIsAuthenticated(true))
+      const profile = await fetchProfile().unwrap();
+      dispatch(setCredentials(profile))
       toast.success("Welcome back!", {
         description: `Signed in as ${data.emailId}`,
       });

@@ -14,7 +14,6 @@ type AuthHandler interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	Refresh(ctx *gin.Context)
-	IsAuthenticated(ctx *gin.Context)
 	VerifyInvitation(ctx *gin.Context)
 	AcceptInvitation(ctx *gin.Context)
 	Logout(ctx *gin.Context)
@@ -105,35 +104,6 @@ func (h *AuthHandlerImpl) Login(ctx *gin.Context) {
 	}
 	h.setTokenCookies(ctx, pair)
 	response.OK(ctx, LoginResponse{AccessToken: pair.AccessToken})
-}
-
-// IsAuthenticated godoc
-// @Summary      Check if user is authenticated
-// @Description  Returns true if the user is authenticated, false otherwise.
-// @Tags         auth
-// @Produce      json
-// @Success      200 {object} bool "true if authenticated, false otherwise"
-// @Failure      500 {object} response.APIError "internal server error"
-// @Router       /auth/is-authenticated [get]
-func (h *AuthHandlerImpl) IsAuthenticated(ctx *gin.Context) {
-	tokenString, err := ctx.Cookie(h.cfg.CookieTokenName)
-	if err != nil {
-		response.OK(ctx, gin.H{
-			"isAuthenticated": false,
-		})
-		return
-	}
-
-	isAuthenticated, err := h.authService.IsAuthenticated(ctx, tokenString)
-	if err != nil {
-		response.OK(ctx, gin.H{
-			"isAuthenticated": false,
-		})
-		return
-	}
-	response.OK(ctx, gin.H{
-		"isAuthenticated": isAuthenticated,
-	})
 }
 
 // Refresh godoc

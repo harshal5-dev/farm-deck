@@ -1,6 +1,5 @@
 import { baseQuery } from "@/lib/api";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { setUser } from "../auth";
 
 
 export const ProfileApi = createApi({
@@ -10,14 +9,6 @@ export const ProfileApi = createApi({
   endpoints: (builder) => ({
     getProfile: builder.query({
       query: () => ({ url: "/users/me" }),
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setUser(data));
-        } catch (error) {
-          console.error(error);
-        }
-      },
       transformResponse: (response) => response?.data,
       providesTags: ["Profile"],
     }),

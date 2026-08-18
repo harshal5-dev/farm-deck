@@ -10,11 +10,8 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setIsAuthenticated(state, action) {
-      console.log("setIsAuthenticated payload", action.payload);
-      state.isAuthenticated = action.payload;
-    },
-    setUser(state, action) {
+    setCredentials(state, action) {
+      state.isAuthenticated = true;
       state.user = action.payload ?? null;
       state.intentionalLogout = false;
     },
@@ -30,5 +27,5 @@ export const selectUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectIntentionalLogout = (state) => state.auth.intentionalLogout;
 
-export const { setIsAuthenticated, setUser, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials } = authSlice.actions;
 export default authSlice.reducer;

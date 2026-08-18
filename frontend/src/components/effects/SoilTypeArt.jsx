@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
  *
  * `variant`: "sandy" | "sandy_loam" | "clay" | "clay_loam" | "silt" | "loam" | "chalky" | "peaty"
  */
-export default function SoilTypeArt({ variant, className }) {
+const SoilTypeArt = ({ variant, className }) => {
   const art = {
     sandy_loam: (
       <>
@@ -94,7 +94,7 @@ export default function SoilTypeArt({ variant, className }) {
         {/* sunburst motif for heavy-feeder energy */}
         <g transform="translate(60,82)" stroke="var(--clay)" strokeWidth="1.5" opacity="0.4" fill="none">
           <circle cx="0" cy="0" r="8" />
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
             <line key={deg} x1="0" y1="0" x2={8 * Math.cos(deg * Math.PI / 180)} y2={8 * Math.sin(deg * Math.PI / 180)}
               strokeWidth="2" strokeLinecap="round" />
           ))}
@@ -178,7 +178,9 @@ export default function SoilTypeArt({ variant, className }) {
       {art[variant] || art.loam}
     </svg>
   )
-}
+};
+
+export default SoilTypeArt;
 
 /** Deterministic scatter of small circles for a textured "grain" look. */
 function grains(x0, x1, yMax, count, r, color) {

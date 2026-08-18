@@ -22,11 +22,6 @@ export const authApi = createApi({
       transformResponse: transformResult,
     }),
 
-    isAuthenticated: builder.query({
-      query: () => ({ url: "/auth/is-authenticated", method: "GET" }),
-      transformResponse: transformResult,
-    }),
-
     logout: builder.mutation({
       query: () => ({ url: "/auth/logout", method: "POST" }),
       transformResponse: transformResult,
@@ -38,6 +33,5 @@ export const authApi = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
-  useIsAuthenticatedQuery,
   useRefreshMutation,
 } = authApi;

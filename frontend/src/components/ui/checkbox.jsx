@@ -13,8 +13,8 @@ function Checkbox({ className, ...props }) {
         "hover:border-leaf/60 hover:bg-card/80",
         "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[checked]:border-leaf data-[checked]:bg-leaf data-[checked]:text-primary-foreground",
-        "data-[indeterminate]:border-leaf data-[indeterminate]:bg-leaf data-[indeterminate]:text-primary-foreground",
+        "data-checked:border-leaf data-checked:bg-leaf data-checked:text-primary-foreground",
+        "data-indeterminate:border-leaf data-indeterminate:bg-leaf data-indeterminate:text-primary-foreground",
         className
       )}
       {...props}

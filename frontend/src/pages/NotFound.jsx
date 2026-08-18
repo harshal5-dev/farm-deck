@@ -11,7 +11,7 @@ import {
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/features/auth";
 
-export default function NotFound() {
+const NotFound = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const homeLink = isAuthenticated ? "/app" : "/";
 
@@ -86,33 +86,31 @@ export default function NotFound() {
           <Reveal delay={320} duration={500}>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button
-                asChild
+                nativeButton={false}
                 className="group/cta relative h-11 overflow-hidden rounded-xl px-5 text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
+                render={<Link to={homeLink} />}
               >
-                <Link to={homeLink}>
-                  <span
-                    aria-hidden
-                    className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
-                  />
-                  <span className="relative inline-flex items-center gap-2">
-                    {isAuthenticated ? (
-                      <IconArrowLeft className="size-4" strokeWidth={2} />
-                    ) : (
-                      <IconHome className="size-4" strokeWidth={2} />
-                    )}
-                    {isAuthenticated ? "Back to dashboard" : "Back to home"}
-                  </span>
-                </Link>
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
+                />
+                <span className="relative inline-flex items-center gap-2">
+                  {isAuthenticated ? (
+                    <IconArrowLeft className="size-4" strokeWidth={2} />
+                  ) : (
+                    <IconHome className="size-4" strokeWidth={2} />
+                  )}
+                  {isAuthenticated ? "Back to dashboard" : "Back to home"}
+                </span>
               </Button>
               <Button
-                asChild
+                nativeButton={false}
                 variant="outline"
                 className="h-11 gap-2 rounded-xl px-5 text-sm font-semibold"
+                render={<Link to="/" />}
               >
-                <Link to="/">
-                  <IconArrowLeft className="size-4" strokeWidth={1.85} />
-                  Landing page
-                </Link>
+                <IconArrowLeft className="size-4" strokeWidth={1.85} />
+                Landing page
               </Button>
             </div>
           </Reveal>
@@ -128,4 +126,6 @@ export default function NotFound() {
       </Reveal>
     </div>
   );
-}
+};
+
+export default NotFound;

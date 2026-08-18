@@ -80,9 +80,9 @@ export default function FullPageError({
             className="absolute inset-0 rounded-2xl bg-destructive/15 opacity-50 blur-xl"
             aria-hidden="true"
           />
-          <div className="relative flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-destructive/30 to-destructive/5 bg-destructive/15 text-destructive shadow-sm ring-1 ring-inset ring-destructive/25">
+          <div className="relative flex size-16 items-center justify-center rounded-2xl bg-linear-to-br from-destructive/30 to-destructive/5 bg-destructive/15 text-destructive shadow-sm ring-1 ring-inset ring-destructive/25">
             <div
-              className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/15 to-transparent dark:from-white/5"
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-b from-white/15 to-transparent dark:from-white/5"
               aria-hidden="true"
             />
             <IconLeaf
@@ -108,7 +108,7 @@ export default function FullPageError({
         </h2>
 
         <div
-          className="mx-auto mt-3 h-px w-10 bg-gradient-to-r from-transparent via-border to-transparent"
+          className="mx-auto mt-3 h-px w-10 bg-linear-to-r from-transparent via-border to-transparent"
           aria-hidden="true"
         />
 
@@ -133,14 +133,13 @@ export default function FullPageError({
             )}
             {homeTo && (
               <Button
-                asChild
+                nativeButton={false}
                 variant="outline"
                 className="gap-2 hover:bg-accent/50"
+                render={<Link to={homeTo} />}
               >
-                <Link to={homeTo}>
-                  <IconHome className="size-4" strokeWidth={1.85} />
-                  {homeLabel}
-                </Link>
+                <IconHome className="size-4" strokeWidth={1.85} />
+                {homeLabel}
               </Button>
             )}
           </div>

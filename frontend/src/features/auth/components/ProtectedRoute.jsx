@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../authSlice";
 
 const ProtectedRoute = () => {
-  const { isLoading } = useSessionBootstrap();
+  const { isLoading } = useSessionBootstrap({});
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
 

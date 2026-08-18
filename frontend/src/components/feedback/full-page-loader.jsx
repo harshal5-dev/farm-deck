@@ -218,7 +218,7 @@ export default function FullPageLoader({
           {/* center chip */}
           <div className="relative flex size-16 items-center justify-center rounded-2xl bg-card/70 shadow-sm ring-1 ring-inset ring-foreground/10 backdrop-blur">
             <div
-              className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/20 to-transparent dark:from-white/5"
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-b from-white/20 to-transparent dark:from-white/5"
               aria-hidden="true"
             />
             <Mark className={cn("relative size-9", meta.leafTint)} />
@@ -250,7 +250,7 @@ export default function FullPageLoader({
         </h2>
 
         <div
-          className="mx-auto mt-3 h-px w-10 bg-gradient-to-r from-transparent via-border to-transparent"
+          className="mx-auto mt-3 h-px w-10 bg-linear-to-r from-transparent via-border to-transparent"
           aria-hidden="true"
         />
 

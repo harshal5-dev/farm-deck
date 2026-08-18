@@ -19,7 +19,6 @@ type AuthService interface {
 	RegisterUser(ctx context.Context, req RegisterUserRequest) error
 	LoginUser(ctx context.Context, req LoginRequest, meta SessionMeta) (TokenPair, error)
 	RefreshTokens(ctx context.Context, rawRefreshToken string, meta SessionMeta) (TokenPair, error)
-	IsAuthenticated(ctx context.Context, tokenString string) (bool, error)
 	VerifyInvitation(ctx context.Context, rawToken string) (VerifyInvitationResponse, error)
 	AcceptInvitation(ctx context.Context, req AcceptInvitationRequest, meta SessionMeta) (TokenPair, error)
 	Logout(ctx context.Context, rawRefreshToken string) error
@@ -29,17 +28,15 @@ type AuthServiceImpl struct {
 	credentialRepo repository.CredentialRepo
 	refreshRepo    repository.RefreshTokenRepo
 	invitationRepo repository.InvitationRepo
-	userRepo       repository.UserRepo
 	cfg            config.Config
 	emailService   email.EmailService
 }
 
-func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, invitationRepo repository.InvitationRepo, userRepo repository.UserRepo, cfg config.Config, emailService email.EmailService) AuthService {
+func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, invitationRepo repository.InvitationRepo, cfg config.Config, emailService email.EmailService) AuthService {
 	return &AuthServiceImpl{
 		credentialRepo: credentialRepo,
 		refreshRepo:    refreshRepo,
 		invitationRepo: invitationRepo,
-		userRepo:       userRepo,
 		cfg:            cfg,
 		emailService:   emailService,
 	}
@@ -95,25 +92,11 @@ func (s *AuthServiceImpl) RefreshTokens(ctx context.Context, rawRefreshToken str
 		return TokenPair{}, fmt.Errorf("refresh: rotate: %w", err)
 	}
 
-	// A successful refresh means the user is active; stamp their last-active time.
-	if err := s.userRepo.TouchUserLastActive(ctx, result.GetCredentialByUserIDRow.UserID); err != nil {
-		return TokenPair{}, fmt.Errorf("refresh: touch last active: %w", err)
-	}
-
 	accessToken, err := s.generateAccessToken(toJwtUserDetailsFromUserID(result.GetCredentialByUserIDRow))
 	if err != nil {
 		return TokenPair{}, fmt.Errorf("refresh: access token: %w", err)
 	}
 	return TokenPair{AccessToken: accessToken, RefreshToken: newRaw}, nil
-}
-
-func (s *AuthServiceImpl) IsAuthenticated(ctx context.Context, tokenString string) (bool, error) {
-	_, err := jwt.VerifyToken(tokenString, s.cfg.JWTSecret)
-	if err != nil {
-		return false, fmt.Errorf("invalid or expired token: %w", err)
-	}
-
-	return true, nil
 }
 
 func (s *AuthServiceImpl) VerifyInvitation(ctx context.Context, rawToken string) (VerifyInvitationResponse, error) {
@@ -192,11 +175,6 @@ func (s *AuthServiceImpl) issueTokens(ctx context.Context, userDetails jwt.UserD
 	ua, ip := stringPtr(meta.UserAgent), stringPtr(meta.IP)
 	if _, err := s.refreshRepo.CreateRefreshToken(ctx, toCreateRefreshTokenParams(userDetails.UserId, hash, s.cfg.RefreshTokenDuration, ua, ip)); err != nil {
 		return TokenPair{}, fmt.Errorf("issue refresh: %w", err)
-	}
-
-	// A fresh session means the user is active; stamp their last-active time.
-	if err := s.userRepo.TouchUserLastActive(ctx, userDetails.UserId); err != nil {
-		return TokenPair{}, fmt.Errorf("issue: touch last active: %w", err)
 	}
 
 	return TokenPair{AccessToken: accessToken, RefreshToken: raw}, nil

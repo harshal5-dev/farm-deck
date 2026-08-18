@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  *
  * `variant`: "outdoor" | "greenhouse" | "mixed" | "indoor" | "vertical"
  */
-export default function FarmTypeArt({ variant, className }) {
+const FarmTypeArt = ({ variant, className }) => {
   const art = {
     outdoor: (
       <>
@@ -288,4 +288,6 @@ export default function FarmTypeArt({ variant, className }) {
       {art[variant] || art.outdoor}
     </svg>
   );
-}
+};
+
+export default FarmTypeArt;

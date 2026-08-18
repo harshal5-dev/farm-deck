@@ -2,17 +2,14 @@ import { Link } from "react-router-dom"
 import { IconArrowLeft, IconBell } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
-/**
- * ComingSoon — a themed placeholder for routes not yet built (Crops, Harvest).
- * Shows the section's icon + a friendly message + a "notify me" mock button.
- */
-export default function ComingSoon({
+
+const ComingSoon = ({
   title,
   description,
   icon: Icon,
   accent = "text-leaf",
   accentBg = "bg-leaf/15",
-}) {
+}) => {
   return (
     <div className="space-y-6">
       <Link
@@ -70,4 +67,6 @@ export default function ComingSoon({
       </div>
     </div>
   )
-}
+};
+
+export default ComingSoon;

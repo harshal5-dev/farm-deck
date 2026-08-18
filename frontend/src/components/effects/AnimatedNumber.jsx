@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
  * AnimatedNumber — count up to a target value when scrolled into view.
  * Used for stat counters on the home page.
  */
-export default function AnimatedNumber({
+const AnimatedNumber = ({
   value,
   suffix = "",
   prefix = "",
   duration = 800,
   className,
-}) {
+}) => {
   const supportsObserver =
     typeof IntersectionObserver !== "undefined";
   const [display, setDisplay] = useState(supportsObserver ? 0 : value);
@@ -48,4 +48,6 @@ export default function AnimatedNumber({
       {suffix}
     </span>
   );
-}
+};
+
+export default AnimatedNumber;
