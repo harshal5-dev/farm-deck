@@ -6,6 +6,7 @@ import {
   AcceptInvitation,
   ProtectedRoute,
   PublicOnlyRoute,
+  AppAuthGate,
 } from "@/features/auth";
 import { Dashboard } from "@/features/dashboard";
 import { Profile } from "@/features/profile";
@@ -20,8 +21,9 @@ import NotFound from "@/pages/NotFound";
 const App = () => {
   return (
     <BrowserRouter>
+    <AppAuthGate>
       <Routes>
-        <Route path="/" element={<PublicOnlyRoute><Home /></PublicOnlyRoute>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
         <Route path="/accept-invite" element={<AcceptInvitation />} />
         <Route element={<ProtectedRoute />}>
@@ -34,7 +36,8 @@ const App = () => {
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
-      </Routes>
+        </Routes>
+    </AppAuthGate>
     </BrowserRouter>
   );
 };

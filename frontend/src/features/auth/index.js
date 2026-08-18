@@ -26,3 +26,4 @@ export {
   default as ProtectedRoute
 } from "./components/ProtectedRoute";
 export { default as PublicOnlyRoute } from "./components/PublicOnlyRoute";
+export { default as AppAuthGate } from "./components/AppAuthGate";

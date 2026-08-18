@@ -4,6 +4,7 @@ import {
   IconArrowRight,
   IconBrandGithub,
   IconDatabase,
+  IconLayoutDashboard,
   IconShieldLock,
   IconSparkles,
   IconUsers,
@@ -11,19 +12,41 @@ import {
 import { Link } from "react-router-dom";
 import HeroArtCard from "./HeroArtCard";
 
-const Hero = ({ appLink }) => {
+const Hero = ({ appLink, isAuthenticated = false }) => {
+  const primaryCta = isAuthenticated
+    ? { label: "Open dashboard", icon: IconLayoutDashboard }
+    : { label: "Sign in to demo", icon: IconArrowRight };
+
   return (
     <section className="relative mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-24">
       <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         {/* ---------- Copy column ---------- */}
         <div>
           <Reveal delay={0} duration={500}>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf">
+            <span
+              className={
+                isAuthenticated
+                  ? "inline-flex items-center gap-1.5 rounded-full border border-sage/30 bg-sage/10 px-3 py-1 text-xs font-semibold text-sage-deep dark:text-sage"
+                  : "inline-flex items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf"
+              }
+            >
               <span className="relative flex size-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-leaf/70" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-leaf" />
+                <span
+                  className={
+                    isAuthenticated
+                      ? "absolute inset-0 animate-ping rounded-full bg-sage/70"
+                      : "absolute inset-0 animate-ping rounded-full bg-leaf/70"
+                  }
+                />
+                <span
+                  className={
+                    isAuthenticated
+                      ? "relative inline-flex size-1.5 rounded-full bg-sage-deep dark:bg-sage"
+                      : "relative inline-flex size-1.5 rounded-full bg-leaf"
+                  }
+                />
               </span>
-              Portfolio Project · v1.0
+              {isAuthenticated ? "Welcome back" : "Portfolio Project · v1.0"}
             </span>
           </Reveal>
 
@@ -72,8 +95,8 @@ const Hero = ({ appLink }) => {
                     className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
                   />
                   <span className="relative inline-flex items-center gap-2">
-                    Sign in to demo
-                    <IconArrowRight
+                    {primaryCta.label}
+                    <primaryCta.icon
                       className="size-4 transition-transform group-hover/cta:translate-x-0.5"
                       strokeWidth={2.2}
                     />

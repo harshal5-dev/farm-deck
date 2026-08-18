@@ -1,12 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useSessionBootstrap } from "../useSessionBootstrap";
 import { FullPageLoader } from "@/components/feedback";
 import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../authSlice";
+import { selectAuthLoading, selectIsAuthenticated } from "../authSlice";
 
 const ProtectedRoute = () => {
-  const { isLoading } = useSessionBootstrap({});
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isLoading = useSelector(selectAuthLoading);
   const location = useLocation();
 
   if (isLoading) return <FullPageLoader />;

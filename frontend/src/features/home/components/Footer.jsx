@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/layout/Logo";
 
-const Footer = ({ appLink }) => {
+const Footer = ({ appLink, isAuthenticated = false }) => {
+  const authLink = isAuthenticated
+    ? { to: "/app", label: "Dashboard" }
+    : { to: "/login", label: "Sign in" };
+
   return (
     <footer className="relative border-t border-border/40 bg-card/30">
       <div className="absolute inset-0 pattern-contour opacity-20" aria-hidden />
@@ -54,10 +58,10 @@ const Footer = ({ appLink }) => {
               </li>
               <li>
                 <Link
-                  to="/login"
+                  to={authLink.to}
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Sign in
+                  {authLink.label}
                 </Link>
               </li>
             </ul>

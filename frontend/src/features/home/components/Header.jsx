@@ -2,6 +2,7 @@ import ThemeToggle from "@/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   IconBrandGithub,
+  IconLayoutDashboard,
   IconMenu2,
   IconStar,
   IconX,
@@ -14,7 +15,10 @@ import { navLinks, REPO_URL } from "../constants";
 import { useActiveSection } from "../useActiveSection";
 
 
-const Header = () => {
+const Header = ({ isAuthenticated = false }) => {
+  const authCta = isAuthenticated
+    ? { to: "/app", label: "Dashboard", icon: IconLayoutDashboard }
+    : { to: "/login", label: "Sign in", icon: null };
   const [open, setOpen] = useState(false);
   const activeId = useActiveSection();
 
@@ -98,9 +102,14 @@ const Header = () => {
             <IconBrandGithub className="size-3.5" strokeWidth={1.85} />
           </a>
           <ThemeToggle />
-          <Link to="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm">
-              Sign in
+          <Link to={authCta.to} className="hidden sm:block">
+            <Button
+              variant={isAuthenticated ? "default" : "ghost"}
+              size="sm"
+              className={cn(isAuthenticated && "gap-1.5 shadow-sm shadow-leaf/20")}
+            >
+              {authCta.icon && <authCta.icon className="size-3.5" strokeWidth={2} />}
+              {authCta.label}
             </Button>
           </Link>
           {/* Mobile menu toggle */}
@@ -166,9 +175,17 @@ const Header = () => {
               <IconBrandGithub className="size-3.5" strokeWidth={1.85} />
             </a>
             <div className="mt-1 border-t border-border/40 pt-2">
-              <Link to="/login" onClick={() => setOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full">
-                  Sign in
+              <Link to={authCta.to} onClick={() => setOpen(false)}>
+                <Button
+                  variant={isAuthenticated ? "default" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "w-full",
+                    isAuthenticated && "gap-1.5 shadow-sm shadow-leaf/20"
+                  )}
+                >
+                  {authCta.icon && <authCta.icon className="size-3.5" strokeWidth={2} />}
+                  {authCta.label}
                 </Button>
               </Link>
             </div>

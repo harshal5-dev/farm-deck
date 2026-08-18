@@ -4,13 +4,21 @@ import {
   IconArrowRight,
   IconBrandGithub,
   IconHeartHandshake,
+  IconLayoutDashboard,
+  IconUserCircle,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import StatTile from "./StatTile";
 import { highlights, stats } from "../../constants";
 
 
-const About = ({ appLink }) => {
+const About = ({ appLink, isAuthenticated = false }) => {
+  const primaryCta = isAuthenticated
+    ? { label: "Open dashboard", icon: IconLayoutDashboard }
+    : { label: "Explore the demo", icon: IconArrowRight };
+  const secondaryCta = isAuthenticated
+    ? { to: "/app/profile", label: "View profile", icon: IconUserCircle }
+    : { to: "/login", label: "Sign in", icon: null };
   return (
     <>
       <section
@@ -108,14 +116,17 @@ const About = ({ appLink }) => {
             </div>
             <div className="relative">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf backdrop-blur-sm">
-                Ready to grow?
+                {isAuthenticated ? "Back to your fields" : "Ready to grow?"}
               </span>
               <h2 className="mt-5 font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                Step inside the dashboard.
+                {isAuthenticated
+                  ? "Pick up where you left off."
+                  : "Step inside the dashboard."}
               </h2>
               <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground sm:text-[17px]">
-                Try the demo — no signup, no setup. Just explore the platform
-                in action.
+                {isAuthenticated
+                  ? "Your farms, fields, and recent activity are waiting. Head back into the dashboard to keep things growing."
+                  : "Try the demo — no signup, no setup. Just explore the platform in action."}
               </p>
               <div className="mt-7 flex flex-wrap justify-center gap-3">
                 <Link to={appLink}>
@@ -128,21 +139,27 @@ const About = ({ appLink }) => {
                       className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full"
                     />
                     <span className="relative inline-flex items-center gap-2">
-                      Explore the demo
-                      <IconArrowRight
+                      {primaryCta.label}
+                      <primaryCta.icon
                         className="size-4 transition-transform group-hover/cta:translate-x-0.5"
                         strokeWidth={2.2}
                       />
                     </span>
                   </Button>
                 </Link>
-                <Link to="/login">
+                <Link to={secondaryCta.to}>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="h-12 rounded-xl px-6 text-sm font-semibold"
+                    className="h-12 gap-2 rounded-xl px-6 text-sm font-semibold"
                   >
-                    Sign in
+                    {secondaryCta.icon && (
+                      <secondaryCta.icon
+                        className="size-4"
+                        strokeWidth={1.85}
+                      />
+                    )}
+                    {secondaryCta.label}
                   </Button>
                 </Link>
               </div>

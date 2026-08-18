@@ -23,13 +23,6 @@ export const authApi = createApi({
       transformResponse: transformResult,
     }),
 
-    isAuthenticated: builder.query({
-      query: () => ({ url: "/auth/is-authenticated", method: "GET" }),
-      transformResponse: transformResult,
-      refetchOnMountOrArgsChange: true,
-      keepUnusedDataFor: 0,
-    }),
-
     verifyInvitation: builder.query({
       query: (token) => ({
         url: "/auth/verify-invitation",
@@ -59,7 +52,6 @@ export const authApi = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
-  useIsAuthenticatedQuery,
   useRefreshMutation,
   useVerifyInvitationQuery,
   useLazyVerifyInvitationQuery,
