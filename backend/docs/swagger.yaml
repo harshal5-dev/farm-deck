@@ -281,23 +281,6 @@ paths:
       summary: Accept an invitation and set the account password
       tags:
       - auth
-  /auth/is-authenticated:
-    get:
-      description: Returns true if the user is authenticated, false otherwise.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: true if authenticated, false otherwise
-          schema:
-            type: boolean
-        "500":
-          description: internal server error
-          schema:
-            $ref: '#/definitions/APIError'
-      summary: Check if user is authenticated
-      tags:
-      - auth
   /auth/login:
     post:
       consumes:

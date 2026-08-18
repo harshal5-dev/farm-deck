@@ -73,32 +73,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/is-authenticated": {
-            "get": {
-                "description": "Returns true if the user is authenticated, false otherwise.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Check if user is authenticated",
-                "responses": {
-                    "200": {
-                        "description": "true if authenticated, false otherwise",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    "500": {
-                        "description": "internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/APIError"
-                        }
-                    }
-                }
-            }
-        },
         "/auth/login": {
             "post": {
                 "consumes": [
