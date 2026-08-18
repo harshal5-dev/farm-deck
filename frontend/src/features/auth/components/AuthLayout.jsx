@@ -70,24 +70,36 @@ const AuthLayout = ({ children }) => {
 
       {/* Right form panel */}
       <div className="relative flex w-full flex-col lg:w-1/2">
-        <div className="flex flex-col items-center gap-4 px-6 pt-8 pb-2">
-          {/* Mobile logo — centered above the form so the brand sits at
-              the top of attention instead of being tucked in the corner.
-              No `animate` here: the entrance animation forces a transform
-              compositing layer which can render blurry on mobile GPUs. */}
-          <Link to="/" className="lg:hidden">
-            <Logo variant="full" withSubtitle={false} />
-          </Link>
+        {/* Top bar — back link on the left, visually mirrors the fixed
+            theme toggle on the right so the corners feel balanced. */}
+        <div className="flex items-center px-4 pt-4 sm:px-6 sm:pt-5">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
-            <IconArrowLeft className="size-4" strokeWidth={1.75} />
-            Back to home
+            <IconArrowLeft
+              className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5"
+              strokeWidth={1.75}
+            />
+            <span>Back to home</span>
           </Link>
         </div>
 
-        <div className="flex flex-1 items-center justify-center px-6 pb-12">
+        {/* Mobile logo — stacked: bigger mark on top, wordmark below.
+            The full mark+wordmark lives in the left brand panel on
+            desktop, so on mobile we stack vertically to avoid horizontal
+            crowding on narrow screens. */}
+        <div className="flex flex-col items-center px-6 pt-4 pb-2 lg:hidden">
+          <Link
+            to="/"
+            aria-label="Farmdeck home"
+            className="transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+          >
+            <Logo variant="stacked" />
+          </Link>
+        </div>
+
+        <div className="flex flex-1 items-center justify-center px-6 pb-10 pt-2 sm:pb-12">
           <div className="w-full max-w-sm">{children}</div>
         </div>
       </div>

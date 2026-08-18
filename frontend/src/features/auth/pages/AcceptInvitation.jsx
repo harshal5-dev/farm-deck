@@ -124,8 +124,12 @@ const AcceptInvitation = () => {
       {/* Right form panel */}
       <div className="relative flex w-full flex-col lg:w-1/2">
         <div className="flex flex-col items-center gap-4 px-6 pt-8 pb-2">
-          <Link to="/" className="lg:hidden">
-            <Logo variant="full" withSubtitle={false} />
+          <Link
+            to="/"
+            className="lg:hidden"
+            aria-label="Farmdeck home"
+          >
+            <Logo variant="stacked" />
           </Link>
           <Link
             to="/"

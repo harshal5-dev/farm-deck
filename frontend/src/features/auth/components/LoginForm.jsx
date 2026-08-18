@@ -6,13 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import FieldWrapper from "@/components/ui/field-wrapper";
 import { IconArrowRight, IconEye, IconEyeOff, IconKey, IconLoader2, IconLock, IconMail } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 
 const LoginForm = ({ onSubmit, serverError, isLoading }) => {
     const [showPassword, setShowPassword] = useState(false);
-    const [remember, setRemember] = useState(true);
 
   const form = useForm({
     defaultValues: { emailId: "", password: "" },
@@ -126,19 +124,10 @@ const LoginForm = ({ onSubmit, serverError, isLoading }) => {
             )}
           />
 
-          <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs text-muted-foreground select-none">
-            <Checkbox
-              checked={remember}
-              onCheckedChange={(v) => setRemember(v === true)}
-              className="size-4"
-            />
-            <span>Keep me signed in on this device</span>
-          </label>
-
           <Button
             type="submit"
             disabled={isLoading}
-            className="group/submit relative h-11 w-full overflow-hidden rounded-xl text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
+            className="group/submit relative w-full overflow-hidden rounded-xl text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30 mt-2"
           >
             <span
               aria-hidden

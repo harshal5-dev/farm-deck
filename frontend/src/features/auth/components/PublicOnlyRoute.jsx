@@ -12,8 +12,8 @@ const PublicOnlyRoute = ({ children, redirectTo = "/app" }) => {
   const { isLoading } = useSessionBootstrap({ skipQuery: true });
 
   if (intentionalLogout) return children;
-  if (isAuthenticated) return <Navigate to={redirectTo} replace />;
   if (isLoading) return <FullPageLoader />;
+  if (isAuthenticated) return <Navigate to={redirectTo} replace />;
 
   return children;
 }
