@@ -17,11 +17,6 @@ type UserHandler interface {
 	ListMember(ctx *gin.Context)
 	UpdateMember(ctx *gin.Context)
 	DeleteMember(ctx *gin.Context)
-
-	IsCreateMemberAllowed(ctx *gin.Context)
-	IsListMembersAllowed(ctx *gin.Context)
-	IsUpdateMemberAllowed(ctx *gin.Context)
-	IsDeleteMemberAllowed(ctx *gin.Context)
 }
 
 type UserHandlerImpl struct {
@@ -120,6 +115,12 @@ func (h *UserHandlerImpl) CreateMember(ctx *gin.Context) {
 
 	var req CreateMemberRequest
 	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	inviterRole, _ := ctxutil.GetRole(ctx) // already on context
+	if req.Role == domain.RoleOwner && inviterRole != domain.RoleOwner {
+		httperr.HandleError(ctx, domain.ErrForbidden)
 		return
 	}
 
@@ -227,70 +228,4 @@ func (h *UserHandlerImpl) DeleteMember(ctx *gin.Context) {
 
 func parseMemberID(ctx *gin.Context) (uuid.UUID, error) {
 	return uuid.Parse(ctx.Param("memberId"))
-}
-
-func (h *UserHandlerImpl) IsCreateMemberAllowed(ctx *gin.Context) {
-	role, err := ctxutil.GetRole(ctx)
-	if err != nil {
-		response.Unauthorized(ctx, "authentication required")
-		ctx.Abort()
-		return
-	}
-
-	if role != domain.UserRoleOwner {
-		response.Forbidden(ctx, "only owner can create member")
-		ctx.Abort()
-		return
-	}
-
-	ctx.Next()
-}
-
-func (h *UserHandlerImpl) IsListMembersAllowed(ctx *gin.Context) {
-	role, err := ctxutil.GetRole(ctx)
-	if err != nil {
-		response.Unauthorized(ctx, "authentication required")
-		ctx.Abort()
-		return
-	}
-
-	if role != domain.UserRoleOwner {
-		response.Forbidden(ctx, "only owner can list members")
-		ctx.Abort()
-		return
-	}
-
-	ctx.Next()
-}
-
-func (h *UserHandlerImpl) IsUpdateMemberAllowed(ctx *gin.Context) {
-	role, err := ctxutil.GetRole(ctx)
-	if err != nil {
-		response.Unauthorized(ctx, "authentication required")
-		ctx.Abort()
-		return
-	}
-
-	if role != domain.UserRoleOwner {
-		response.Forbidden(ctx, "only owner can update member")
-		ctx.Abort()
-		return
-	}
-	ctx.Next()
-}
-
-func (h *UserHandlerImpl) IsDeleteMemberAllowed(ctx *gin.Context) {
-	role, err := ctxutil.GetRole(ctx)
-	if err != nil {
-		response.Unauthorized(ctx, "authentication required")
-		ctx.Abort()
-		return
-	}
-
-	if role != domain.UserRoleOwner {
-		response.Forbidden(ctx, "only owner can delete member")
-		ctx.Abort()
-		return
-	}
-	ctx.Next()
 }

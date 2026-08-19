@@ -151,8 +151,9 @@ const Hero = ({ user, isOwner }) => {
               </div>
             </div>
 
-            {/* Quick actions */}
-            <div className="flex items-center gap-2 sm:pb-1">
+            {/* Quick actions — hidden on mobile because the email row
+                above already has a copy trigger; keeps the layout clean. */}
+            <div className="hidden items-center gap-2 sm:flex sm:pb-1">
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -172,8 +173,9 @@ const Hero = ({ user, isOwner }) => {
             </div>
           </div>
 
-          {/* Stat strip — sits at bottom of hero */}
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Stat strip — 2-up on mobile so the hero doesn't get too tall,
+              expanding to 4 across on desktop. */}
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Reveal delay={140} duration={500} changeKey="stat-role">
               <InfoTile
                 icon={IconShieldCheck}

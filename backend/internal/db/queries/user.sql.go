@@ -107,13 +107,27 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const deleteMember = `-- name: DeleteMember :exec
-UPDATE users SET deleted_at = now() WHERE id = $1
+const deleteMember = `-- name: DeleteMember :one
+UPDATE users SET deleted_at = now() WHERE id = $1 RETURNING id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at, deleted_at
 `
 
-func (q *Queries) DeleteMember(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteMember, id)
-	return err
+func (q *Queries) DeleteMember(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, deleteMember, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.EmailID,
+		&i.FullName,
+		&i.ProfilePicture,
+		&i.Role,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.LastActiveAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const getUserByEmailID = `-- name: GetUserByEmailID :one
@@ -205,17 +219,19 @@ func (q *Queries) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetU
 
 const listMembers = `-- name: ListMembers :many
 SELECT id, tenant_id, email_id, full_name, profile_picture, role, status, created_at, updated_at, last_active_at, deleted_at FROM users
-WHERE tenant_id = $1 AND id != $2 AND deleted_at IS NULL
+WHERE tenant_id = $1 AND id != $2 AND role != $3
+AND deleted_at IS NULL
 ORDER BY last_active_at DESC NULLS LAST, full_name
 `
 
 type ListMembersParams struct {
 	TenantID uuid.UUID
 	ID       uuid.UUID
+	Role     string
 }
 
 func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, listMembers, arg.TenantID, arg.ID)
+	rows, err := q.db.Query(ctx, listMembers, arg.TenantID, arg.ID, arg.Role)
 	if err != nil {
 		return nil, err
 	}

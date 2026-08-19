@@ -2,7 +2,6 @@ package tenant
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/ctxutil"
@@ -11,7 +10,6 @@ import (
 
 type TenantHandler interface {
 	UpdateTenant(ctx *gin.Context)
-	IsUpdateTenantAllowed(ctx *gin.Context)
 }
 
 type TenantHandlerImpl struct {
@@ -34,8 +32,12 @@ func NewTenantHandler(tenantService TenantService) TenantHandler {
 // @Success      200 {object} response.APIResponse "tenant updated successfully"
 // @Failure      400 {object} response.APIError "validation error"
 // @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "requires permission: workspace.manage"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /tenants/me [patch]
+//
+// Authorization: gated by middlewares.RequirePermission(PermManageWorkspace)
+// at the route level — see internal/modules/tenant/http/routes.go.
 func (h *TenantHandlerImpl) UpdateTenant(ctx *gin.Context) {
 	tenantID, err := ctxutil.GetTenantID(ctx)
 	if err != nil {
@@ -53,21 +55,4 @@ func (h *TenantHandlerImpl) UpdateTenant(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx, "tenant updated successfully")
-}
-
-func (h *TenantHandlerImpl) IsUpdateTenantAllowed(ctx *gin.Context) {
-	role, err := ctxutil.GetRole(ctx)
-	if err != nil {
-		response.Unauthorized(ctx, "authentication required")
-		ctx.Abort()
-		return
-	}
-
-	if role != domain.UserRoleOwner {
-		response.Forbidden(ctx, "only owner can update tenant")
-		ctx.Abort()
-		return
-	}
-
-	ctx.Next()
 }

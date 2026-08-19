@@ -101,6 +101,7 @@ func (r *userRepo) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeI
 	result, err := r.store.ListMembers(ctx, db.ListMembersParams{
 		TenantID: tenantID,
 		ID:       excludeID,
+		Role:     domain.UserRoleOwner,
 	})
 	if err != nil {
 		return nil, err
@@ -124,5 +125,5 @@ func (r *userRepo) UpdateMember(ctx context.Context, params db.UpdateMemberParam
 }
 
 func (r *userRepo) DeleteMember(ctx context.Context, id uuid.UUID) error {
-	return r.store.DeleteMember(ctx, id)
+	return r.store.DeleteMemberTx(ctx, id)
 }

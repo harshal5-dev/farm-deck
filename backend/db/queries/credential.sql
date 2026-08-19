@@ -10,3 +10,6 @@ SELECT c.user_id, c.email_id, c.password_hash, u.full_name, u.role, u.tenant_id 
 
 -- name: GetCredentialByUserID :one
 SELECT c.user_id, c.email_id, c.password_hash, u.full_name, u.role, u.tenant_id FROM credentials c JOIN users u ON c.user_id = u.id WHERE c.user_id = $1;
+
+-- name: DeleteCredentialByUserID :exec
+DELETE FROM credentials WHERE user_id = $1;

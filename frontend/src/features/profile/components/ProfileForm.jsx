@@ -61,7 +61,7 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
 
           <CardContent>
             <FieldGroup>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
                 {/* Left column — Profile avatar */}
                 <FormField
                   control={form.control}
@@ -150,19 +150,22 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
 
           <Separator />
 
-          <div className="flex flex-wrap items-center justify-end gap-2 px-6 py-4 sm:px-8">
+          {/* On mobile: stack, save button fills the row. On desktop: align
+              to the end with a normal-width button. */}
+          <div className="flex flex-col-reverse gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-end sm:gap-2 sm:px-8 sm:py-4">
             <Button
               type="button"
               variant="ghost"
               onClick={onProfileReset}
               disabled={!isDirty || isSaving}
+              className="w-full sm:w-auto"
             >
               Discard
             </Button>
             <Button
               type="submit"
               disabled={!isDirty || isSaving}
-              className="gap-2"
+              className="w-full gap-2 sm:w-auto"
             >
               {isSaving ? (
                 <IconLoader2

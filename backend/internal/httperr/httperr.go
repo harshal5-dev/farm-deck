@@ -49,6 +49,9 @@ func HandleError(ctx *gin.Context, err error) {
 	case errors.Is(err, domain.ErrInvitationAccepted):
 		response.Conflict(ctx, messageOf(err))
 
+	case errors.Is(err, domain.ErrForbidden):
+		response.Forbidden(ctx, messageOf(err))
+
 	default:
 		log.Printf("internal error: %s %s: %v", ctx.Request.Method, ctx.Request.URL.Path, err)
 		response.InternalError(ctx, "something went wrong, please try again later")

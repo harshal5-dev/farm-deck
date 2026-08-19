@@ -19,7 +19,8 @@ type Querier interface {
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserInvitation(ctx context.Context, arg CreateUserInvitationParams) (UserInvitation, error)
-	DeleteMember(ctx context.Context, id uuid.UUID) error
+	DeleteCredentialByUserID(ctx context.Context, userID uuid.UUID) error
+	DeleteMember(ctx context.Context, id uuid.UUID) (User, error)
 	GetCredentialByEmail(ctx context.Context, emailID string) (GetCredentialByEmailRow, error)
 	GetCredentialByUserID(ctx context.Context, userID uuid.UUID) (GetCredentialByUserIDRow, error)
 	GetInvitationDetailsByTokenHash(ctx context.Context, tokenHash string) (GetInvitationDetailsByTokenHashRow, error)

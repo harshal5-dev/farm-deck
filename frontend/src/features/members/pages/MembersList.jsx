@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   IconUserPlus,
@@ -24,6 +24,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { ROLE_ORDER } from "@/constants/roles";
+import { usePermissions } from "@/features/auth/usePermissions";
 import { useListMembersQuery, useDeleteMemberMutation } from "../memberApi";
 import { setSelectedMember } from "../selectedMemberSlice";
 import { buildPageList } from "../lib/format";
@@ -47,6 +48,7 @@ const Members = () => {
   const { data, isLoading } = useListMembersQuery();
   const { total = 0, activeCount = 0, invitedCount = 0, members = [] } = data ?? {};
   const [deleteMember] = useDeleteMemberMutation();
+  const { canViewMembers, canManageMembers } = usePermissions();
 
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("active");
@@ -88,6 +90,12 @@ const Members = () => {
     const start = (activePage - 1) * PAGE_SIZE;
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, activePage]);
+
+  // Permission gate — bounce anyone without `view_members` straight back
+  // to the dashboard (the sidebar already hides the link, but a typed
+  // URL could still reach this route). Kept AFTER every hook so the
+  // hook order stays stable across renders.
+  if (!canViewMembers) return <Navigate to="/app" replace />;
 
   const pageItems = buildPageList(activePage, totalPages);
   const startIndex =
@@ -181,10 +189,12 @@ const Members = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button onClick={handleAdd} size="sm" className="gap-1.5 shadow-md shadow-leaf/25">
-                  <IconUserPlus className="size-4" strokeWidth={1.85} />
-                  Add member
-                </Button>
+                {canManageMembers && (
+                  <Button onClick={handleAdd} size="sm" className="gap-1.5 shadow-md shadow-leaf/25">
+                    <IconUserPlus className="size-4" strokeWidth={1.85} />
+                    Add member
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -285,7 +295,7 @@ const Members = () => {
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex min-h-64 items-center justify-center py-6">
-              <EmptyMembers onAdd={handleAdd} />
+              <EmptyMembers onAdd={handleAdd} canAdd={canManageMembers} />
             </div>
           ) : (
             <div
@@ -300,6 +310,7 @@ const Members = () => {
                 onView={() => handleView(m)}
                 onDelete={() => handleDelete(m)}
                 onEdit={() => handleEdit(m)}
+                canManage={canManageMembers}
               />
               ))}
             </div>
@@ -369,6 +380,7 @@ const Members = () => {
         member={viewingMember}
         open={Boolean(viewingMember)}
         onOpenChange={(open) => !open && setViewingMember(null)}
+        canManage={canManageMembers}
       />
     </div>
   );

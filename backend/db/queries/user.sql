@@ -32,7 +32,8 @@ UPDATE users SET status = $2 WHERE id = $1 RETURNING *;
 
 -- name: ListMembers :many
 SELECT * FROM users
-WHERE tenant_id = $1 AND id != $2 AND deleted_at IS NULL
+WHERE tenant_id = $1 AND id != $2 AND role != $3
+AND deleted_at IS NULL
 ORDER BY last_active_at DESC NULLS LAST, full_name;
 
 -- name: TouchUserLastActive :exec
@@ -41,5 +42,5 @@ UPDATE users SET last_active_at = now() WHERE id = $1;
 -- name: UpdateMember :one
 UPDATE users SET full_name = $2, profile_picture = $3, role = $4, updated_at = now() WHERE id = $1 RETURNING *;
 
--- name: DeleteMember :exec
-UPDATE users SET deleted_at = now() WHERE id = $1;
+-- name: DeleteMember :one
+UPDATE users SET deleted_at = now() WHERE id = $1 RETURNING *;

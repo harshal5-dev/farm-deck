@@ -14,7 +14,10 @@ const IdentityPreview = ({ fullName, email, role, avatarId }) => {
   const avatar = avatarId || DEFAULT_AVATAR_ID;
 
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border border-border/40 bg-card/40 p-5 shadow-sm backdrop-blur items-center flex justify-center">
+    // On mobile the preview sits above the form (single column) so we let
+    // it size to its content. On desktop we stretch to match the form
+    // column height so the two columns align.
+    <div className="relative flex items-center justify-center overflow-hidden rounded-2xl border border-border/40 bg-card/40 p-5 shadow-sm backdrop-blur lg:h-full">
       {/* Soft tinted glow */}
       <div
         className={cn(

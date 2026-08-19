@@ -124,8 +124,10 @@ func buildAcceptURL(appURL, rawToken string) string {
 }
 
 func checkRole(role string) error {
-	if role != domain.UserRoleGrower && role != domain.UserRoleManager && role != domain.UserRoleViewer {
+	switch role {
+	case domain.RoleManager, domain.RoleGrower, domain.RoleViewer:
+		return nil
+	default:
 		return fmt.Errorf("invalid role: %s", role)
 	}
-	return nil
 }

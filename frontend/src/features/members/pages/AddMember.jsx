@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   IconArrowLeft,
@@ -7,13 +7,18 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
+import { usePermissions } from "@/features/auth/usePermissions";
 import UserForm from "../components/user-form/UserForm";
 import { useCreateMemberMutation } from "../memberApi";
 
 const AddMember = () => {
   const navigate = useNavigate();
-
+  const { canManageMembers } = usePermissions();
   const [createMember, { isLoading }] = useCreateMemberMutation();
+
+  // Only roles that can manage members should reach this form. Bounce
+  // anyone else back to the list so a typed URL never exposes the form.
+  if (!canManageMembers) return <Navigate to="/app/members" replace />;
 
 
   const handleSubmit = async (values) => {
@@ -33,7 +38,9 @@ const AddMember = () => {
   const handleCancel = () => navigate("/app/members");
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    // On mobile the page scrolls naturally with content; on lg+ the
+    // dashboard expects a fixed-height column so the form fills it.
+    <div className="flex flex-col lg:h-full lg:min-h-0">
       {/* ===== Compact back link ===== */}
       <Reveal duration={350}>
         <Link
@@ -103,7 +110,7 @@ const AddMember = () => {
 
       {/* ===== Form body ===== */}
       <Reveal delay={140} duration={500}>
-        <div className="glass-card texture-paper highlight-edge flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl p-4 sm:p-5">
+        <div className="glass-card texture-paper highlight-edge flex flex-col rounded-2xl p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
           <UserForm
             mode="create"
             onSubmit={handleSubmit}

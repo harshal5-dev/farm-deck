@@ -24,7 +24,7 @@ import { formatDate, formatRelative } from "../lib/format";
 import DetailRow from "./DetailRow";
 import MemberAvatar from "./member-card/MemberAvatar";
 
-const MemberDetailsDialog = ({ member, open, onOpenChange }) => {
+const MemberDetailsDialog = ({ member, open, onOpenChange, canManage = true }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -155,14 +155,16 @@ const MemberDetailsDialog = ({ member, open, onOpenChange }) => {
               >
                 Close
               </Button>
-              <Button
-                type="button"
-                onClick={handleEdit}
-                className="gap-1.5 shadow-md shadow-leaf/20"
-              >
-                <IconPencil className="size-4" strokeWidth={1.85} />
-                Edit details
-              </Button>
+              {canManage && (
+                <Button
+                  type="button"
+                  onClick={handleEdit}
+                  className="gap-1.5 shadow-md shadow-leaf/20"
+                >
+                  <IconPencil className="size-4" strokeWidth={1.85} />
+                  Edit details
+                </Button>
+              )}
             </DialogFooter>
           </div>
         </div>

@@ -65,7 +65,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
 
           <CardContent>
             <FieldGroup>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
                 {/* Left column — Workspace identity card */}
                 <div className="flex flex-col items-center">
                   <FieldLabel className="flex items-center gap-1.5">
@@ -184,19 +184,22 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
 
           <Separator />
 
-          <div className="flex flex-wrap items-center justify-end gap-2 px-6 py-3 sm:px-8">
+          {/* On mobile: stack, save button fills the row. On desktop:
+              align to the end with normal-width buttons. */}
+          <div className="flex flex-col-reverse gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-end sm:gap-2 sm:px-8">
             <Button
               type="button"
               variant="ghost"
               onClick={onTenantReset}
               disabled={!tenantIsDirty || isSavingTenant}
+              className="w-full sm:w-auto"
             >
               Discard
             </Button>
             <Button
               type="submit"
               disabled={!tenantIsDirty || isSavingTenant}
-              className="gap-2"
+              className="w-full gap-2 sm:w-auto"
             >
               {isSavingTenant ? (
                 <IconLoader2

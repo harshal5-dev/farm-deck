@@ -76,9 +76,11 @@ const UserForm = ({
       <form
         onSubmit={form.handleSubmit(submit)}
         noValidate
-        className="flex h-full min-h-0 flex-col"
+        // On mobile grow with content (natural page scroll). On lg+ fill
+        // the fixed-height card.
+        className="flex flex-col lg:h-full lg:min-h-0"
       >
-        <div className="grid h-full min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:gap-4">
           {/* ===== Left — identity preview ===== */}
           <div className="flex min-h-0 flex-col">
             <IdentityPreview
@@ -91,14 +93,16 @@ const UserForm = ({
 
           {/* ===== Right — form fields ===== */}
           <div className="flex min-h-0 flex-col gap-3.5">
-            {/* Avatar + Full name (avatar dropdown sits left of the name input) */}
-            <div className="grid grid-cols-[auto_1fr] items-start gap-3 sm:gap-4">
+            {/* Avatar + Full name — stack on mobile (avatar on top, name
+                below), sit side-by-side on tablet+. The labels for the
+                two columns align horizontally thanks to the shared grid. */}
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[auto_1fr] sm:gap-4">
               {/* Avatar — bound via FormField but rendered with its own layout */}
               <FormField
                 control={form.control}
                 name="profilePicture"
                 render={({ field }) => (
-                  <div>
+                  <div className="flex flex-col items-center sm:items-start">
                     <span className={cn("mb-1 flex items-center gap-1.5", fieldLabel)}>
                       <IconBolt className="size-3.5" strokeWidth={1.75} />
                       Avatar
@@ -228,9 +232,9 @@ const UserForm = ({
           </div>
         </div>
 
-        {/* ===== Footer (sticky to the bottom of the page column) ===== */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3">
-          <p className="text-[11px] text-muted-foreground">
+        {/* ===== Footer ===== */}
+        <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+          <p className="text-[11px] text-muted-foreground sm:order-1">
             {isDirty ? (
               <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
                 <span className="size-1.5 rounded-full bg-amber-500" />
@@ -243,7 +247,10 @@ const UserForm = ({
               </span>
             )}
           </p>
-          <div className="flex items-center gap-2">
+          {/* On mobile the actions stack and the primary button fills
+              the row so it's easy to tap. On desktop they sit side by
+              side with normal widths. */}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
             <Button
               type="button"
               variant="ghost"
@@ -252,13 +259,14 @@ const UserForm = ({
                 onCancel?.();
               }}
               disabled={submitting}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={submitting || (isEdit && !isDirty)}
-              className="gap-2 shadow-md shadow-leaf/20"
+              className="w-full gap-2 shadow-md shadow-leaf/20 sm:w-auto"
             >
               {submitting ? (
                 <IconLoader2 className="size-4 animate-spin" strokeWidth={2} />

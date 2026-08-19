@@ -17,6 +17,7 @@ const MemberCard = ({
   onView,
   onDelete,
   onEdit,
+  canManage = true,
 }) => {
   const r = getRole(member.role);
   const RoleIcon = r.icon;
@@ -104,18 +105,23 @@ const MemberCard = ({
               </div>
             </div>
 
-            {/* Action menu on the far right — stops propagation so it doesn't open the dialog */}
-            <div
-              className="shrink-0"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <MemberActionMenu
-                member={member}
-                onDelete={onDelete}
-                onEdit={onEdit}
-              />
-            </div>
+            {/* Action menu on the far right — stops propagation so it doesn't open the dialog.
+                Hidden entirely for roles that can't manage members; the card stays
+                clickable so the details dialog still works for read-only viewers. */}
+            {canManage && (
+              <div
+                className="shrink-0"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                <MemberActionMenu
+                  member={member}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  canManage={canManage}
+                />
+              </div>
+            )}
           </div>
 
           {/* Stat tiles */}

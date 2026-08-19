@@ -1,0 +1,91 @@
+package domain
+
+type Permission string
+
+const (
+	PermViewMembers   Permission = "members.view"
+	PermManageMembers Permission = "members.manage"
+
+	PermViewFarms    Permission = "farms.view"
+	PermManageFarms  Permission = "farms.manage"
+	PermViewFields   Permission = "fields.view"
+	PermManageFields Permission = "fields.manage"
+	PermViewCrops    Permission = "crops.view"
+	PermManageCrops  Permission = "crops.manage"
+
+	PermViewHarvests Permission = "harvests.view"
+	PermLogHarvests  Permission = "harvests.log"
+
+	PermViewReports Permission = "reports.view"
+
+	PermManageWorkspace Permission = "workspace.manage"
+	PermManageBilling   Permission = "billing.manage"
+)
+
+const (
+	RoleOwner   = "owner"
+	RoleManager = "manager"
+	RoleGrower  = "grower"
+	RoleViewer  = "viewer"
+)
+
+var allPermissions = []Permission{
+	PermViewMembers, PermManageMembers,
+	PermViewFarms, PermManageFarms,
+	PermViewFields, PermManageFields,
+	PermViewCrops, PermManageCrops,
+	PermViewHarvests, PermLogHarvests,
+	PermViewReports,
+	PermManageWorkspace, PermManageBilling,
+}
+
+var rolePermissions = func() map[string]map[Permission]struct{} {
+	owner := make(map[Permission]struct{}, len(allPermissions))
+	for _, p := range allPermissions {
+		owner[p] = struct{}{}
+	}
+
+	set := func(ps ...Permission) map[Permission]struct{} {
+		m := make(map[Permission]struct{}, len(ps))
+		for _, p := range ps {
+			m[p] = struct{}{}
+		}
+		return m
+	}
+
+	return map[string]map[Permission]struct{}{
+		RoleOwner: owner,
+		RoleManager: set(
+			PermViewMembers, PermManageMembers,
+			PermViewFarms, PermManageFarms,
+			PermViewFields, PermManageFields,
+			PermViewCrops, PermManageCrops,
+			PermViewHarvests, PermLogHarvests,
+			PermViewReports,
+		),
+		RoleGrower: set(
+			PermViewFarms, PermManageFarms,
+			PermViewFields, PermManageFields,
+			PermViewCrops, PermManageCrops,
+			PermViewHarvests, PermLogHarvests,
+			PermViewReports,
+		),
+		RoleViewer: set(
+			PermViewFarms, PermViewFields,
+			PermViewCrops, PermViewHarvests,
+			PermViewReports,
+		),
+	}
+}()
+
+func HasPermission(role string, perm Permission) bool {
+	if role == RoleOwner {
+		return true
+	}
+	perms, ok := rolePermissions[role]
+	if !ok {
+		return false
+	}
+	_, has := perms[perm]
+	return has
+}

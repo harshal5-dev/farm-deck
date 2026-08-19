@@ -101,57 +101,11 @@ func TestTenantHandler_UpdateTenant_NotFoundMapped(t *testing.T) {
 	}
 }
 
-// runAllowed builds a router that optionally injects a role, then runs the
-// IsUpdateTenantAllowed middleware followed by a probe handler, returning the
-// recorder so the caller can assert on the outcome.
-func runAllowed(role string, setRole bool) *httptest.ResponseRecorder {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
-	g := r.Group("/t")
-	if setRole {
-		g.Use(func(c *gin.Context) { c.Set(ctxutil.RoleKey, role) })
-	}
-	h := NewTenantHandler(&fakeTenantService{updateTenant: func(context.Context, uuid.UUID, UpdateTenantRequest) error {
-		return nil
-	}})
-	g.Use(h.IsUpdateTenantAllowed)
-	g.PATCH("/", func(c *gin.Context) { c.String(http.StatusOK, "reached") })
-
-	req := httptest.NewRequest(http.MethodPatch, "/t/", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
-
-func TestIsUpdateTenantAllowed_OwnerPassesThrough(t *testing.T) {
-	w := runAllowed(domain.UserRoleOwner, true)
-	if w.Code != http.StatusOK {
-		t.Fatalf("status: got %d want 200 (owner should pass through)", w.Code)
-	}
-	if w.Body.String() != "reached" {
-		t.Errorf("expected the downstream handler to run, got %q", w.Body.String())
-	}
-}
-
-func TestIsUpdateTenantAllowed_NonOwnerForbidden(t *testing.T) {
-	w := runAllowed(domain.UserRoleGrower, true)
-	if w.Code != http.StatusForbidden {
-		t.Fatalf("status: got %d want 403", w.Code)
-	}
-	if !strings.Contains(w.Body.String(), "only owner can update tenant") {
-		t.Errorf("expected 'only owner' message, got %s", w.Body.String())
-	}
-	if strings.Contains(w.Body.String(), "reached") {
-		t.Error("downstream handler must not run for a non-owner")
-	}
-}
-
-func TestIsUpdateTenantAllowed_NoRoleRejected(t *testing.T) {
-	w := runAllowed("", false) // role never set
-	if w.Code != http.StatusUnauthorized {
-		t.Fatalf("status: got %d want 401", w.Code)
-	}
-	if !strings.Contains(w.Body.String(), "authentication required") {
-		t.Errorf("expected 'authentication required', got %s", w.Body.String())
-	}
-}
+// Authorization for /tenants/me is now enforced exclusively by
+// middlewares.RequirePermission(PermManageWorkspace) at the route
+// registration. See:
+//   - internal/middlewares/auth_test.go (TestRequirePermission_*)
+//   - internal/domain/permissions_test.go (TestHasPermission,
+//     TestRolePermissionsAreMonotonic)
+// The IsUpdateTenantAllowed handler method and these tests were
+// removed in favour of the permission-based path.

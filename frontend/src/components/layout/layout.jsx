@@ -1,47 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Outlet } from "react-router-dom";
-import {
-  IconLayoutDashboard,
-  IconUsers,
-} from "@tabler/icons-react";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/features/auth";
+import { NAV_GROUPS } from "@/constants/nav-config";
+import { filterNavGroups } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import Header from "@/components/layout/header/Header";
 import BackgroundDecor from "./BackgroundDecor";
 import DesktopSidebar from "./desktop-sidebar/DesktopSidebar";
 import MobileSidebar from "./mobile-sidebar/MobileSidebar";
 
-import { useSelector } from "react-redux";
-import { selectUser } from "@/features/auth";
-
-const navGroups = [
-  {
-    label: "Overview",
-    items: [
-      {
-        label: "Dashboard",
-        href: "/app",
-        icon: IconLayoutDashboard,
-        end: true,
-      },
-    ],
-  },
-  {
-    label: "Team",
-    items: [
-      {
-        label: "Members",
-        href: "/app/members",
-        icon: IconUsers,
-      },
-    ],
-  },
-];
-
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const user = useSelector(selectUser);
+
+  // Role-aware sidebar: drop nav items the current user can't see and
+  // hide whole groups that end up empty. Memoized so the child sidebars
+  // don't re-render unless the role or the static config changes.
+  const navGroups = useMemo(
+    () => filterNavGroups(NAV_GROUPS, user?.role),
+    [user?.role]
+  );
 
   const handleKeyDown = useCallback((e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "b") {
@@ -63,7 +44,11 @@ const Layout = () => {
         onToggle={() => setCollapsed(!collapsed)}
         navGroups={navGroups}
       />
-      <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} navGroups={navGroups} />
+      <MobileSidebar
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        navGroups={navGroups}
+      />
       <main
         className={cn(
           "relative flex flex-1 flex-col transition-all duration-300",
@@ -77,6 +62,6 @@ const Layout = () => {
       </main>
     </div>
   );
-}
+};
 
 export default Layout;

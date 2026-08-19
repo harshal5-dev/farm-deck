@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,6 +16,7 @@ type Store interface {
 	CreateMemberTx(ctx context.Context, arg domain.CreateMemberTxParams) (CreateMemberTxResult, error)
 	CreateRefreshTokenTx(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	AcceptInvitationTx(ctx context.Context, arg domain.AcceptInvitationTxParams) (AcceptInvitationTxResult, error)
+	DeleteMemberTx(ctx context.Context, id uuid.UUID) error
 	Close()
 }
 

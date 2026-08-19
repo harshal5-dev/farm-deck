@@ -25,6 +25,7 @@ const MemberActionMenu = ({
   member,
   onDelete,
   onEdit,
+  canManage = true,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -70,24 +71,26 @@ const MemberActionMenu = ({
           <IconDots className="size-4" strokeWidth={1.85} />
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={6} className="w-56 gap-0 p-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              onEdit();
-            }}
-            className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-muted"
-          >
-            <span className="flex size-7 items-center justify-center rounded-md bg-leaf/15 text-leaf">
-              <IconPencil className="size-3.5" strokeWidth={1.85} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">
-                Edit details
-              </p>
-              <p className="text-[10px] text-muted-foreground">Name, email & role</p>
-            </div>
-          </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                onEdit();
+              }}
+              className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-muted"
+            >
+              <span className="flex size-7 items-center justify-center rounded-md bg-leaf/15 text-leaf">
+                <IconPencil className="size-3.5" strokeWidth={1.85} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-foreground">
+                  Edit details
+                </p>
+                <p className="text-[10px] text-muted-foreground">Name, email & role</p>
+              </div>
+            </button>
+          )}
           <button
             type="button"
             onClick={copyEmail}
@@ -104,24 +107,28 @@ const MemberActionMenu = ({
             </div>
           </button>
 
-          <div className="my-1 h-px bg-border/60" />
-          <button
-            type="button"
-            onClick={askDelete}
-            className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-red-500/8"
-          >
-            <span className="flex size-7 items-center justify-center rounded-md bg-red-500/15 text-red-500">
-              <IconTrash className="size-3.5" strokeWidth={1.85} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-red-500/90">
-                Delete user
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                Permanently remove from workspace
-              </p>
-            </div>
-          </button>
+          {canManage && (
+            <>
+              <div className="my-1 h-px bg-border/60" />
+              <button
+                type="button"
+                onClick={askDelete}
+                className="group/menu flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-red-500/8"
+              >
+                <span className="flex size-7 items-center justify-center rounded-md bg-red-500/15 text-red-500">
+                  <IconTrash className="size-3.5" strokeWidth={1.85} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-red-500/90">
+                    Delete user
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Permanently remove from workspace
+                  </p>
+                </div>
+              </button>
+            </>
+          )}
         </PopoverContent>
       </Popover>
 

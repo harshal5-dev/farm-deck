@@ -78,7 +78,7 @@ const Profile = () => {
 
 
   return (
-      <div className="mx-auto space-y-5">
+      <div className="mx-auto space-y-4 sm:space-y-5">
         {/* Back link */}
         <Reveal duration={400}>
           <Link
@@ -99,7 +99,9 @@ const Profile = () => {
         {/* ---------------- Tabs ---------------- */}
         <Reveal delay={180} duration={500}>
           <Tabs defaultValue="profile" className="mx-auto">
-            <div className="flex items-center justify-between gap-3">
+            {/* Stack the helper text under the tab strip on mobile so the
+                tabs themselves can wrap freely without competing for room. */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <TabsList>
                 <TabsTrigger value="profile" icon={IconUser}>
                   Personal info
@@ -108,7 +110,7 @@ const Profile = () => {
                   Company
                 </TabsTrigger>)}
               </TabsList>
-              <p className="hidden text-xs text-muted-foreground sm:block">
+              <p className="text-xs text-muted-foreground sm:text-end">
                 Changes save when you press the Save button.
               </p>
             </div>

@@ -38,6 +38,15 @@ func (q *Queries) CreateCredential(ctx context.Context, arg CreateCredentialPara
 	return i, err
 }
 
+const deleteCredentialByUserID = `-- name: DeleteCredentialByUserID :exec
+DELETE FROM credentials WHERE user_id = $1
+`
+
+func (q *Queries) DeleteCredentialByUserID(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCredentialByUserID, userID)
+	return err
+}
+
 const getCredentialByEmail = `-- name: GetCredentialByEmail :one
 SELECT c.user_id, c.email_id, c.password_hash, u.full_name, u.role, u.tenant_id FROM credentials c JOIN users u ON c.user_id = u.id WHERE c.email_id = $1
 `

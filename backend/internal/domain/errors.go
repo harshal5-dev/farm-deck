@@ -29,4 +29,7 @@ var (
 	ErrInvitationExpired  = errors.New("invitation has expired")
 	ErrInvitationRevoked  = errors.New("invitation has been revoked")
 	ErrInvitationAccepted = errors.New("invitation already accepted")
+
+	// Permission errors
+	ErrForbidden = errors.New("forbidden")
 )

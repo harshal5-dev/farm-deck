@@ -1,9 +1,16 @@
 import { IconUsers, IconUserPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-const EmptyMembers = ({ onAdd }) => {
+/**
+ * EmptyMembers — shown when the filtered list has zero rows.
+ *
+ *   canAdd=false: read-only copy, no CTA. Used for roles (e.g. viewer)
+ *                 that can see the member list but can't invite.
+ *   canAdd=true:  copy nudges toward inviting, CTA is shown.
+ */
+const EmptyMembers = ({ onAdd, canAdd = true }) => {
   return (
-    <div className="glass-card texture-paper highlight-edge relative overflow-hidden rounded-3xl py-16 text-center">
+    <div className="glass-card texture-paper highlight-edge relative w-full max-w-xl overflow-hidden rounded-3xl py-16 text-center">
       <div className="pointer-events-none absolute -top-10 left-1/2 size-48 -translate-x-1/2 rounded-full bg-leaf/10 blur-3xl" />
       <div className="relative flex flex-col items-center gap-4">
         <div className="relative">
@@ -17,16 +24,20 @@ const EmptyMembers = ({ onAdd }) => {
             No members match your filters
           </h3>
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-            Try adjusting your search or add someone new to the team.
+            {canAdd
+              ? "Try adjusting your search or add someone new to the team."
+              : "Try adjusting your filters — only workspace managers can add new members."}
           </p>
         </div>
-        <Button onClick={onAdd} className="mt-2 gap-2">
-          <IconUserPlus className="size-4" strokeWidth={1.85} />
-          Add a member
-        </Button>
+        {canAdd && onAdd && (
+          <Button onClick={onAdd} className="mt-2 gap-2">
+            <IconUserPlus className="size-4" strokeWidth={1.85} />
+            Add a member
+          </Button>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default EmptyMembers;
