@@ -57,14 +57,16 @@ function DialogContent({
           "rounded-3xl bg-card text-card-foreground shadow-2xl shadow-foreground/15",
           "ring-1 ring-foreground/10",
           // Sizing
-          "data-[size=default]:max-w-lg data-[size=sm]:max-w-sm data-[size=lg]:max-w-2xl data-[size=xl]:max-w-4xl",
+          "data-[size=default]:max-w-lg data-[size=lg]:max-w-2xl data-[size=sm]:max-w-sm data-[size=xl]:max-w-4xl",
           // Animations — use CSS transitions (not keyframe animations) so the
-          // close is smooth and doesn't flash. translate-y keeps the dialog
-          // centred while animating in/out (scale would override the -translate
-          // centering transform).
-          "transition-all duration-200 outline-none",
-          "data-open:opacity-100 data-open:translate-y-0",
-          "data-closed:opacity-0 data-closed:translate-y-2",
+          // close is smooth and doesn't flash. Scale composes with the
+          // -translate centering (in Tailwind v4 they're separate CSS
+          // properties), whereas translate-y variants would override it and
+          // push the dialog below centre. Transition only the properties we
+          // animate — never transition-all.
+          "transition-[opacity,scale] duration-200 ease-out outline-none",
+          "data-open:scale-100 data-open:opacity-100",
+          "data-closed:scale-95 data-closed:opacity-0",
           className
         )}
         {...props}
@@ -76,7 +78,7 @@ function DialogContent({
               <button
                 type="button"
                 aria-label="Close"
-                className="absolute top-3.5 right-3.5 z-10 inline-flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                className="absolute top-3.5 right-3.5 z-10 inline-flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               />
             }
           >
@@ -92,10 +94,7 @@ function DialogHeader({ className, ...props }) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn(
-        "flex flex-col gap-1.5 p-6 pb-4 text-left",
-        className
-      )}
+      className={cn("flex flex-col gap-1.5 p-6 pb-4 text-left", className)}
       {...props}
     />
   );
@@ -105,7 +104,10 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("font-heading text-lg font-semibold tracking-tight", className)}
+      className={cn(
+        "font-heading text-lg font-semibold tracking-tight",
+        className
+      )}
       {...props}
     />
   );
@@ -125,10 +127,7 @@ function DialogBody({ className, ...props }) {
   return (
     <div
       data-slot="dialog-body"
-      className={cn(
-        "flex-1 overflow-y-auto px-6 py-2",
-        className
-      )}
+      className={cn("flex-1 overflow-y-auto px-6 py-2", className)}
       {...props}
     />
   );

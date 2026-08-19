@@ -33,14 +33,6 @@ export const memberApi = createApi({
       invalidatesTags: ["Profile"],
     }),
 
-    reinviteMember: builder.mutation({
-      query: (id) => ({
-        url: `/users/members/${id}/reinvite`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Profile"],
-    }),
-
     deleteMember: builder.mutation({
       query: (id) => ({
         url: `/users/members/${id}`,
@@ -55,6 +47,5 @@ export const {
   useCreateMemberMutation,
   useListMembersQuery,
   useUpdateMemberMutation,
-  useReinviteMemberMutation,
   useDeleteMemberMutation,
 } = memberApi;

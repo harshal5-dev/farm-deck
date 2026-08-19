@@ -1,56 +1,12 @@
 import {
-  IconAlertTriangle,
-  IconClockHour4,
-  IconMail,
   IconRefresh,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
+import { REASONS } from "../constants";
 
-/**
- * InvitationInvalid — themed fallback rendered when the invitation token
- * is missing, malformed, expired, revoked, or already accepted. Mirrors
- * the visual language of `FullPageError` + the NotFound page so the user
- * never sees a jarring style jump.
- *
- * The `reason` prop nudges the copy + icon to match the failure mode:
- *  - "missing"   — no token in the URL (user typed the URL manually)
- *  - "expired"   — token past its TTL
- *  - "consumed"  — already accepted (409)
- *  - "invalid"   — anything else (bad signature, revoked, generic 4xx)
- */
-const REASONS = {
-  missing: {
-    eyebrow: "Invitation link is missing",
-    title: "We couldn't find your invitation",
-    message:
-      "The link looks incomplete. Please open the email we sent you and click the button — or paste the full URL into your browser.",
-    icon: IconMail,
-  },
-  expired: {
-    eyebrow: "Invitation expired",
-    title: "This invitation has expired",
-    message:
-      "Invitations are valid for a limited time. Ask the workspace owner to send you a fresh invite so you can pick a password and join.",
-    icon: IconClockHour4,
-  },
-  consumed: {
-    eyebrow: "Invitation already used",
-    title: "This invitation has already been accepted",
-    message:
-      "Each invitation link can only be used once. If that's you, sign in instead. If not, ask the workspace owner to reissue the invitation.",
-    icon: IconAlertTriangle,
-  },
-  invalid: {
-    eyebrow: "Invitation invalid",
-    title: "This invitation can't be used",
-    message:
-      "The link may be mistyped, revoked, or no longer valid. Ask the workspace owner to send you a new invitation.",
-    icon: IconAlertTriangle,
-  },
-};
 
 const InvitationInvalid = ({ reason = "invalid", onRetry }) => {
   const meta = REASONS[reason] || REASONS.invalid;

@@ -48,10 +48,16 @@ type Config struct {
 	AccessTokenDuration  time.Duration `env:"ACCESS_TOKEN_DURATION,required"`
 	RefreshTokenDuration time.Duration `env:"REFRESH_TOKEN_DURATION,required"`
 
-	// InvitationTokenDuration controls how long a freshly created invitation
-	// stays valid before the accept endpoint starts rejecting it. Defaults
-	// to 168h (7 days) to match the user_invitations migration comment.
 	InvitationTokenDuration time.Duration `env:"INVITATION_TOKEN_DURATION" envDefault:"168h"`
+
+	// Rate limiting (token bucket, per client IP). RateLimit applies to all
+	// /api/v1 routes; AuthRateLimit applies on top of it on auth endpoints
+	// (login, register, ...) as brute-force protection.
+	RateLimitPerMinute int `env:"RATE_LIMIT_PER_MINUTE" envDefault:"240"`
+	RateLimitBurst     int `env:"RATE_LIMIT_BURST" envDefault:"80"`
+
+	AuthRateLimitPerMinute int `env:"AUTH_RATE_LIMIT_PER_MINUTE" envDefault:"10"`
+	AuthRateLimitBurst     int `env:"AUTH_RATE_LIMIT_BURST" envDefault:"5"`
 }
 
 func Load() (Config, error) {

@@ -1,22 +1,13 @@
 import {
   IconBuildingCommunity,
-  IconClockHour4,
   IconMail,
 } from "@tabler/icons-react";
 import { Avatar } from "@/components/avatars/avatars";
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import { getRole } from "@/constants/roles";
 import { cn } from "@/lib/utils";
+import ExpiryNote from "./ExpiryNote";
 
-/**
- * InvitationHeader — celebratory invitee card rendered above the
- * accept-invitation form. Shows the avatar, name, email, the role
- * they'll be granted, the tenant they're joining, and the expiry
- * countdown.
- *
- * Visual language matches the rest of the app (glass-card, role-tinted
- * accents, gradient dividers) so it never feels like a foreign screen.
- */
 const InvitationHeader = ({ invitation }) => {
   const { fullName, emailId, role, tenantName, expiresAt } = invitation || {};
   const roleMeta = getRole(role);
@@ -112,31 +103,5 @@ const InvitationHeader = ({ invitation }) => {
     </div>
   );
 };
-
-function ExpiryNote({ expiresAt }) {
-  const expires = new Date(expiresAt);
-  const now = new Date();
-  const msLeft = expires.getTime() - now.getTime();
-  const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-  const expired = msLeft <= 0;
-
-  const label = expired
-    ? "Invitation has expired"
-    : daysLeft === 1
-      ? "Expires in 1 day"
-      : `Expires in ${daysLeft} days`;
-
-  return (
-    <p
-      className={cn(
-        "mt-3 inline-flex items-center gap-1.5 text-[11px]",
-        expired ? "text-destructive" : "text-muted-foreground/80"
-      )}
-    >
-      <IconClockHour4 className="size-3.5" strokeWidth={1.85} />
-      <span>{label}</span>
-    </p>
-  );
-}
 
 export default InvitationHeader;

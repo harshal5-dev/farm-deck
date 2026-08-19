@@ -51,7 +51,7 @@ const Layout = () => {
       />
       <main
         className={cn(
-          "relative flex flex-1 flex-col transition-all duration-300",
+          "relative flex flex-1 flex-col transition-[margin] duration-300",
           collapsed ? "lg:ml-19" : "lg:ml-65"
         )}
       >

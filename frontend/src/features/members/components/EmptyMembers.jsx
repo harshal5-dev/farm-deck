@@ -1,13 +1,6 @@
 import { IconUsers, IconUserPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-/**
- * EmptyMembers — shown when the filtered list has zero rows.
- *
- *   canAdd=false: read-only copy, no CTA. Used for roles (e.g. viewer)
- *                 that can see the member list but can't invite.
- *   canAdd=true:  copy nudges toward inviting, CTA is shown.
- */
 const EmptyMembers = ({ onAdd, canAdd = true }) => {
   return (
     <div className="glass-card texture-paper highlight-edge relative w-full max-w-xl overflow-hidden rounded-3xl py-16 text-center">

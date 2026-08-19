@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
-import { cn } from "@/lib/utils"
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
-const HAS_INTERSECTION_OBSERVER =
-  typeof IntersectionObserver !== "undefined";
+const HAS_INTERSECTION_OBSERVER = typeof IntersectionObserver !== "undefined";
 
 /**
  * Reveal — fades + slides its children in. Two modes:
@@ -28,56 +27,56 @@ const Reveal = ({
 }) => {
   const [shown, setShown] = useState(
     () => trigger === "scroll" && !HAS_INTERSECTION_OBSERVER
-  )
-  const firstRun = useRef(true)
-  const ref = useRef(null)
+  );
+  const firstRun = useRef(true);
+  const ref = useRef(null);
 
   // Scroll mode: observe and reveal when the element enters the viewport.
   useEffect(() => {
-    if (trigger !== "scroll") return
-    const node = ref.current
-    if (!node) return
+    if (trigger !== "scroll") return;
+    const node = ref.current;
+    if (!node) return;
 
     // Fallback: without IntersectionObserver support, the element starts
     // revealed (see the lazy initializer above) so there's nothing to sync.
-    if (!HAS_INTERSECTION_OBSERVER) return
+    if (!HAS_INTERSECTION_OBSERVER) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setShown(true)
-          if (once) observer.unobserve(node)
+          setShown(true);
+          if (once) observer.unobserve(node);
         } else if (!once) {
-          setShown(false)
+          setShown(false);
         }
       },
       { threshold, rootMargin: "0px 0px -10% 0px" }
-    )
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [trigger, threshold, once])
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [trigger, threshold, once]);
 
   // Mount mode: play on mount + whenever changeKey changes.
   useEffect(() => {
-    if (trigger !== "mount") return
+    if (trigger !== "mount") return;
     // Re-run the entrance animation on every changeKey change.
     if (!firstRun.current) {
-      setShown(false)
+      setShown(false);
     }
-    firstRun.current = false
+    firstRun.current = false;
 
-    const t = setTimeout(() => setShown(true), 16)
-    return () => clearTimeout(t)
+    const t = setTimeout(() => setShown(true), 16);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changeKey])
+  }, [changeKey]);
 
   return (
     <Tag
       ref={trigger === "scroll" ? ref : undefined}
       className={cn(
-        "transition-all ease-out will-change-transform",
+        "transition-[translate,opacity,filter] ease-out will-change-transform",
         shown
-          ? "translate-y-0 opacity-100 blur-0"
+          ? "blur-0 translate-y-0 opacity-100"
           : "translate-y-2 opacity-0 blur-[1px]",
         className
       )}
@@ -89,7 +88,7 @@ const Reveal = ({
     >
       {children}
     </Tag>
-  )
+  );
 };
 
 export default Reveal;

@@ -17,13 +17,25 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 	}
 
 	api := router.Group("/api/v1")
+	// The global limiter must be attached before public/protected are
+	// derived: gin copies the middleware chain when a group is created.
+	api.Use(middlewares.RateLimitMiddleware(server.globalLimiter, middlewares.IPKey))
+
 	public := api.Group("")
 	protected := api.Group("")
 
 	protected.Use(middlewares.AuthMiddleware(server.config.CookieTokenName, server.config.JWTSecret))
 
 	api.GET("/health", server.healthCheck)
-	authhttp.Register(public, protected, server.container.Handlers.Auth)
+
+	// Auth endpoints get a second, stricter limiter on top of the global
+	// one (each request costs a token from both buckets) to blunt
+	// brute-force attempts against login and invitation acceptance.
+	authLimiter := middlewares.RateLimitMiddleware(server.authLimiter, middlewares.IPKey)
+	authPublic := public.Group("", authLimiter)
+	authProtected := protected.Group("", authLimiter)
+
+	authhttp.Register(authPublic, authProtected, server.container.Handlers.Auth)
 	userhttp.Register(public, protected, server.container.Handlers.User)
 	tenanthttp.Register(public, protected, server.container.Handlers.Tenant)
 }

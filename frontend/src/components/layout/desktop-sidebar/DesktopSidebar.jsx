@@ -1,5 +1,9 @@
 import { cn } from "@/lib/utils";
-import { IconChevronLeft, IconChevronRight, IconCommand } from "@tabler/icons-react";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconCommand,
+} from "@tabler/icons-react";
 import BrandLogo from "../BrandLogo";
 import NavList from "../nav-list/NavList";
 
@@ -7,7 +11,7 @@ const DesktopSidebar = ({ collapsed, onToggle, navGroups }) => {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 hidden flex-col bg-sidebar transition-all duration-300 lg:flex",
+        "fixed inset-y-0 left-0 z-40 hidden flex-col bg-sidebar transition-[width] duration-300 lg:flex",
         collapsed ? "w-19" : "w-65"
       )}
     >
@@ -39,7 +43,7 @@ const DesktopSidebar = ({ collapsed, onToggle, navGroups }) => {
                   strokeWidth={1.85}
                 />
                 Collapse
-                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground ring-1 ring-inset ring-leaf/40">
+                <kbd className="ml-auto inline-flex h-5 items-center gap-0.5 rounded-md bg-background/60 px-1.5 font-mono text-[10px] text-muted-foreground ring-1 ring-leaf/40 ring-inset">
                   <IconCommand className="size-2.5" strokeWidth={2.2} />
                   <span>B</span>
                 </kbd>
@@ -50,6 +54,6 @@ const DesktopSidebar = ({ collapsed, onToggle, navGroups }) => {
       </div>
     </aside>
   );
-}
+};
 
 export default DesktopSidebar;

@@ -25,9 +25,9 @@ const FieldWrapper = ({
   return (
     <div
       className={cn(
-        "group/field relative flex gap-2 rounded-xl border bg-card/60 px-3 transition-all",
+        "group/field relative flex gap-2 rounded-xl border bg-card/60 px-3 transition-[color,background-color,border-color,box-shadow]",
         "border-input ring-1 ring-transparent",
-        "focus-within:border-leaf/60 focus-within:ring-leaf/30 focus-within:bg-card/80",
+        "focus-within:border-leaf/60 focus-within:bg-card/80 focus-within:ring-leaf/30",
         hasError &&
           "border-destructive/60 ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/30",
         start ? "items-start py-1" : "items-center"
