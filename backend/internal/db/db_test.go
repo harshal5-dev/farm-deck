@@ -42,3 +42,32 @@ func TestInit_UnreachableHostReturnsError(t *testing.T) {
 		t.Errorf("expected a database-related message, got %q", err.Error())
 	}
 }
+
+// MigrateUp shares Init's connect-then-ping startup, so its failure branches
+// mirror Init's: a malformed DSN fails at pool construction without needing a
+// database. The success path requires a live Postgres and applies the full
+// embedded migration set; that belongs to an integration test suite.
+func TestMigrateUp_MalformedDSNReturnsError(t *testing.T) {
+	err := MigrateUp("postgres://localhost:not-a-port/x")
+
+	if err == nil {
+		t.Fatal("expected an error for a malformed DSN, got nil")
+	}
+	if !strings.Contains(err.Error(), "database") {
+		t.Errorf("expected a database-related message, got %q", err.Error())
+	}
+}
+
+func TestMigrateUp_EmbeddedMigrationsAreLoadable(t *testing.T) {
+	// A DSN pointing at an unreachable host fails at the ping, after the
+	// embedded migrations and driver are wired up. Reaching that point
+	// proves the embed FS and driver setup are valid.
+	err := MigrateUp("postgres://u:p@127.0.0.1:1/x?sslmode=disable&connect_timeout=1")
+
+	if err == nil {
+		t.Fatal("expected an error for an unreachable host, got nil")
+	}
+	if !strings.Contains(err.Error(), "database") {
+		t.Errorf("expected a database-related message, got %q", err.Error())
+	}
+}

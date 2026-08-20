@@ -32,6 +32,7 @@ type Config struct {
 	CookieRefreshTokenName string `env:"COOKIE_REFRESH_TOKEN_NAME" envDefault:"refresh_token"`
 
 	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
+	AppEnv string `env:"APP_ENV" envDefault:"dev"`
 
 	// SwaggerEnabled controls whether the OpenAPI/Swagger UI is served
 	// at /swagger/*any. Disable in production with SWAGGER_ENABLED=false.
@@ -50,9 +51,6 @@ type Config struct {
 
 	InvitationTokenDuration time.Duration `env:"INVITATION_TOKEN_DURATION" envDefault:"168h"`
 
-	// Rate limiting (token bucket, per client IP). RateLimit applies to all
-	// /api/v1 routes; AuthRateLimit applies on top of it on auth endpoints
-	// (login, register, ...) as brute-force protection.
 	RateLimitPerMinute int `env:"RATE_LIMIT_PER_MINUTE" envDefault:"240"`
 	RateLimitBurst     int `env:"RATE_LIMIT_BURST" envDefault:"80"`
 

@@ -36,6 +36,11 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
+	if err := db.MigrateUp(cfg.DatabaseURL); err != nil {
+		log.Fatal("cannot run migrations:", err)
+	}
+	log.Println("database migrations are up to date")
+
 	store, err := db.Init(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatal("cannot connect to database:", err)

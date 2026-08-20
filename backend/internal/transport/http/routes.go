@@ -35,7 +35,7 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 	authPublic := public.Group("", authLimiter)
 	authProtected := protected.Group("", authLimiter)
 
-	authhttp.Register(authPublic, authProtected, server.container.Handlers.Auth)
+	authhttp.Register(authPublic, authProtected, server.container.Handlers.Auth, server.config.AppEnv)
 	userhttp.Register(public, protected, server.container.Handlers.User)
 	tenanthttp.Register(public, protected, server.container.Handlers.Tenant)
 }
