@@ -21,7 +21,7 @@ const Header = ({ onMenuClick, user }) => {
       <Greeting user={user} />
 
       <div className="ml-auto flex items-center gap-1.5">
-        <ThemeToggle variant="solid" />
+        <ThemeToggle />
         <UserMenu user={user} />
       </div>
     </header>

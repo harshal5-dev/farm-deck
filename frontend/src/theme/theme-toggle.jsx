@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
  * change for affordance so the header reads as one clean band instead of
  * a row of bordered chips.
  */
-export default function ThemeToggle({ variant = "ghost", className }) {
+export default function ThemeToggle({ className }) {
   const { theme, setTheme } = useTheme()
   const isDark = theme === "dark"
 
