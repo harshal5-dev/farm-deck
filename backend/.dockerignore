@@ -1,0 +1,24 @@
+# local binaries and build artifacts
+bin/
+*.test
+*.out
+
+# docs is imported by cmd/api (swagger), keep it in the context
+
+# vcs and editor files
+.git
+.gitignore
+.vscode
+.idea
+
+# docker
+Dockerfile
+.dockerignore
+
+# misc
+*.md
+.env
+.env.*
+
+# local env files (configs/), not needed in the image — nothing in the build reads them
+configs/

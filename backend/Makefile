@@ -9,6 +9,9 @@ help: ## Show this help
 dev: ## Run the API server (go run)
 	go run ./cmd/api
 
+prod: ## Run the API server (go run)
+	APP_ENV=prod GIN_MODE=release go run ./cmd/api
+
 build: ## Compile the API binary to bin/api
 	go build -o bin/api ./cmd/api
 

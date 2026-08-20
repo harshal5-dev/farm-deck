@@ -5,10 +5,12 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/auth"
 )
 
-func Register(public, protected *gin.RouterGroup, h auth.AuthHandler) {
+func Register(public, protected *gin.RouterGroup, h auth.AuthHandler, appEnv string) {
 
 	publicRoutes := public.Group("/auth")
-	publicRoutes.POST("/register", h.Register)
+	if appEnv == "dev" {
+		publicRoutes.POST("/register", h.Register)
+	}
 	publicRoutes.POST("/login", h.Login)
 	publicRoutes.POST("/refresh", h.Refresh)
 	publicRoutes.GET("/verify-invitation", h.VerifyInvitation)
