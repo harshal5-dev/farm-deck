@@ -1,7 +1,7 @@
 # Database DSN — change here, used by all migrate targets.
 DB_DSN = postgres://root:12345@localhost:5432/farm_deck_db?sslmode=disable
 
-.PHONY: help dev build test tidy swagger sqlc create-db drop-db migrate-create migrate-up migrate-down
+.PHONY: help dev build test tidy swagger sqlc create-db drop-db migrate-create migrate-up migrate-down docker-build docker-run
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -20,6 +20,22 @@ test: ## Run all tests
 
 tidy: ## Run go mod tidy
 	go mod tidy
+
+# --- Docker (local) ----------------------------------------------------------
+IMAGE_NAME ?= farm-deck-server
+
+DOCKER_DB_URL ?= postgres://root:12345@host.docker.internal:5432/farm_deck_db?sslmode=disable
+
+docker-build: ## Build the server image, tagged :latest
+	docker build -t $(IMAGE_NAME):latest .
+
+docker-run: ## Run the container locally on :8083 using configs/.env
+	@sed -E "s/^([A-Za-z_][A-Za-z0-9_]*)=[\"'](.*)[\"']\$$/\1=\2/" configs/.env > .env.docker.tmp; \
+	trap 'rm -f .env.docker.tmp' EXIT; \
+	docker run --rm --name farm-deck-server -p 8083:8083 \
+		--env DATABASE_URL="$(DOCKER_DB_URL)" \
+		--env-file .env.docker.tmp \
+		$(IMAGE_NAME):latest
 
 swagger: ## Regenerate OpenAPI docs from annotations
 	swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal --useStructName
