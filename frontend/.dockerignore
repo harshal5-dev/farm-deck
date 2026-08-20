@@ -1,0 +1,21 @@
+# dependencies and build output (rebuilt in the image)
+node_modules
+dist
+
+# local env files — the build must only see the api_base_url BuildKit secret
+.env
+.env.*
+!.env.example
+
+# vcs and editor files
+.git
+.gitignore
+.vscode
+.idea
+
+# docker
+Dockerfile
+.dockerignore
+
+# misc
+*.md

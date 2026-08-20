@@ -1,3 +1,4 @@
+import { env } from "@/config/env";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 
 /**
@@ -22,8 +23,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query";
  * synchronously (before any await) inside the handler, concurrent 401s are
  * serialized in arrival order and refresh storms collapse to a single refresh.
  */
-const baseURL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8083/api/v1";
+const baseURL = env.apiBaseUrl;
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: baseURL,
