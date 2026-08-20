@@ -41,10 +41,7 @@ func RateLimitMiddleware(limiter *ratelimit.Limiter, keyFn KeyFunc) gin.HandlerF
 	return func(ctx *gin.Context) {
 		ok, retryAfter := limiter.Allow(keyFn(ctx))
 		if !ok {
-			seconds := int(math.Ceil(retryAfter.Seconds()))
-			if seconds < 1 {
-				seconds = 1
-			}
+			seconds := max(1, int(math.Ceil(retryAfter.Seconds())))
 
 			ctx.Header("Retry-After", strconv.Itoa(seconds))
 			response.ErrorWithDetails(ctx, http.StatusTooManyRequests, "RATE_LIMITED",

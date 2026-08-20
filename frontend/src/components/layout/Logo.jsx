@@ -1,23 +1,6 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * Mark — the FarmDeck leaf-shaped brand symbol.
- *
- * A stylized leaf pointing up: gradient body (leaf → sage-deep), a sun
- * rising behind the horizon, a single sprout climbing toward it, a
- * centre vein, and a top highlight for depth. Self-contained SVG that
- * any component can drop in (sidebar, home page, footer, 404 page,
- * favicon). Sized via the wrapper's className (e.g. `size-9`, `size-8`).
- *
- * The gradient IDs are scoped per-instance via `useId()` so multiple
- * `Mark` components on the same page (mobile logo + theme toggle +
- * brand panel + footer, etc.) each get their own gradient definitions.
- * Without this, browsers reuse the first instance's gradient for every
- * reference — which causes washed-out / pale renders at small sizes
- * because the gradient `userSpaceOnUse` coordinates don't line up with
- * the second/third SVG's viewBox.
- */
 export const Mark = ({ className }) => {
   const uid = useId().replace(/[:#]/g, "");
   const bodyId = `fd-leaf-body-${uid}`;
@@ -122,17 +105,6 @@ export const Mark = ({ className }) => {
   );
 };
 
-/**
- * Logo — composes the leaf `Mark` with the wordmark.
- *
- * Variants:
- *  - `mark`    : leaf only — for favicon, avatars, header logos
- *  - `badge`   : leaf in a size-10 holder (collapsed sidebar)
- *  - `full`    : leaf + "Farmdeck" wordmark side-by-side
- *  - `stacked` : leaf on top, "Farmdeck" wordmark below — for narrow
- *                screens (mobile brand header in auth layouts) where
- *                the side-by-side layout crowds horizontally
- */
 const Logo = ({
   variant = "full",
   className,
@@ -147,11 +119,6 @@ const Logo = ({
     );
   }
 
-  // The Mark already carries the gradient + highlight + outline, so the
-  // "badge" is just the leaf sized to 10 with optional pop animation.
-  // `transition-transform` is only added alongside `animate` so static
-  // renders stay on the default paint path — keeping the leaf crisp on
-  // mobile devices where transform-composited layers can sub-pixel-blur.
   const MarkBadge = (
     <div
       className={cn(
@@ -170,8 +137,6 @@ const Logo = ({
     return MarkBadge;
   }
 
-  // stacked — mark on top, wordmark below. Used on mobile brand headers
-  // where horizontal space is too tight for the side-by-side "full" variant.
   if (variant === "stacked") {
     return (
       <div
@@ -208,7 +173,6 @@ const Logo = ({
     );
   }
 
-  // full
   return (
     <div className={cn("group/logo flex items-center gap-3", className)}>
       {MarkBadge}

@@ -16,9 +16,6 @@ const Layout = () => {
 
   const user = useSelector(selectUser);
 
-  // Role-aware sidebar: drop nav items the current user can't see and
-  // hide whole groups that end up empty. Memoized so the child sidebars
-  // don't re-render unless the role or the static config changes.
   const navGroups = useMemo(
     () => filterNavGroups(NAV_GROUPS, user?.role),
     [user?.role]

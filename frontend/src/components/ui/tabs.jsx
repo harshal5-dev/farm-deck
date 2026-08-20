@@ -15,6 +15,14 @@ import { cn } from "@/lib/utils";
  *     </TabsList>
  *     <TabsContent value="details">…</TabsContent>
  *   </Tabs>
+ *
+ * Notes on the trigger styling:
+ *   - base-ui's Tab renders as `<button>`, and Tailwind's preflight applies
+ *     `appearance: button` to all buttons — that re-applies the OS-native
+ *     styling (the dark glossy background visible in some browsers).
+ *     `appearance-none` strips that, and the `!` important prefix on the
+ *     background utilities locks the colours in so they can't be overridden
+ *     by UA stylesheets on hover/focus.
  */
 
 function Tabs({ className, ...props }) {
@@ -46,14 +54,23 @@ function TabsTrigger({ className, icon: Icon, children, ...props }) {
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-all duration-200",
-        // inactive
-        "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-        // active — base-ui sets data-active="" and aria-selected="true".
-        // Solid leaf gradient matches the sidebar's active-pill language.
-        "data-active:bg-linear-to-br data-active:from-leaf data-active:to-sage-deep data-active:text-primary-foreground data-active:shadow-md data-active:shadow-leaf/30 data-active:hover:brightness-105",
-        "aria-selected:true text-foreground",
-        "focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        // `appearance-none` strips the OS-native button styling that
+        // Tailwind's preflight re-applies via `appearance: button`. Without
+        // this, `<button>` elements can render with a dark glossy background
+        // on hover/focus in some browsers.
+        "appearance-none relative inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-all duration-200",
+        // Inactive base — transparent background, muted text. The `!` prefix
+        // is a Tailwind important modifier — it forces these to beat any
+        // UA stylesheet rule for `background-color`.
+        "bg-transparent! text-muted-foreground hover:bg-muted/70! hover:text-foreground!",
+        // Active — solid leaf gradient. base-ui sets `data-active=""` on the
+        // selected tab. `!` so it overrides the hover background even when
+        // both apply.
+        "data-active:bg-linear-to-br! data-active:from-leaf! data-active:to-sage-deep! data-active:text-primary-foreground! data-active:shadow-md data-active:shadow-leaf/30",
+        "data-active:hover:brightness-105",
+        "aria-selected:text-foreground",
+        "focus-visible:ring-[3px]! focus-visible:ring-ring/50!",
+        "disabled:pointer-events-none disabled:opacity-50",
         className
       )}
       {...props}
@@ -86,4 +103,3 @@ function TabsContent({ className, ...props }) {
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };
-

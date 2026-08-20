@@ -1,28 +1,39 @@
-import { Avatar as ProfileAvatar } from "@/components/avatars/avatars";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import FieldWrapper from "@/components/ui/field-wrapper";
-import { IconCamera, IconCheck, IconLoader2, IconMail, IconUser } from "@tabler/icons-react";
-import AvatarPopover from "./AvatarPopover";
-import { Input } from "@/components/ui/input";
-import LockedField from "@/components/ui/locked-field";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
-import { cn } from "@/lib/utils";
 import { useForm, useWatch } from "react-hook-form";
+import {
+  IconCamera,
+  IconCheck,
+  IconCircleCheckFilled,
+  IconLoader2,
+  IconMail,
+  IconUser,
+} from "@tabler/icons-react";
+import { Reveal } from "@/components/effects";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import FieldWrapper from "@/components/ui/field-wrapper";
+import LockedField from "@/components/ui/locked-field";
+import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
+import ChipAvatarPicker from "./ChipAvatarPicker";
+import ProfileIdentityPreview from "./ProfileIdentityPreview";
 
-/** Uppercase tracking label style — matches the form labels app-wide. */
 const fieldLabel =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
 const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
-  const savedAvatarId = user.profilePicture || DEFAULT_AVATAR_ID;
+  const savedAvatarId = user?.profilePicture || DEFAULT_AVATAR_ID;
+  const role = user?.role || "viewer";
 
   const form = useForm({
     defaultValues: {
-      fullName: user.fullName || "",
+      fullName: user?.fullName || "",
       avatarId: savedAvatarId,
     },
   });
@@ -31,156 +42,151 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
   const watchedFullName = useWatch({ control: form.control, name: "fullName" });
   const previewAvatarId = watchedAvatarId || savedAvatarId;
   const isDirty =
-    watchedFullName !== (user.fullName || "") || previewAvatarId !== savedAvatarId;
+    watchedFullName !== (user?.fullName || "") ||
+    previewAvatarId !== savedAvatarId;
 
   const onProfileReset = () =>
     form.reset({
-      fullName: user.fullName || "",
+      fullName: user?.fullName || "",
       avatarId: savedAvatarId,
     });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onProfileSubmit)} noValidate>
-        <Card className="glass-card texture-paper rounded-3xl">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-leaf/20 to-leaf/5 text-leaf ring-1 ring-white/10 ring-inset dark:ring-white/5">
-                <IconUser className="size-4.5" strokeWidth={1.75} />
-              </div>
+    <Reveal delay={60} duration={500}>
+      {/* `overflow-hidden` + `min-w-0` contain the grid horizontally so
+          nothing inside leaks past the card edge. */}
+      <div className="glass-card texture-paper highlight-edge min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onProfileSubmit)} noValidate>
+            <div className="grid w-full min-w-0 items-stretch gap-5 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:gap-5">
+              {/* ===== Left — identity preview ===== */}
               <div className="min-w-0">
-                <h3 className="font-heading text-base font-semibold tracking-tight">
-                  Personal info
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Your name, email, and profile avatar
-                </p>
+                <ProfileIdentityPreview
+                  fullName={watchedFullName}
+                  email={user?.emailId}
+                  role={role}
+                  avatarId={previewAvatarId}
+                />
               </div>
-            </div>
-          </CardHeader>
 
-          <CardContent>
-            <FieldGroup>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-7">
-                {/* Left column — Profile avatar */}
+              {/* ===== Right — form fields ===== */}
+              <div className="flex min-w-0 flex-col gap-4">
                 <FormField
                   control={form.control}
-                  name="avatarId"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col items-center">
-                      <span
-                        className={cn(
-                          "flex items-center gap-1.5 leading-none select-none",
-                          fieldLabel
-                        )}
-                      >
-                        <IconCamera
-                          className="size-3.5 text-muted-foreground"
-                          strokeWidth={1.75}
-                        />
-                        Profile avatar
-                      </span>
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="relative shrink-0">
-                          <div className="absolute -inset-1 rounded-full bg-linear-to-br from-leaf/30 to-sky-warm/30 blur-md" />
-                          <ProfileAvatar
-                            id={field.value || savedAvatarId}
-                            className="relative size-20 shadow-md ring-4 ring-background"
+                  name="fullName"
+                  rules={{
+                    required: "Full name is required",
+                    minLength: {
+                      value: 2,
+                      message: "At least 2 characters",
+                    },
+                    maxLength: {
+                      value: 100,
+                      message: "Too long",
+                    },
+                  }}
+                  render={({ field, fieldState }) => (
+                    <FormItem className="gap-1.5">
+                      <FormLabel className={fieldLabel}>
+                        Full name
+                      </FormLabel>
+                      <FormControl>
+                        <FieldWrapper
+                          icon={IconUser}
+                          hasError={fieldState.invalid}
+                          trailing={
+                            <ChipAvatarPicker
+                              value={watchedAvatarId}
+                              onChange={(val) =>
+                                form.setValue("avatarId", val, {
+                                  shouldDirty: true,
+                                })
+                              }
+                              disabled={isSaving}
+                            />
+                          }
+                        >
+                          <Input
+                            placeholder="Your full name"
+                            autoComplete="name"
+                            className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                            {...field}
                           />
-                        </div>
-                        <AvatarPopover
-                          value={field.value || savedAvatarId}
-                          onChange={field.onChange}
-                        />
-                      </div>
-                      <FormDescription>
-                        Pick a farm character to represent you.
-                      </FormDescription>
+                        </FieldWrapper>
+                      </FormControl>
+                      <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
                 />
 
-                {/* Right column — Name + locked email */}
-                <div className="flex flex-col gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    rules={{
-                      required: "Full name is required",
-                      minLength: {
-                        value: 2,
-                        message: "At least 2 characters",
-                      },
-                      maxLength: {
-                        value: 100,
-                        message: "Too long",
-                      },
-                    }}
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel className={fieldLabel}>Full name</FormLabel>
-                        <FormControl>
-                          <FieldWrapper
-                            icon={IconUser}
-                            hasError={fieldState.invalid}
-                          >
-                            <Input
-                              placeholder="Your full name"
-                              autoComplete="name"
-                              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                              {...field}
-                            />
-                          </FieldWrapper>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Email — locked */}
+                <LockedField
+                  icon={IconMail}
+                  label="Email address"
+                  value={user?.emailId}
+                  hint="Email is tied to your account and can't be changed here."
+                />
 
-                  <LockedField
-                    icon={IconMail}
-                    label="Email"
-                    value={user.emailId}
-                    hint="Email is tied to your account and can't be changed here."
-                  />
+                {/* Tip — uses an icon for visual consistency */}
+                <div className="mt-1 flex items-start gap-2 rounded-xl border border-border/40 bg-muted/30 px-3 py-2.5 text-[12px] text-muted-foreground">
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-leaf/12 text-leaf">
+                    <IconCamera className="size-3" strokeWidth={2.2} />
+                  </span>
+                  <span className="leading-relaxed">
+                    Click the chip on the right of your name to pick a
+                    different farm character — it shows up next to your name
+                    across the workspace.
+                  </span>
                 </div>
               </div>
-            </FieldGroup>
-          </CardContent>
+            </div>
 
-          <Separator />
-
-          {/* On mobile: stack, save button fills the row. On desktop: align
-              to the end with a normal-width button. */}
-          <div className="flex flex-col-reverse gap-2 px-5 py-3 sm:flex-row sm:items-center sm:justify-end sm:gap-2 sm:px-8 sm:py-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onProfileReset}
-              disabled={!isDirty || isSaving}
-              className="w-full sm:w-auto"
-            >
-              Discard
-            </Button>
-            <Button
-              type="submit"
-              disabled={!isDirty || isSaving}
-              className="w-full gap-2 sm:w-auto"
-            >
-              {isSaving ? (
-                <IconLoader2
-                  className="size-4 animate-spin"
-                  strokeWidth={2}
-                />
-              ) : (
-                <IconCheck className="size-4" strokeWidth={2} />
-              )}
-              {isSaving ? "Saving…" : "Save changes"}
-            </Button>
-          </div>
-        </Card>
-      </form>
-    </Form>
+            {/* ===== Footer ===== */}
+            <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+              <p className="text-[11px] text-muted-foreground sm:order-1">
+                {isDirty ? (
+                  <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                    <span className="size-1.5 rounded-full bg-amber-500" />
+                    Unsaved changes
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                    <IconCircleCheckFilled className="size-3 text-leaf" />
+                    All changes saved
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onProfileReset}
+                  disabled={!isDirty || isSaving}
+                  className="w-full sm:w-auto"
+                >
+                  Discard
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!isDirty || isSaving}
+                  className="w-full gap-2 shadow-md shadow-leaf/20 sm:w-auto"
+                >
+                  {isSaving ? (
+                    <IconLoader2
+                      className="size-4 animate-spin"
+                      strokeWidth={2}
+                    />
+                  ) : (
+                    <IconCheck className="size-4" strokeWidth={2} />
+                  )}
+                  {isSaving ? "Saving…" : "Save changes"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </Reveal>
   );
 };
 

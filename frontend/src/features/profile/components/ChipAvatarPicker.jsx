@@ -1,36 +1,52 @@
+import { useState } from "react";
 import { FARM_AVATARS, getAvatar } from "@/components/avatars/avatars-data";
+import { Avatar } from "@/components/avatars/avatars";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { IconCamera, IconCheck, IconChevronDown } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconChevronDown,
+} from "@tabler/icons-react";
 
-
-function AvatarPopover({ value, onChange }) {
+const ChipAvatarPicker = ({ value, onChange, disabled }) => {
   const currentLabel = getAvatar(value).label;
+  const [open, setOpen] = useState(false);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <button
             type="button"
-            aria-label="Choose a profile avatar"
-            className="group inline-flex items-center gap-1.5 rounded-xl border border-border/40 bg-card/40 px-3 py-2 text-sm font-medium transition-all hover:border-leaf/50 hover:bg-card/70 hover:shadow-sm"
+            disabled={disabled}
+            aria-label={`Change avatar, currently ${currentLabel}`}
+            className={cn(
+              "group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/40 bg-card/60 py-0.5 pl-1 pr-1.5 text-xs font-medium transition-all hover:border-leaf/50 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 mt-[.2rem]"
+            )}
           />
         }
       >
-        <IconCamera
-          className="size-3.5 text-muted-foreground"
-          strokeWidth={1.75}
-        />
-        <span className="truncate">{currentLabel}</span>
+        <Avatar id={value} className="size-6" />
+        <span className="hidden max-w-24 truncate font-semibold tracking-tight sm:inline-block">
+          {currentLabel}
+        </span>
         <IconChevronDown
-          className="size-3.5 text-muted-foreground transition-transform group-data-popup-open:rotate-180"
-          strokeWidth={1.75}
+          className={cn(
+            "size-3 shrink-0 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180"
+          )}
+          strokeWidth={1.85}
         />
       </PopoverTrigger>
+
       <PopoverContent
-        align="start"
-        sideOffset={8}
+        align="end"
+        sideOffset={6}
         className="w-[min(28rem,calc(100vw-2rem))] p-4"
       >
         <div className="mb-3 flex items-center justify-between gap-2">
@@ -48,7 +64,10 @@ function AvatarPopover({ value, onChange }) {
               <button
                 key={a.id}
                 type="button"
-                onClick={() => onChange(a.id)}
+                onClick={() => {
+                  onChange(a.id);
+                  setOpen(false);
+                }}
                 title={a.label}
                 aria-label={`Select ${a.label} avatar`}
                 aria-pressed={isSelected}
@@ -91,4 +110,4 @@ function AvatarPopover({ value, onChange }) {
   );
 }
 
-export default AvatarPopover;
+export default ChipAvatarPicker;

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   IconArrowLeft,
@@ -13,11 +14,6 @@ import ProfileForm from "../components/ProfileForm";
 import TenantForm from "../components/TenantForm";
 import Hero from "../components/Hero";
 import { checkIsOwner } from "@/lib/utils";
-import { useSelector } from "react-redux";
-
-
-
-/* ============================================================ */
 
 const Profile = () => {
   const user = useSelector(selectUser);
@@ -26,21 +22,7 @@ const Profile = () => {
   const [updateTenant, { isLoading: isSavingTenant }] =
     useUpdateTenantMutation();
 
-  // if (!user) {
-  //   return (
-  //     <div className="flex min-h-[50vh] items-center justify-center">
-  //       <div className="flex flex-col items-center gap-3">
-  //         <IconLoader2
-  //           className="size-6 animate-spin text-muted-foreground"
-  //           strokeWidth={1.75}
-  //         />
-  //         <p className="text-sm text-muted-foreground">Loading profile…</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  const isOwner = checkIsOwner(user.role);
+  const isOwner = checkIsOwner(user?.role);
 
   const onProfileSubmit = async (values) => {
     try {
@@ -76,60 +58,67 @@ const Profile = () => {
     }
   };
 
-
   return (
-      <div className="mx-auto space-y-4 sm:space-y-5">
-        {/* Back link */}
-        <Reveal duration={400}>
-          <Link
-            to="/app"
-            className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <IconArrowLeft
-              className="size-4 transition-transform group-hover:-translate-x-0.5"
-              strokeWidth={1.75}
-            />
-            Back to Dashboard
-          </Link>
-        </Reveal>
+    <div className="space-y-4">
+      {/* ===== Compact back link ===== */}
+      <Reveal duration={350}>
+        <Link
+          to="/app"
+          className="group inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <IconArrowLeft
+            className="size-3.5 transition-transform group-hover:-translate-x-0.5"
+            strokeWidth={1.85}
+          />
+          Back to Dashboard
+        </Link>
+      </Reveal>
 
-        {/* ---------------- Hero ---------------- */}
-        <Hero user={user} isOwner={isOwner} />
+      {/* ===== Hero ===== */}
+      <Hero user={user} isOwner={isOwner} />
 
-        {/* ---------------- Tabs ---------------- */}
-        <Reveal delay={180} duration={500}>
-          <Tabs defaultValue="profile" className="mx-auto">
-            {/* Stack the helper text under the tab strip on mobile so the
-                tabs themselves can wrap freely without competing for room. */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList>
-                <TabsTrigger value="profile" icon={IconUser}>
-                  Personal info
-                </TabsTrigger>
-                {isOwner && (<TabsTrigger value="company" icon={IconBuildingWarehouse}>
+      {/* ===== Tabs ===== */}
+      <Reveal delay={140} duration={500}>
+        <Tabs defaultValue="profile">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <TabsList>
+              <TabsTrigger value="profile" icon={IconUser}>
+                Personal info
+              </TabsTrigger>
+              {isOwner && (
+                <TabsTrigger value="company" icon={IconBuildingWarehouse}>
                   Company
-                </TabsTrigger>)}
-              </TabsList>
-              <p className="text-xs text-muted-foreground sm:text-end">
-                Changes save when you press the Save button.
-              </p>
-            </div>
+                </TabsTrigger>
+              )}
+            </TabsList>
+            <p className="text-xs text-muted-foreground sm:text-end">
+              Changes save when you press the Save button.
+            </p>
+          </div>
 
-            {/* §1 — Personal info (always-on form, popover avatar) */}
-            <TabsContent value="profile">
-              <ProfileForm onProfileSubmit={onProfileSubmit} isSaving={isSaving} user={user} />
-            </TabsContent>
+          {/* §1 — Personal info */}
+          <TabsContent value="profile">
+            <ProfileForm
+              onProfileSubmit={onProfileSubmit}
+              isSaving={isSaving}
+              user={user}
+            />
+          </TabsContent>
 
           {/* §2 — Company (tenant) */}
-          { isOwner && (<TabsContent value="company">
-              <TenantForm onTenantSubmit={onTenantSubmit} isSavingTenant={isSavingTenant} tenantDetails={user.tenantDetails} />
+          {isOwner && (
+            <TabsContent value="company">
+              <TenantForm
+                onTenantSubmit={onTenantSubmit}
+                isSavingTenant={isSavingTenant}
+                tenantDetails={user.tenantDetails}
+              />
             </TabsContent>
           )}
-          </Tabs>
-        </Reveal>
-      </div>
-
+        </Tabs>
+      </Reveal>
+    </div>
   );
-}
+};
 
 export default Profile;
