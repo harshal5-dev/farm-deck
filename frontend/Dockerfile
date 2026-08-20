@@ -25,8 +25,6 @@ fi
 
 : "${VITE_API_BASE_URL:?Missing VITE_API_BASE_URL build secret}"
 
-fi
-
 npm run build
 EOF
 
