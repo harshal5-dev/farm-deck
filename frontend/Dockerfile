@@ -12,8 +12,7 @@ RUN npm ci
 COPY . .
 
 RUN --mount=type=secret,id=vite_env \
-  --mount=type=secret,id=api_base_url \
-  <<'EOF'
+  --mount=type=secret,id=api_base_url <<'EOF'
 set -eu
 
 if [ -f /run/secrets/vite_env ]; then
@@ -25,6 +24,8 @@ else
 fi
 
 : "${VITE_API_BASE_URL:?Missing VITE_API_BASE_URL build secret}"
+
+fi
 
 npm run build
 EOF
