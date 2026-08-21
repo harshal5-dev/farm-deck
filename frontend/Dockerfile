@@ -11,19 +11,24 @@ RUN npm ci
 
 COPY . .
 
-RUN --mount=type=secret,id=vite_env \
-  --mount=type=secret,id=api_base_url <<'EOF'
+# The API base must be passed as a build ARG, not only a BuildKit secret:
+# secret values do not participate in BuildKit's layer cache key, so a cached
+# npm run build layer would keep serving a stale URL forever. ARG values do
+# bust the cache. The URL is public by nature (Vite inlines it into the
+# browser bundle), so its presence in builder-stage history is not a leak.
+ARG VITE_API_BASE_URL=""
+
+RUN --mount=type=secret,id=vite_env <<'EOF'
 set -eu
 
 if [ -f /run/secrets/vite_env ]; then
+  # Local builds: docker build --secret id=vite_env,src=.env.production
   set -a
   . /run/secrets/vite_env
   set +a
-else
-  export VITE_API_BASE_URL="$(cat /run/secrets/api_base_url 2>/dev/null || true)"
 fi
 
-: "${VITE_API_BASE_URL:?Missing VITE_API_BASE_URL build secret}"
+: "${VITE_API_BASE_URL:?Missing VITE_API_BASE_URL build arg}"
 
 npm run build
 EOF

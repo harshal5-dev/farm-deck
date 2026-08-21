@@ -58,8 +58,11 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          secrets: |
-            api_base_url=${{ secrets.VITE_API_BASE_URL }}
+          # Must be a build-arg, not a BuildKit secret: secret values are not
+          # part of the layer cache key, so a changed URL would keep hitting
+          # the cached build layer and ship the stale bundle forever.
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
