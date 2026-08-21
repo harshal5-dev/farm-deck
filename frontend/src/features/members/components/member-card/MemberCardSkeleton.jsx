@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const MemberCardSkeleton = () => {
   return (
-    <div className="glass-card texture-paper relative flex h-full flex-col overflow-hidden rounded-3xl">
+    <div className="glass-card texture-paper relative flex h-full min-h-72 flex-col overflow-hidden rounded-3xl">
       {/* Top gradient strip */}
       <div className="relative h-1 shrink-0 overflow-hidden">
         <Skeleton className="absolute inset-0 rounded-none" />
@@ -22,7 +22,6 @@ const MemberCardSkeleton = () => {
               <Skeleton className="h-4 w-12 rounded-full" />
             </div>
           </div>
-          <Skeleton className="size-8 shrink-0 rounded-xl" />
         </div>
 
         {/* Stat tiles */}
@@ -43,10 +42,15 @@ const MemberCardSkeleton = () => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-auto flex items-center justify-between border-t border-border/30 pt-3">
+        {/* Role info */}
+        <div className="mt-3 flex items-center gap-1.5">
+          <Skeleton className="size-3.5 shrink-0 rounded" />
           <Skeleton className="h-3 w-36" />
-          <Skeleton className="h-3 w-10" />
+        </div>
+
+        {/* Footer */}
+        <div className="mt-auto flex items-center justify-end border-t border-border/30 pt-3">
+          <Skeleton className="h-8 w-[104px] rounded-xl" />
         </div>
       </div>
     </div>
