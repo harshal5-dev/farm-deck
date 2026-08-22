@@ -77,7 +77,7 @@ const InvitationHeader = ({ invitation }) => {
           aria-hidden="true"
         />
 
-        {/* Role + tenant chips */}
+        {/* Role + workspace chips */}
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
           <span
             className={cn(

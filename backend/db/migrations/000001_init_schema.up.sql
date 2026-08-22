@@ -67,3 +67,31 @@ CREATE TABLE user_invitations (
 CREATE UNIQUE INDEX uq_invite_token_hash ON user_invitations(token_hash);
 CREATE INDEX idx_invite_user_live ON user_invitations(user_id)
     WHERE accepted_at IS NULL AND revoked_at IS NULL;
+
+CREATE TABLE farm_types (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name         VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    description  VARCHAR(1000)
+);
+
+CREATE TABLE farms (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    farm_type_id  UUID NOT NULL REFERENCES farm_types(id),
+    name          VARCHAR(255) NOT NULL,
+    location      VARCHAR(255),
+    latitude      NUMERIC(9,6),
+    longitude     NUMERIC(9,6),
+    total_area    NUMERIC(12,2),
+    area_unit     VARCHAR(20) NOT NULL DEFAULT 'sq_m',
+    notes         VARCHAR(1000),
+    is_active     BOOLEAN NOT NULL DEFAULT true,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT farms_lat_chk CHECK (latitude  IS NULL OR (latitude  BETWEEN -90 AND 90)),
+    CONSTRAINT farms_lng_chk CHECK (longitude IS NULL OR (longitude BETWEEN -180 AND 180)),
+    CONSTRAINT farms_area_chk CHECK (total_area IS NULL OR total_area > 0)
+);
+CREATE INDEX idx_farms_tenant_active ON farms(tenant_id) WHERE is_active = true;
+CREATE INDEX idx_farms_tenant_all    ON farms(tenant_id);

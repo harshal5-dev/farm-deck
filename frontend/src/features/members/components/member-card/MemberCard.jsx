@@ -91,7 +91,7 @@ const MemberCard = ({
         aria-label={`View ${member.fullName}`}
         onClick={onView}
         onKeyDown={handleKeyDown}
-        className="group/member glass-card texture-paper highlight-edge relative flex h-full min-h-72 cursor-pointer flex-col overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-leaf/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="group/member glass-card texture-paper highlight-edge relative flex h-full min-h-64 cursor-pointer flex-col overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-leaf/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         {/* External role-tinted bloom on hover */}
         <div
@@ -121,7 +121,7 @@ const MemberCard = ({
         </div>
 
         {/* Body */}
-        <div className="relative flex flex-1 flex-col p-5">
+        <div className="relative flex flex-1 flex-col p-5 pb-3">
           {/* Identity row: avatar left, name + email + pills on the right */}
           <div className="flex items-start gap-3">
             {/* Avatar with role gradient ring */}
@@ -159,7 +159,7 @@ const MemberCard = ({
           </div>
 
           {/* Stat tiles */}
-          <div className="mt-6 grid grid-cols-2 gap-2">
+          <div className="mt-5 grid grid-cols-2 gap-2">
             <StatTile
               icon={IconCalendar}
               label={isInvited ? "Invited" : "Joined"}
@@ -174,7 +174,7 @@ const MemberCard = ({
           </div>
 
           {/* Role info — plain, in the main body below the stat tiles */}
-          <div className="mt-5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <RoleIcon
               className={cn("size-3.5 shrink-0", r.text)}
               strokeWidth={1.85}
@@ -183,7 +183,7 @@ const MemberCard = ({
           </div>
 
           {/* Footer — action toolbar only */}
-          <div className="mt-auto flex items-center justify-end border-t border-border/30 pt-3">
+          <div className="mt-2 flex items-center justify-end border-t border-border/30 pt-2">
             <div
               className="flex shrink-0 items-center gap-0.5 rounded-xl border border-border/40 bg-muted/30 p-0.5 shadow-xs"
               onClick={(e) => e.stopPropagation()}

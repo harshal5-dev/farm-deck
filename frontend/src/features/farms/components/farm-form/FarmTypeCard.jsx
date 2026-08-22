@@ -3,13 +3,21 @@ import { FarmTypeArt } from "@/components/effects";
 import { cn } from "@/lib/utils";
 import { IconCheck } from "@tabler/icons-react";
 
-const FarmTypeCard = ({ farmTypeId, selected, onSelect, disabled }) => {
-  const t = getFarmType(farmTypeId);
+/**
+ * Selectable card for one farm type from the lookups API
+ * (`{ id, name, displayName, description }`). The selected value is the
+ * row's UUID (`farms.farm_type_id` FK); visual meta — icon, art variant,
+ * palette — is derived from the type's `name` via the local FARM_TYPES
+ * config, falling back to the Outdoor palette for unknown names.
+ */
+const FarmTypeCard = ({ farmType, selected, onSelect, disabled }) => {
+  const t = getFarmType(farmType?.name);
   const Icon = t.icon;
+
   return (
     <button
       type="button"
-      onClick={() => !disabled && onSelect(farmTypeId)}
+      onClick={() => !disabled && onSelect(farmType.id)}
       disabled={disabled}
       className={cn(
         "group/type relative flex flex-col items-stretch overflow-hidden rounded-2xl border p-0 text-left transition-all duration-200",
@@ -29,15 +37,16 @@ const FarmTypeCard = ({ farmTypeId, selected, onSelect, disabled }) => {
           )}
         />
         <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
-        {/* Top-left type icon chip */}
+        {/* Top-left type icon badge — solid gradient circle so the white
+            icon stays crisp in light theme (no translucency/blur) */}
         <div className="absolute top-2 left-2">
           <span
             className={cn(
-              "inline-flex size-7 items-center justify-center rounded-lg shadow-sm ring-1 ring-white/15 ring-inset backdrop-blur",
-              t.gradient
+              "flex size-7 items-center justify-center rounded-full text-white shadow-md ring-2 ring-card",
+              `bg-linear-to-br ${t.gradient}`
             )}
           >
-            <Icon className="size-3.5 text-white" strokeWidth={2} />
+            <Icon className="size-3.5" strokeWidth={2.1} />
           </span>
         </div>
         {/* Selected check */}
@@ -62,10 +71,10 @@ const FarmTypeCard = ({ farmTypeId, selected, onSelect, disabled }) => {
               selected ? t.text : "text-foreground"
             )}
           >
-            {t.label}
+            {farmType?.displayName || t.label}
           </p>
-          <p className="truncate text-[10px] text-muted-foreground">
-            {t.tagline}
+          <p className="line-clamp-2 text-[10px] leading-snug text-muted-foreground">
+            {farmType?.description || t.tagline}
           </p>
         </div>
       </div>

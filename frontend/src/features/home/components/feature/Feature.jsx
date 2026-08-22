@@ -11,8 +11,8 @@ import FeatureCard from "./FeatureCard";
 const features = [
   {
     icon: IconBuildingWarehouse,
-    title: "Multi-tenant by design",
-    desc: "Every farm, field, and crop is scoped to a tenant. Complete data isolation, row-level security, and a single Postgres backend serving many workspaces.",
+    title: "Multi-workspace by design",
+    desc: "Every farm, field, and crop is scoped to a workspace. Complete data isolation, row-level security, and a single Postgres backend serving many workspaces.",
     accent: "leaf",
     art: <FarmTypeArt variant="greenhouse" className="size-full" />,
     span: "lg:col-span-2",

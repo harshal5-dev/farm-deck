@@ -71,7 +71,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                   control={tenantForm.control}
                   name="name"
                   rules={{
-                    required: "Company name is required",
+                    required: "Workspace name is required",
                     minLength: {
                       value: 2,
                       message: "At least 2 characters",
@@ -84,7 +84,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                   render={({ field, fieldState }) => (
                     <FormItem className="gap-1.5">
                       <FormLabel className={fieldLabel}>
-                        Company name
+                        Workspace name
                       </FormLabel>
                       <FormControl>
                         <FieldWrapper
@@ -92,7 +92,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                           hasError={fieldState.invalid}
                         >
                           <Input
-                            placeholder="Your farm organization name"
+                            placeholder="Your workspace name"
                             autoComplete="organization"
                             className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                             {...field}
@@ -145,8 +145,8 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                         </FieldWrapper>
                       </FormControl>
                       <p className="text-[11px] text-muted-foreground">
-                        A short blurb about your farm organization. Members
-                        see this in their workspace switcher.
+                        A short blurb about your workspace. Members see this
+                        in their workspace switcher.
                       </p>
                       <FormMessage className="text-[11px]" />
                     </FormItem>

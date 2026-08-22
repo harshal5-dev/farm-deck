@@ -29,6 +29,7 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
+	ListFarmTypes(ctx context.Context) ([]FarmType, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
 	MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error

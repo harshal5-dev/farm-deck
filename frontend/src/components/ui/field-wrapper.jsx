@@ -33,14 +33,16 @@ const FieldWrapper = ({
         start ? "items-start py-1" : "items-center"
       )}
     >
-      <Icon
-        className={cn(
-          "size-4 shrink-0 transition-colors",
-          start && "mt-2",
-          hasError ? "text-destructive" : "text-muted-foreground"
-        )}
-        strokeWidth={1.75}
-      />
+      {Icon && (
+        <Icon
+          className={cn(
+            "size-4 shrink-0 transition-colors",
+            start && "mt-2",
+            hasError ? "text-destructive" : "text-muted-foreground"
+          )}
+          strokeWidth={1.75}
+        />
+      )}
       <div className="min-w-0 flex-1">{children}</div>
       {trailing && <div className="shrink-0">{trailing}</div>}
     </div>

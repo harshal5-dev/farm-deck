@@ -26,17 +26,6 @@ import FieldWrapper from "@/components/ui/field-wrapper";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-/**
- * AcceptInvitationForm — themed password form shown after the invitation
- * token is verified. Lets the invitee pick a password (min 8 chars, max
- * 72) and confirm it, with a live strength meter + requirements list so
- * they don't submit a weak password only to bounce off server validation.
- *
- * Props:
- *  - onSubmit: async (values) => void   parent handles the API call + redirect
- *  - serverError: { title, message }?   optional inline error from the server
- *  - isLoading: boolean                 disables the submit while the request is in flight
- */
 const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -201,7 +190,7 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="group/submit relative h-11 w-full overflow-hidden rounded-xl text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
+            className="group/submit relative w-full overflow-hidden rounded-xl text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
           >
             <span
               aria-hidden

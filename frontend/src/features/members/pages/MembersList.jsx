@@ -300,7 +300,7 @@ const Members = () => {
           ) : (
             <div
               key={`members-${activePage}-${roleFilter}-${statusFilter}-${search}`}
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-1.5"
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-2"
             >
               {pagedMembers.map((m, i) => (
               <MemberCard

@@ -43,7 +43,7 @@ const AuthLayout = ({ children }) => {
             </Reveal>
             <Reveal delay={170} duration={500}>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                Farmdeck is a modern multi-tenant platform for modern farming —
+                Farmdeck is a modern multi-workspace platform for modern farming —
                 track every field, crop, and harvest in one place.
               </p>
             </Reveal>

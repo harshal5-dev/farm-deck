@@ -45,6 +45,10 @@ const nowIso = () => new Date().toISOString();
  * localStorageBaseQuery — a tiny RTK Query baseQuery for the farms
  * feature. The backend doesn't expose a farms module yet, so this
  * shim persists farms in localStorage and pretends to be a REST API.
+ * Records follow the `farms` table schema in camelCase — farmTypeId,
+ * name, location, latitude, longitude, totalArea, areaUnit, notes.
+ * farmTypeId is a real lookup row id from /lookups/farm-types; legacy
+ * demo records from earlier seeds may still carry extra display fields.
  *
  * Supported routes:
  *   GET    /farms           → list (returns { data: { farms, counts } })
@@ -109,7 +113,7 @@ const localStorageBaseQuery = async (args) => {
         },
       };
     }
-    if (!body.farmType) {
+    if (!body.farmTypeId) {
       return {
         error: {
           status: 400,
@@ -119,20 +123,49 @@ const localStorageBaseQuery = async (args) => {
         },
       };
     }
+    const hasLat = body.latitude !== null && body.latitude !== undefined && body.latitude !== "";
+    const hasLng = body.longitude !== null && body.longitude !== undefined && body.longitude !== "";
+    if (hasLat !== hasLng) {
+      return {
+        error: {
+          status: 400,
+          data: {
+            error: {
+              code: "invalid",
+              message: "Latitude and longitude must be set together",
+            },
+          },
+        },
+      };
+    }
+    const totalArea =
+      body.totalArea === null || body.totalArea === undefined || body.totalArea === ""
+        ? null
+        : Number(body.totalArea);
+    if (totalArea !== null && (Number.isNaN(totalArea) || totalArea <= 0)) {
+      return {
+        error: {
+          status: 400,
+          data: {
+            error: { code: "invalid", message: "Total area must be greater than 0" },
+          },
+        },
+      };
+    }
+    // Mirrors the `farms` table columns (camelCase JSON): farm_type_id,
+    // name, location, latitude, longitude, total_area, area_unit, notes
+    // + id / is_active / timestamps added by the "server".
     const farm = {
       id: newId(),
+      farmTypeId: body.farmTypeId,
       name: String(body.name).trim(),
-      farmType: body.farmType,
-      location: (body.location || "").trim(),
-      sizeAcres: Number(body.sizeAcres) || 0,
-      soilType: body.soilType || "loam",
-      description: (body.description || "").trim(),
-      establishedAt: body.establishedAt || null,
-      status: body.status || "active",
-      managerName: (body.managerName || "").trim(),
-      fieldsCount: Number(body.fieldsCount) || 0,
-      cropsCount: Number(body.cropsCount) || 0,
-      yieldKg: Number(body.yieldKg) || 0,
+      location: body.location ? String(body.location).trim() : null,
+      latitude: hasLat ? Number(body.latitude) : null,
+      longitude: hasLng ? Number(body.longitude) : null,
+      totalArea,
+      areaUnit: body.areaUnit || "sq_m",
+      notes: body.notes ? String(body.notes).trim() : null,
+      isActive: true,
       createdAt: nowIso(),
       updatedAt: nowIso(),
     };
@@ -157,39 +190,36 @@ const localStorageBaseQuery = async (args) => {
       };
     }
     const patch = args?.body || {};
+    // The form always submits the full camelCase payload, so a plain
+    // merge keeps any legacy fields on older mock records intact while
+    // numeric/optional fields are normalised to the new schema.
+    const numberOrNull = (value, fallback) => {
+      if (value === undefined) return fallback;
+      if (value === null || value === "") return null;
+      const n = Number(value);
+      return Number.isNaN(n) ? fallback : n;
+    };
     const updated = {
       ...farms[idx],
       ...patch,
-      sizeAcres:
-        patch.sizeAcres !== undefined
-          ? Number(patch.sizeAcres) || 0
-          : farms[idx].sizeAcres,
-      fieldsCount:
-        patch.fieldsCount !== undefined
-          ? Number(patch.fieldsCount) || 0
-          : farms[idx].fieldsCount,
-      cropsCount:
-        patch.cropsCount !== undefined
-          ? Number(patch.cropsCount) || 0
-          : farms[idx].cropsCount,
-      yieldKg:
-        patch.yieldKg !== undefined
-          ? Number(patch.yieldKg) || 0
-          : farms[idx].yieldKg,
       name:
         patch.name !== undefined ? String(patch.name).trim() : farms[idx].name,
       location:
         patch.location !== undefined
-          ? String(patch.location).trim()
+          ? patch.location
+            ? String(patch.location).trim()
+            : null
           : farms[idx].location,
-      managerName:
-        patch.managerName !== undefined
-          ? String(patch.managerName).trim()
-          : farms[idx].managerName,
-      description:
-        patch.description !== undefined
-          ? String(patch.description).trim()
-          : farms[idx].description,
+      notes:
+        patch.notes !== undefined
+          ? patch.notes
+            ? String(patch.notes).trim()
+            : null
+          : farms[idx].notes,
+      latitude: numberOrNull(patch.latitude, farms[idx].latitude),
+      longitude: numberOrNull(patch.longitude, farms[idx].longitude),
+      totalArea: numberOrNull(patch.totalArea, farms[idx].totalArea),
+      areaUnit: patch.areaUnit || farms[idx].areaUnit || "sq_m",
       updatedAt: nowIso(),
     };
     const next = [...farms];

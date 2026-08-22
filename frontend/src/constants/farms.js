@@ -198,6 +198,50 @@ export function getSoilType(id) {
 }
 
 /**
+ * Area units — matches `farms.area_unit VARCHAR(20) NOT NULL DEFAULT 'sq_m'`.
+ * Every id is ≤ 20 chars (the column limit). `factor` converts to square
+ * metres for future normalisation (sorting, totals, unit switching).
+ */
+export const AREA_UNITS = {
+  sq_m: { id: "sq_m", label: "m²", longLabel: "square metres", factor: 1 },
+  hectare: { id: "hectare", label: "ha", longLabel: "hectares", factor: 10000 },
+  acre: { id: "acre", label: "ac", longLabel: "acres", factor: 4046.8564224 },
+  sq_km: {
+    id: "sq_km",
+    label: "km²",
+    longLabel: "square kilometres",
+    factor: 1000000,
+  },
+  sq_ft: {
+    id: "sq_ft",
+    label: "ft²",
+    longLabel: "square feet",
+    factor: 0.09290304,
+  },
+  sq_yd: {
+    id: "sq_yd",
+    label: "yd²",
+    longLabel: "square yards",
+    factor: 0.83612736,
+  },
+};
+
+export const AREA_UNIT_ORDER = [
+  "sq_m",
+  "hectare",
+  "acre",
+  "sq_km",
+  "sq_ft",
+  "sq_yd",
+];
+
+export const DEFAULT_AREA_UNIT = "sq_m";
+
+export function getAreaUnit(id) {
+  return AREA_UNITS[id] || AREA_UNITS[DEFAULT_AREA_UNIT];
+}
+
+/**
  * Farm status — lifecycle states used for filter chips and pills.
  */
 export const FARM_STATUS_META = {

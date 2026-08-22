@@ -40,7 +40,7 @@ const About = ({ appLink, isAuthenticated = false }) => {
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-[17px]">
               Farmdeck demonstrates end-to-end system design: a Go + Gin REST
               API backed by PostgreSQL with sqlc-generated type-safe queries,
-              secure multi-tenant data isolation, and a polished React +
+              secure multi-workspace data isolation, and a polished React +
               shadcn/ui frontend.
             </p>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-[17px]">

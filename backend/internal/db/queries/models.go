@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Credential struct {
@@ -16,6 +17,29 @@ type Credential struct {
 	PasswordHash string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+type Farm struct {
+	ID         uuid.UUID
+	TenantID   uuid.UUID
+	FarmTypeID uuid.UUID
+	Name       string
+	Location   *string
+	Latitude   pgtype.Numeric
+	Longitude  pgtype.Numeric
+	TotalArea  pgtype.Numeric
+	AreaUnit   string
+	Notes      *string
+	IsActive   bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type FarmType struct {
+	ID          uuid.UUID
+	Name        string
+	DisplayName string
+	Description *string
 }
 
 type RefreshToken struct {

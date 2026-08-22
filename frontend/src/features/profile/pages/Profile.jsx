@@ -48,11 +48,11 @@ const Profile = () => {
         description: values.description?.trim() || null,
       };
       await updateTenant(payload).unwrap();
-      toast.success("Company updated", {
-        description: "Your company details have been saved.",
+      toast.success("Workspace updated", {
+        description: "Your workspace details have been saved.",
       });
     } catch (err) {
-      toast.error("Could not save company", {
+      toast.error("Could not save workspace", {
         description: err?.data?.error?.message || "Please try again.",
       });
     }
@@ -86,8 +86,8 @@ const Profile = () => {
                 Personal info
               </TabsTrigger>
               {isOwner && (
-                <TabsTrigger value="company" icon={IconBuildingWarehouse}>
-                  Company
+                <TabsTrigger value="workspace" icon={IconBuildingWarehouse}>
+                  Workspace
                 </TabsTrigger>
               )}
             </TabsList>
@@ -105,9 +105,9 @@ const Profile = () => {
             />
           </TabsContent>
 
-          {/* §2 — Company (tenant) */}
+          {/* §2 — Workspace (tenant) */}
           {isOwner && (
-            <TabsContent value="company">
+            <TabsContent value="workspace">
               <TenantForm
                 onTenantSubmit={onTenantSubmit}
                 isSavingTenant={isSavingTenant}

@@ -247,9 +247,6 @@ const UserForm = ({
               </span>
             )}
           </p>
-          {/* On mobile the actions stack and the primary button fills
-              the row so it's easy to tap. On desktop they sit side by
-              side with normal widths. */}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
             <Button
               type="button"

@@ -9,14 +9,41 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
+import { useListFarmTypesQuery } from "@/features/lookups";
 import FarmForm from "../components/farm-form/FarmForm";
 import { useUpdateFarmMutation } from "../farmApi";
-import { getFarmType } from "@/constants/farms";
+import { getFarmType, DEFAULT_AREA_UNIT } from "@/constants/farms";
 import { cn } from "@/lib/utils";
 import {
   clearSelectedFarm,
   selectSelectedFarm,
 } from "../selectedFarmSlice";
+
+/**
+ * Map a stored farm onto the form's field shape. Records created with
+ * the new payload carry farmTypeId/totalArea already; legacy mock
+ * records only stored the type *name* and sizeAcres, so the matching
+ * lookup row supplies the UUID and the area falls back to acres.
+ */
+const toFormDefaults = (farm, farmTypes) => ({
+  farmTypeId:
+    farm.farmTypeId ||
+    farmTypes.find((t) => t.name === farm.farmType)?.id ||
+    "",
+  name: farm.name || "",
+  location: farm.location || "",
+  latitude: farm.latitude != null ? String(farm.latitude) : "",
+  longitude: farm.longitude != null ? String(farm.longitude) : "",
+  totalArea:
+    farm.totalArea != null
+      ? String(farm.totalArea)
+      : farm.sizeAcres != null && farm.sizeAcres !== ""
+        ? String(farm.sizeAcres)
+        : "",
+  areaUnit:
+    farm.areaUnit || (farm.sizeAcres != null && farm.sizeAcres !== "" ? "acre" : DEFAULT_AREA_UNIT),
+  notes: farm.notes || farm.description || "",
+});
 
 const EditFarm = () => {
   const navigate = useNavigate();
@@ -24,6 +51,8 @@ const EditFarm = () => {
   const farm = useSelector(selectSelectedFarm);
   const [updateFarm, { isLoading: submitting }] = useUpdateFarmMutation();
   const { canManageFarms } = usePermissions();
+  const { data: farmTypes = [], isLoading: typesLoading } =
+    useListFarmTypesQuery();
 
   useEffect(() => {
     if (!farm) {
@@ -64,7 +93,10 @@ const EditFarm = () => {
     );
   }
 
-  const t = getFarmType(farm.farmType);
+  // New records reference the type by UUID; legacy mock records by name.
+  const typeName =
+    farm.farmType || farmTypes.find((t) => t.id === farm.farmTypeId)?.name;
+  const t = getFarmType(typeName);
   const TypeIcon = t.icon;
 
   const handleSubmit = async (values) => {
@@ -157,7 +189,7 @@ const EditFarm = () => {
                   Edit farm
                 </h1>
                 <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-                  Update {farm.name}'s type, soil, size & details.
+                  Update {farm.name}'s type, location, pin & details.
                 </p>
               </div>
             </div>
@@ -165,16 +197,19 @@ const EditFarm = () => {
         </div>
       </Reveal>
 
-      {/* ===== Form body ===== */}
+      {/* ===== Form body — waits for farm types so legacy records can
+             resolve their type name to a farmTypeId ===== */}
       <Reveal delay={140} duration={500}>
         <div className="glass-card texture-paper highlight-edge flex flex-col rounded-2xl p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
-          <FarmForm
-            mode="edit"
-            defaultValues={farm}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            submitting={submitting}
-          />
+          {typesLoading ? null : (
+            <FarmForm
+              mode="edit"
+              defaultValues={toFormDefaults(farm, farmTypes)}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              submitting={submitting}
+            />
+          )}
         </div>
       </Reveal>
     </div>
