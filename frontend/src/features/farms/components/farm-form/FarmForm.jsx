@@ -33,6 +33,11 @@ import {
 } from "@/components/ui/form";
 import FieldWrapper from "@/components/ui/field-wrapper";
 import {
+  RequiredStar,
+  CharCount,
+  RequiredLegend,
+} from "@/components/ui/field-indicators";
+import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
@@ -53,32 +58,6 @@ const fieldLabel =
 const NAME_MAX = 255;
 const LOCATION_MAX = 255;
 const NOTES_MAX = 1000;
-
-/** Required-field marker — appended to labels of NOT NULL fields. */
-const RequiredStar = () => (
-  <span className="ml-0.5 text-destructive" aria-hidden="true">
-    *
-  </span>
-);
-
-/** Live character counter for length-capped text fields; warns amber
- *  within the last 10% of the budget. */
-const CharCount = ({ value, max }) => {
-  const len = (value || "").length;
-  return (
-    <span
-      className={cn(
-        "text-[10px] font-medium tabular-nums mr-2.5",
-        len > max * 0.9
-          ? "text-amber-600 dark:text-amber-400"
-          : "text-muted-foreground/70"
-      )}
-      aria-live="polite"
-    >
-      {len}/{max}
-    </span>
-  );
-};
 
 /** Stringify optional numeric defaults; blank/undefined stay "". */
 const asString = (v) => (v === 0 || v ? String(v) : "");
@@ -452,9 +431,7 @@ const FarmForm = ({
                 </span>
               )}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground/60">
-              <span className="text-destructive">*</span> Required fields
-            </p>
+            <RequiredLegend />
           </div>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
             <Button

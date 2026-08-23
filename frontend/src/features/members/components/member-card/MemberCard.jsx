@@ -13,11 +13,6 @@ import { getRole } from "@/constants/roles";
 import { formatDate, formatRelative } from "../../lib/format";
 import { RolePill, StatusPill } from "../pills";
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -80,8 +75,10 @@ const MemberCard = ({
     }
   };
 
-  const actionBtn =
-    "inline-flex size-8 items-center justify-center rounded-md transition-all hover:bg-card hover:shadow-sm active:scale-90";
+  // Same icon-button base the farm cards use — keeps both sections'
+  // action styling in lockstep.
+  const iconAction =
+    "inline-flex size-8 items-center justify-center rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
   return (
     <Reveal delay={Math.min(index * 50, 400)} duration={500} changeKey={member.id}>
@@ -173,7 +170,7 @@ const MemberCard = ({
             />
           </div>
 
-          {/* Role info — plain, in the main body below the stat tiles */}
+          {/* Role info — what this role can do, in the main body */}
           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <RoleIcon
               className={cn("size-3.5 shrink-0", r.text)}
@@ -181,67 +178,57 @@ const MemberCard = ({
             />
             <span className="truncate">{r.description}</span>
           </div>
+        </div>
 
-          {/* Footer — action toolbar only */}
-          <div className="mt-2 flex items-center justify-end border-t border-border/30 pt-2">
-            <div
-              className="flex shrink-0 items-center gap-0.5 rounded-xl border border-border/40 bg-muted/30 p-0.5 shadow-xs"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
+        {/* Footer — icon-only colored actions (farm-card style). The card
+            itself is clickable, so stop the actions from opening it. */}
+        <div
+          className="relative flex items-center justify-end gap-2 border-t border-border/40 bg-muted/25 px-3.5 py-2"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          {canManage && (
+              <button
+                type="button"
+                onClick={handleEdit}
+                aria-label={`Edit ${member.fullName}`}
+                title="Edit details"
+                className={cn(
+                  iconAction,
+                  "bg-sky-warm/12 text-sky-warm hover:bg-sky-warm/22 hover:-translate-y-px"
+                )}
+              >
+                <IconPencil className="size-4" strokeWidth={1.85} />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label={`Copy ${member.fullName}'s email`}
+              title="Copy email"
+              className={cn(
+                iconAction,
+                "bg-leaf/12 text-leaf hover:bg-leaf/22 hover:-translate-y-px"
+              )}
             >
-              {canManage && (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        onClick={handleEdit}
-                        aria-label={`Edit ${member.fullName}`}
-                        className={cn(actionBtn, "text-leaf hover:bg-leaf/10")}
-                      />
-                    }
-                  >
-                    <IconPencil className="size-4" strokeWidth={1.85} />
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Edit details</TooltipContent>
-                </Tooltip>
-              )}
+              <IconCopy className="size-4" strokeWidth={1.85} />
+            </button>
 
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      aria-label={`Copy ${member.fullName}'s email`}
-                      className={cn(actionBtn, "text-sky-warm hover:bg-sky-warm/10")}
-                    />
-                  }
-                >
-                  <IconCopy className="size-4" strokeWidth={1.85} />
-                </TooltipTrigger>
-                <TooltipContent side="top">Copy email</TooltipContent>
-              </Tooltip>
-
-              {canManage && (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        onClick={askDelete}
-                        aria-label={`Delete ${member.fullName}`}
-                        className={cn(actionBtn, "text-red-500 hover:bg-red-500/10")}
-                      />
-                    }
-                  >
-                    <IconTrash className="size-4" strokeWidth={1.85} />
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Delete user</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
+            {canManage && (
+              <button
+                type="button"
+                onClick={askDelete}
+                aria-label={`Delete ${member.fullName}`}
+                title="Delete user"
+                className={cn(
+                  iconAction,
+                  "bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:-translate-y-px"
+                )}
+              >
+                <IconTrash className="size-4" strokeWidth={1.85} />
+              </button>
+            )}
         </div>
       </div>
 

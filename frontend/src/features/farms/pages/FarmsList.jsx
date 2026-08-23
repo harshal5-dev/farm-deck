@@ -8,7 +8,6 @@ import {
   IconX,
   IconTractor,
   IconFilter,
-  IconRuler2,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ import {
 import {
   FARM_TYPE_ORDER,
   getAreaUnitFactor,
-  getAreaUnitLabel,
 } from "@/constants/farms";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useListFarmTypesQuery } from "@/features/lookups";
@@ -50,8 +48,6 @@ import FarmCardSkeleton from "../components/FarmCardSkeleton";
 import EmptyFarms from "../components/EmptyFarms";
 import FarmTypeFilterChip from "../components/FarmTypeFilterChip";
 
-// Two rows of three cards on desktop — the whole list fits the viewport
-// without scrolling; pagination handles anything beyond a page.
 const PAGE_SIZE = 6;
 const GRID_COLS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
@@ -78,7 +74,7 @@ const Farms = () => {
     isFetching,
     refetch,
   } = useListFarmsQuery();
-  const { farms = [], active = 0, inactive = 0 } = data ?? {};
+  const { farms = [], active = 0, inactive = 0, total = 0 } = data ?? {};
   const [inactivateFarm] = useInactivateFarmMutation();
   const [activateFarm] = useActivateFarmMutation();
   const { canViewFarms, canManageFarms } = usePermissions();
@@ -93,8 +89,6 @@ const Farms = () => {
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
 
-  // Resolve each farm's farmTypeId against the lookup rows so cards and
-  // dialogs can keep using the visual farm-type config by name.
   const decorated = useMemo(() => {
     const typeById = new Map(farmTypes.map((t) => [t.id, t.name]));
     return farms.map((f) => ({
@@ -116,44 +110,12 @@ const Farms = () => {
     );
   }, [farmTypes]);
 
-  const statusCounts = useMemo(
-    () => ({
-      all: decorated.length,
-      active: decorated.filter((f) => f.isActive).length,
-      inactive: decorated.filter((f) => !f.isActive).length,
-    }),
-    [decorated]
-  );
-
   const typeCounts = useMemo(() => {
     const counts = { all: decorated.length };
     decorated.forEach((f) => {
       counts[f.farmTypeId] = (counts[f.farmTypeId] || 0) + 1;
     });
     return counts;
-  }, [decorated]);
-
-  // Combined area across farms, expressed in the most common unit.
-  const combinedArea = useMemo(() => {
-    const withArea = decorated.filter(
-      (f) => f.totalArea != null && f.totalArea !== ""
-    );
-    if (withArea.length === 0) return null;
-    const tally = {};
-    withArea.forEach((f) => {
-      const unit = f.areaUnit || "";
-      tally[unit] = (tally[unit] || 0) + 1;
-    });
-    const target = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
-    const factor = getAreaUnitFactor(target);
-    const sum = withArea.reduce(
-      (acc, f) =>
-        acc +
-        (Number(f.totalArea) * getAreaUnitFactor(f.areaUnit)) / (factor || 1),
-      0
-    );
-    const rounded = sum >= 100 ? Math.round(sum) : Math.round(sum * 10) / 10;
-    return `${rounded} ${getAreaUnitLabel(target)}`;
   }, [decorated]);
 
   const filtered = useMemo(() => {
@@ -290,40 +252,16 @@ const Farms = () => {
                     </span>
                     <span className="text-muted-foreground/40">·</span>
                     <span className="inline-flex items-center gap-1">
-                      <IconRuler2 className="size-3 text-wheat-deep dark:text-wheat" strokeWidth={1.85} />
-                      {combinedArea ? (
-                        <span className="font-semibold text-foreground tabular-nums">
-                          {combinedArea}
-                        </span>
-                      ) : (
-                        "No area recorded"
-                      )}
+                      <span className="font-semibold text-foreground tabular-nums">
+                        {total}
+                      </span>{" "}
+                      total
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* <div className="hidden items-center gap-2 md:flex">
-                  <HeaderStat
-                    icon={IconTractor}
-                    value={total}
-                    label="Total"
-                    tone="text-sky-warm"
-                  />
-                  <HeaderStat
-                    icon={IconCircleCheck}
-                    value={active}
-                    label="Active"
-                    tone="text-leaf"
-                  />
-                  <HeaderStat
-                    icon={IconCircleOff}
-                    value={inactive}
-                    label="Inactive"
-                    tone="text-muted-foreground"
-                  />
-                </div>*/}
                 {canManageFarms && (
                   <Button
                     onClick={handleAdd}
@@ -377,16 +315,6 @@ const Farms = () => {
                       )}
                     >
                       {s.label}
-                      <span
-                        className={cn(
-                          "inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums",
-                          statusFilter === s.id
-                            ? "bg-background/25 text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {statusCounts[s.id]}
-                      </span>
                     </button>
                   ))}
                 </div>
@@ -395,7 +323,7 @@ const Farms = () => {
                   <SelectTrigger
                     size="sm"
                     aria-label="Sort farms"
-                    className="h-9 min-w-38 rounded-2xl"
+                    className="h-9 min-w-38"
                   >
                     <SelectValue />
                   </SelectTrigger>

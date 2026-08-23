@@ -3,8 +3,8 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE tenants (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(255) NOT NULL,
-    subdomain   VARCHAR(100) UNIQUE NOT NULL,
-    description VARCHAR(255),
+    subdomain   VARCHAR(300) UNIQUE NOT NULL,
+    description VARCHAR(500),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );

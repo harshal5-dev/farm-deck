@@ -21,6 +21,11 @@ import {
 } from "@/components/ui/form";
 import FieldWrapper from "@/components/ui/field-wrapper";
 import LockedField from "@/components/ui/locked-field";
+import {
+  RequiredStar,
+  CharCount,
+  RequiredLegend,
+} from "@/components/ui/field-indicators";
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import {
   Tooltip,
@@ -123,11 +128,17 @@ const UserForm = ({
                 rules={{
                   required: "Full name is required",
                   minLength: { value: 2, message: "At least 2 characters" },
-                  maxLength: { value: 100, message: "Too long" },
+                  maxLength: { value: 255, message: "Too long" },
                 }}
                 render={({ field, fieldState }) => (
                   <FormItem className="gap-1.5">
-                    <FormLabel className={fieldLabel}>Full name</FormLabel>
+                    <div className="flex items-center justify-between gap-2">
+                      <FormLabel className={fieldLabel}>
+                        Full name
+                        <RequiredStar />
+                      </FormLabel>
+                      <CharCount value={fullName} max={255} />
+                    </div>
                     <FormControl>
                       <FieldWrapper icon={IconUser} hasError={fieldState.invalid}>
                         <Input
@@ -158,6 +169,7 @@ const UserForm = ({
                 name="emailId"
                 rules={{
                   required: "Email is required",
+                  maxLength: { value: 255, message: "Too long" },
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                     message: "Enter a valid email address",
@@ -165,7 +177,13 @@ const UserForm = ({
                 }}
                 render={({ field, fieldState }) => (
                   <FormItem className="gap-1.5">
-                    <FormLabel className={fieldLabel}>Email address</FormLabel>
+                    <div className="flex items-center justify-between gap-2">
+                      <FormLabel className={fieldLabel}>
+                        Email address
+                        <RequiredStar />
+                      </FormLabel>
+                      <CharCount value={email} max={255} />
+                    </div>
                     <FormControl>
                       <FieldWrapper icon={IconMail} hasError={fieldState.invalid}>
                         <Input
@@ -193,6 +211,7 @@ const UserForm = ({
                     <span className={cn("flex items-center gap-1.5", fieldLabel)}>
                       <IconShieldCheck className="size-3.5" strokeWidth={1.75} />
                       Role
+                      <RequiredStar />
                     </span>
                     <Tooltip>
                       <TooltipTrigger className="text-[10px] font-medium text-muted-foreground hover:text-foreground">
@@ -234,19 +253,22 @@ const UserForm = ({
 
         {/* ===== Footer ===== */}
         <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-          <p className="text-[11px] text-muted-foreground sm:order-1">
-            {isDirty ? (
-              <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                <span className="size-1.5 rounded-full bg-amber-500" />
-                Unsaved changes
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
-                <IconCircleCheckFilled className="size-3 text-leaf" />
-                {isEdit ? "All changes saved" : "Ready to add"}
-              </span>
-            )}
-          </p>
+          <div className="text-[11px] text-muted-foreground sm:order-1">
+            <p>
+              {isDirty ? (
+                <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                  <span className="size-1.5 rounded-full bg-amber-500" />
+                  Unsaved changes
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                  <IconCircleCheckFilled className="size-3 text-leaf" />
+                  {isEdit ? "All changes saved" : "Ready to add"}
+                </span>
+              )}
+            </p>
+            <RequiredLegend />
+          </div>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
             <Button
               type="button"

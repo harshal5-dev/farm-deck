@@ -20,6 +20,11 @@ import {
 } from "@/components/ui/form";
 import FieldWrapper from "@/components/ui/field-wrapper";
 import LockedField from "@/components/ui/locked-field";
+import {
+  RequiredStar,
+  CharCount,
+  RequiredLegend,
+} from "@/components/ui/field-indicators";
 import { DEFAULT_AVATAR_ID } from "@/components/avatars/avatars-data";
 import ChipAvatarPicker from "./ChipAvatarPicker";
 import ProfileIdentityPreview from "./ProfileIdentityPreview";
@@ -81,15 +86,19 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
                       message: "At least 2 characters",
                     },
                     maxLength: {
-                      value: 100,
+                      value: 255,
                       message: "Too long",
                     },
                   }}
                   render={({ field, fieldState }) => (
                     <FormItem className="gap-1.5">
-                      <FormLabel className={fieldLabel}>
-                        Full name
-                      </FormLabel>
+                      <div className="flex items-center justify-between gap-2">
+                        <FormLabel className={fieldLabel}>
+                          Full name
+                          <RequiredStar />
+                        </FormLabel>
+                        <CharCount value={watchedFullName} max={255} />
+                      </div>
                       <FormControl>
                         <FieldWrapper
                           icon={IconUser}
@@ -143,19 +152,22 @@ const ProfileForm = ({ onProfileSubmit, isSaving, user }) => {
 
             {/* ===== Footer ===== */}
             <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-              <p className="text-[11px] text-muted-foreground sm:order-1">
-                {isDirty ? (
-                  <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                    <span className="size-1.5 rounded-full bg-amber-500" />
-                    Unsaved changes
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
-                    <IconCircleCheckFilled className="size-3 text-leaf" />
-                    All changes saved
-                  </span>
-                )}
-              </p>
+          <div className="text-[11px] text-muted-foreground sm:order-1">
+            <p>
+              {isDirty ? (
+                <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                  <span className="size-1.5 rounded-full bg-amber-500" />
+                  Unsaved changes
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                  <IconCircleCheckFilled className="size-3 text-leaf" />
+                  All changes saved
+                </span>
+              )}
+            </p>
+            <RequiredLegend />
+          </div>
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
                 <Button
                   type="button"
