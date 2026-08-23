@@ -24,7 +24,6 @@ func NewServer(container *app.Container) *Server {
 		container: container,
 	}
 
-	// Per-minute settings are converted to a per-second refill rate.
 	server.globalLimiter = ratelimit.NewLimiter(ratelimit.Config{
 		Rate:  rate.Limit(container.Config.RateLimitPerMinute) / 60,
 		Burst: container.Config.RateLimitBurst,
@@ -47,9 +46,6 @@ func (server *Server) Start() error {
 	return server.router.Run(server.config.ServerAddress)
 }
 
-// Shutdown stops the rate limiter janitor goroutines. The HTTP server
-// itself has no graceful shutdown path yet, so this only matters for
-// embedded/long-running usages of NewServer outside main.
 func (server *Server) Shutdown() {
 	server.globalLimiter.Stop()
 	server.authLimiter.Stop()

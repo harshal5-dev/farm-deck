@@ -1,10 +1,3 @@
-// Package httperr maps domain/service errors to HTTP responses in one place.
-//
-// Services and repositories return sentinel errors (see internal/domain),
-// wrapped with context using fmt.Errorf("...: %w", err). Handlers pass any
-// error to HandleError, which picks the right status code and a safe,
-// client-facing message. Internal details of unexpected errors are logged
-// server-side only and never leaked to clients.
 package httperr
 
 import (
@@ -16,13 +9,6 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 )
 
-// HandleError writes the HTTP response for err. Handlers should call it and
-// return immediately:
-//
-//	if err := h.service.Do(ctx, req); err != nil {
-//		httperr.HandleError(ctx, err)
-//		return
-//	}
 func HandleError(ctx *gin.Context, err error) {
 	switch {
 	case errors.Is(err, domain.ErrUserExists),
@@ -52,14 +38,15 @@ func HandleError(ctx *gin.Context, err error) {
 	case errors.Is(err, domain.ErrForbidden):
 		response.Forbidden(ctx, messageOf(err))
 
+	case errors.Is(err, domain.ErrFarmNotFound):
+		response.NotFound(ctx, messageOf(err))
+
 	default:
 		log.Printf("internal error: %s %s: %v", ctx.Request.Method, ctx.Request.URL.Path, err)
 		response.InternalError(ctx, "something went wrong, please try again later")
 	}
 }
 
-// messageOf unwraps err down to the matched sentinel and returns its message,
-// so wrap context (e.g. "register user: ") is not exposed to clients.
 func messageOf(err error) string {
 	for _, sentinel := range []error{
 		domain.ErrUserExists,
@@ -70,6 +57,7 @@ func messageOf(err error) string {
 		domain.ErrInvitationExpired,
 		domain.ErrInvitationRevoked,
 		domain.ErrInvitationAccepted,
+		domain.ErrFarmNotFound,
 	} {
 		if errors.Is(err, sentinel) {
 			return sentinel.Error()

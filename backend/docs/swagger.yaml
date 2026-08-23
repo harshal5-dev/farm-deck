@@ -65,6 +65,45 @@ definitions:
       message:
         type: string
     type: object
+  FarmInfo:
+    properties:
+      areaUnit:
+        example: acres
+        type: string
+      createdAt:
+        example: "2026-08-22T09:00:00Z"
+        type: string
+      farmTypeID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      id:
+        example: 11111111-1111-1111-1111-111111111111
+        type: string
+      isActive:
+        example: true
+        type: boolean
+      latitude:
+        example: 18.5204
+        type: number
+      location:
+        example: Pune, MH
+        type: string
+      longitude:
+        example: 73.8567
+        type: number
+      name:
+        example: Greenfield Orchard
+        type: string
+      notes:
+        example: North-facing slope, drip irrigation installed
+        type: string
+      totalArea:
+        example: 12.5
+        type: number
+      updatedAt:
+        example: "2026-08-22T09:00:00Z"
+        type: string
+    type: object
   HealthResponse:
     properties:
       service:
@@ -73,6 +112,22 @@ definitions:
       status:
         example: ok
         type: string
+    type: object
+  ListFarmResponse:
+    properties:
+      active:
+        example: 2
+        type: integer
+      farms:
+        items:
+          $ref: '#/definitions/FarmInfo'
+        type: array
+      inactive:
+        example: 1
+        type: integer
+      total:
+        example: 3
+        type: integer
     type: object
   ListMembersResponse:
     properties:
@@ -101,6 +156,41 @@ definitions:
     properties:
       accessToken:
         type: string
+    type: object
+  ManageFarmRequest:
+    properties:
+      areaUnit:
+        example: acres
+        maxLength: 50
+        minLength: 2
+        type: string
+      farmTypeID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      latitude:
+        example: 18.5204
+        type: number
+      location:
+        example: Pune, MH
+        type: string
+      longitude:
+        example: 73.8567
+        type: number
+      name:
+        example: Greenfield Orchard
+        maxLength: 255
+        minLength: 2
+        type: string
+      notes:
+        example: North-facing slope, drip irrigation installed
+        type: string
+      totalArea:
+        example: 12.5
+        type: number
+    required:
+    - areaUnit
+    - farmTypeID
+    - name
     type: object
   MemberResponse:
     properties:
@@ -417,6 +507,184 @@ paths:
       summary: Verify an invitation token
       tags:
       - auth
+  /farms:
+    get:
+      description: Returns every farm belonging to the caller's tenant, along with
+        active/inactive counts.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tenant farms with status counts
+          schema:
+            allOf:
+            - $ref: '#/definitions/APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ListFarmResponse'
+              type: object
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List tenant farms
+      tags:
+      - farm
+    post:
+      consumes:
+      - application/json
+      description: Creates a farm owned by the caller's tenant. Authorization is gated
+        by the workspace.manage permission at the route level.
+      parameters:
+      - description: Farm create payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ManageFarmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: farm created successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Create a new farm
+      tags:
+      - farm
+  /farms/{id}:
+    patch:
+      description: Soft-deactivates the farm with the given id (sets is_active=false).
+        Authorization is gated by the workspace.manage permission at the route level.
+      parameters:
+      - description: Farm ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: farm inactivated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid farm id
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Inactivate a farm
+      tags:
+      - farm
+    put:
+      consumes:
+      - application/json
+      description: Updates the farm with the given id. Authorization is gated by the
+        workspace.manage permission at the route level.
+      parameters:
+      - description: Farm ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Farm update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ManageFarmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: farm updated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid farm id or validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: farm not found
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Update a farm
+      tags:
+      - farm
+  /farms/{id}/activate:
+    patch:
+      description: Reactivates the farm with the given id (sets is_active=true). Authorization
+        is gated by the workspace.manage permission at the route level.
+      parameters:
+      - description: Farm ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: farm activated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid farm id
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Activate a farm
+      tags:
+      - farm
   /health:
     get:
       description: Returns the service status. Does not require authentication.
@@ -454,6 +722,10 @@ paths:
             $ref: '#/definitions/APIError'
         "401":
           description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: 'requires permission: workspace.manage'
           schema:
             $ref: '#/definitions/APIError'
         "500":

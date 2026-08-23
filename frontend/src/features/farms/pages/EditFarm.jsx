@@ -20,29 +20,18 @@ import {
 } from "../selectedFarmSlice";
 
 /**
- * Map a stored farm onto the form's field shape. Records created with
- * the new payload carry farmTypeId/totalArea already; legacy mock
- * records only stored the type *name* and sizeAcres, so the matching
- * lookup row supplies the UUID and the area falls back to acres.
+ * Map a stored farm onto the form's field shape. Farm records come from
+ * the API normalised (farmTypeId, totalArea, areaUnit, notes…).
  */
-const toFormDefaults = (farm, farmTypes) => ({
-  farmTypeId:
-    farm.farmTypeId ||
-    farmTypes.find((t) => t.name === farm.farmType)?.id ||
-    "",
+const toFormDefaults = (farm) => ({
+  farmTypeId: farm.farmTypeId || "",
   name: farm.name || "",
   location: farm.location || "",
   latitude: farm.latitude != null ? String(farm.latitude) : "",
   longitude: farm.longitude != null ? String(farm.longitude) : "",
-  totalArea:
-    farm.totalArea != null
-      ? String(farm.totalArea)
-      : farm.sizeAcres != null && farm.sizeAcres !== ""
-        ? String(farm.sizeAcres)
-        : "",
-  areaUnit:
-    farm.areaUnit || (farm.sizeAcres != null && farm.sizeAcres !== "" ? "acre" : DEFAULT_AREA_UNIT),
-  notes: farm.notes || farm.description || "",
+  totalArea: farm.totalArea != null ? String(farm.totalArea) : "",
+  areaUnit: farm.areaUnit || DEFAULT_AREA_UNIT,
+  notes: farm.notes || "",
 });
 
 const EditFarm = () => {
@@ -93,7 +82,7 @@ const EditFarm = () => {
     );
   }
 
-  // New records reference the type by UUID; legacy mock records by name.
+  // Records reference the type by UUID; resolve its name for the header.
   const typeName =
     farm.farmType || farmTypes.find((t) => t.id === farm.farmTypeId)?.name;
   const t = getFarmType(typeName);
@@ -197,14 +186,14 @@ const EditFarm = () => {
         </div>
       </Reveal>
 
-      {/* ===== Form body — waits for farm types so legacy records can
-             resolve their type name to a farmTypeId ===== */}
+      {/* ===== Form body — waits for farm types so the type chip in the
+             header resolves ===== */}
       <Reveal delay={140} duration={500}>
         <div className="glass-card texture-paper highlight-edge flex flex-col rounded-2xl p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
           {typesLoading ? null : (
             <FarmForm
               mode="edit"
-              defaultValues={toFormDefaults(farm, farmTypes)}
+              defaultValues={toFormDefaults(farm)}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               submitting={submitting}

@@ -5,6 +5,7 @@ import (
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/auth"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/email"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/farm"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/lookup"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/tenant"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/user"
@@ -18,6 +19,7 @@ type Services struct {
 	User   user.UserService
 	Tenant tenant.TenantService
 	Lookup lookup.LookupService
+	Farm   farm.FarmService
 }
 
 type Handlers struct {
@@ -25,6 +27,7 @@ type Handlers struct {
 	User   user.UserHandler
 	Tenant tenant.TenantHandler
 	Lookup lookup.LookupHandler
+	Farm   farm.FarmHandler
 }
 
 type Repositories struct {
@@ -34,6 +37,7 @@ type Repositories struct {
 	Tenant       repository.TenantRepo
 	Invitation   repository.InvitationRepo
 	Lookup       repository.LookupRepo
+	Farm         repository.FarmRepo
 }
 
 type Container struct {
@@ -58,6 +62,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		Tenant:       repository.NewTenantRepo(store),
 		Invitation:   repository.NewInvitationRepo(store),
 		Lookup:       repository.NewLookupRepo(store),
+		Farm:         repository.NewFarmRepo(store),
 	}
 
 	container.Mailer = mailer.NewAsyncMailer(
@@ -78,6 +83,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		User:   user.NewUserService(container.Repositories.User, emailService, cfg),
 		Tenant: tenant.NewTenantService(container.Repositories.Tenant),
 		Lookup: lookup.NewLookupService(container.Repositories.Lookup),
+		Farm:   farm.NewFarmService(container.Repositories.Farm),
 	}
 
 	container.Handlers = Handlers{
@@ -85,6 +91,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		User:   user.NewUserHandler(container.Services.User),
 		Tenant: tenant.NewTenantHandler(container.Services.Tenant),
 		Lookup: lookup.NewLookupHandler(container.Services.Lookup),
+		Farm:   farm.NewFarmHandler(container.Services.Farm),
 	}
 
 	return container

@@ -7,6 +7,7 @@ import (
 
 	"github.com/harshal5-dev/farm-deck/backend/internal/middlewares"
 	authhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/auth/http"
+	farmhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/farm/http"
 	lookuphttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/lookup/http"
 	tenanthttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/tenant/http"
 	userhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/user/http"
@@ -36,4 +37,5 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 	userhttp.Register(public, protected, server.container.Handlers.User)
 	tenanthttp.Register(public, protected, server.container.Handlers.Tenant)
 	lookuphttp.Register(public, protected, server.container.Handlers.Lookup)
+	farmhttp.Register(public, protected, server.container.Handlers.Farm)
 }

@@ -32,4 +32,7 @@ var (
 
 	// Permission errors
 	ErrForbidden = errors.New("forbidden")
+
+	// Farm errors
+	ErrFarmNotFound = errors.New("farm not found")
 )

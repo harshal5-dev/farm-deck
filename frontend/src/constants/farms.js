@@ -63,15 +63,15 @@ export const FARM_TYPES = {
       "A blend of indoor propagation and outdoor finishing — best of both environments.",
     icon: IconPlant2,
     art: "mixed",
-    accent: "sage",
-    text: "text-sage-deep dark:text-sage",
-    textBright: "text-sage-deep",
-    bg: "bg-sage/15 dark:bg-sage/15",
-    bgSoft: "bg-sage/8",
-    ring: "ring-sage/40",
-    border: "border-sage/30",
-    gradient: "from-sage to-sage-deep",
-    chip: "from-sage/25 to-sage/5 text-sage-deep dark:text-sage ring-sage/25",
+    accent: "lagoon",
+    text: "text-lagoon-deep dark:text-lagoon",
+    textBright: "text-lagoon-deep",
+    bg: "bg-lagoon/12 dark:bg-lagoon/15",
+    bgSoft: "bg-lagoon/8",
+    ring: "ring-lagoon/40",
+    border: "border-lagoon/30",
+    gradient: "from-lagoon to-lagoon-deep",
+    chip: "from-lagoon/20 to-lagoon/5 text-lagoon-deep dark:text-lagoon ring-lagoon/25",
   },
   indoor: {
     id: "indoor",
@@ -242,7 +242,33 @@ export function getAreaUnit(id) {
 }
 
 /**
- * Farm status — lifecycle states used for filter chips and pills.
+ * Resolve an `areaUnit` string to its short label ("12.5 ac"). The column
+ * is free-form VARCHAR(50), so values may arrive as "acres", "acre", or
+ * one of the AREA_UNITS ids — normalise case and trailing plurals before
+ * giving up and echoing the raw string.
+ */
+export function getAreaUnitLabel(unit) {
+  if (!unit) return "";
+  const key = String(unit).trim().toLowerCase();
+  const direct =
+    AREA_UNITS[key] || AREA_UNITS[key.replace(/\s+/g, "_")] ||
+    AREA_UNITS[key.replace(/s$/, "")];
+  return direct?.label ?? String(unit);
+}
+
+/** Square-metre conversion factor for an `areaUnit` string (1 when unknown). */
+export function getAreaUnitFactor(unit) {
+  if (!unit) return 1;
+  const key = String(unit).trim().toLowerCase();
+  const direct =
+    AREA_UNITS[key] || AREA_UNITS[key.replace(/\s+/g, "_")] ||
+    AREA_UNITS[key.replace(/s$/, "")];
+  return direct?.factor ?? 1;
+}
+
+/**
+ * Farm status — derived from the API's `isActive` boolean. Used for
+ * filter segments and pills.
  */
 export const FARM_STATUS_META = {
   active: {
@@ -253,24 +279,16 @@ export const FARM_STATUS_META = {
     chip:
       "border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
   },
-  planning: {
-    id: "planning",
-    label: "Planning",
-    dot: "bg-amber-500",
-    text: "text-amber-700 dark:text-amber-400",
-    chip:
-      "border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-400",
-  },
-  archived: {
-    id: "archived",
-    label: "Archived",
+  inactive: {
+    id: "inactive",
+    label: "Inactive",
     dot: "bg-muted-foreground/50",
     text: "text-muted-foreground",
     chip: "border-border/60 bg-muted/40 text-muted-foreground",
   },
 };
 
-export const FARM_STATUS_ORDER = ["active", "planning", "archived"];
+export const FARM_STATUS_ORDER = ["active", "inactive"];
 
 export function getFarmStatus(id) {
   return FARM_STATUS_META[id] || FARM_STATUS_META.active;

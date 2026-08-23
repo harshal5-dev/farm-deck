@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Credential struct {
@@ -25,9 +24,9 @@ type Farm struct {
 	FarmTypeID uuid.UUID
 	Name       string
 	Location   *string
-	Latitude   pgtype.Numeric
-	Longitude  pgtype.Numeric
-	TotalArea  pgtype.Numeric
+	Latitude   *float64
+	Longitude  *float64
+	TotalArea  *float64
 	AreaUnit   string
 	Notes      *string
 	IsActive   bool

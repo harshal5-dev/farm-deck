@@ -6,9 +6,9 @@ import {
   IconCirclePlus,
   IconSearch,
   IconX,
-  IconClock,
   IconTractor,
   IconFilter,
+  IconRuler2,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Reveal } from "@/components/effects";
+import ErrorState from "@/components/ui/error-state";
 import {
   Pagination,
   PaginationContent,
@@ -30,67 +31,139 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { FARM_TYPE_ORDER } from "@/constants/farms";
+import {
+  FARM_TYPE_ORDER,
+  getAreaUnitFactor,
+  getAreaUnitLabel,
+} from "@/constants/farms";
 import { usePermissions } from "@/features/auth/usePermissions";
+import { useListFarmTypesQuery } from "@/features/lookups";
 import {
   useListFarmsQuery,
-  useDeleteFarmMutation,
+  useInactivateFarmMutation,
+  useActivateFarmMutation,
 } from "../farmApi";
 import { setSelectedFarm } from "../selectedFarmSlice";
 import { buildPageList } from "../lib/format";
 import FarmCard from "../components/FarmCard";
 import FarmCardSkeleton from "../components/FarmCardSkeleton";
 import EmptyFarms from "../components/EmptyFarms";
-import FarmDetailsDialog from "../components/FarmDetailsDialog";
 import FarmTypeFilterChip from "../components/FarmTypeFilterChip";
 
-const PAGE_SIZE = 8;
+// Two rows of three cards on desktop — the whole list fits the viewport
+// without scrolling; pagination handles anything beyond a page.
+const PAGE_SIZE = 6;
+const GRID_COLS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
 const STATUS_OPTIONS = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
-  { id: "planning", label: "Planning" },
-  { id: "archived", label: "Archived" },
+  { id: "inactive", label: "Inactive" },
 ];
 
 const SORT_OPTIONS = [
   { id: "recent", label: "Recently updated" },
   { id: "name", label: "Name (A → Z)" },
-  { id: "size", label: "Largest first" },
-  { id: "fields", label: "Most fields" },
-  { id: "yield", label: "Highest yield" },
+  { id: "size", label: "Largest area" },
+  { id: "newest", label: "Newest added" },
 ];
 
 const Farms = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data, isLoading } = useListFarmsQuery();
-  const { farms = [], counts = {} } = data ?? {};
-  const [deleteFarm] = useDeleteFarmMutation();
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useListFarmsQuery();
+  const { farms = [], active = 0, inactive = 0 } = data ?? {};
+  const [inactivateFarm] = useInactivateFarmMutation();
+  const [activateFarm] = useActivateFarmMutation();
   const { canViewFarms, canManageFarms } = usePermissions();
+  const {
+    data: farmTypes = [],
+    isLoading: typesLoading,
+  } = useListFarmTypesQuery();
 
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("recent");
-  const [viewingFarm, setViewingFarm] = useState(null);
   const [page, setPage] = useState(1);
 
-  const totals = useMemo(() => {
-    const c = { all: farms.length };
-    FARM_TYPE_ORDER.forEach((id) => {
-      c[id] = farms.filter((f) => f.farmType === id).length;
+  // Resolve each farm's farmTypeId against the lookup rows so cards and
+  // dialogs can keep using the visual farm-type config by name.
+  const decorated = useMemo(() => {
+    const typeById = new Map(farmTypes.map((t) => [t.id, t.name]));
+    return farms.map((f) => ({
+      ...f,
+      farmType: typeById.get(f.farmTypeId),
+    }));
+  }, [farms, farmTypes]);
+
+  // Lookup rows ordered like the visual config (unknown types last).
+  const orderedTypes = useMemo(() => {
+    const rank = (name) => {
+      const idx = FARM_TYPE_ORDER.indexOf(name);
+      return idx === -1 ? FARM_TYPE_ORDER.length : idx;
+    };
+    return [...farmTypes].sort((a, b) =>
+      rank(a.name) === rank(b.name)
+        ? a.displayName.localeCompare(b.displayName)
+        : rank(a.name) - rank(b.name)
+    );
+  }, [farmTypes]);
+
+  const statusCounts = useMemo(
+    () => ({
+      all: decorated.length,
+      active: decorated.filter((f) => f.isActive).length,
+      inactive: decorated.filter((f) => !f.isActive).length,
+    }),
+    [decorated]
+  );
+
+  const typeCounts = useMemo(() => {
+    const counts = { all: decorated.length };
+    decorated.forEach((f) => {
+      counts[f.farmTypeId] = (counts[f.farmTypeId] || 0) + 1;
     });
-    return c;
-  }, [farms]);
+    return counts;
+  }, [decorated]);
+
+  // Combined area across farms, expressed in the most common unit.
+  const combinedArea = useMemo(() => {
+    const withArea = decorated.filter(
+      (f) => f.totalArea != null && f.totalArea !== ""
+    );
+    if (withArea.length === 0) return null;
+    const tally = {};
+    withArea.forEach((f) => {
+      const unit = f.areaUnit || "";
+      tally[unit] = (tally[unit] || 0) + 1;
+    });
+    const target = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
+    const factor = getAreaUnitFactor(target);
+    const sum = withArea.reduce(
+      (acc, f) =>
+        acc +
+        (Number(f.totalArea) * getAreaUnitFactor(f.areaUnit)) / (factor || 1),
+      0
+    );
+    const rounded = sum >= 100 ? Math.round(sum) : Math.round(sum * 10) / 10;
+    return `${rounded} ${getAreaUnitLabel(target)}`;
+  }, [decorated]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    let out = farms.filter((f) => {
-      if (typeFilter !== "all" && f.farmType !== typeFilter) return false;
-      if (statusFilter !== "all" && f.status !== statusFilter) return false;
+    let out = decorated.filter((f) => {
+      if (typeFilter !== "all" && f.farmTypeId !== typeFilter) return false;
+      if (statusFilter === "active" && !f.isActive) return false;
+      if (statusFilter === "inactive" && f.isActive) return false;
       if (q) {
-        const hay = `${f.name} ${f.location} ${f.managerName}`.toLowerCase();
+        const hay = `${f.name} ${f.location ?? ""} ${f.notes ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -99,13 +172,14 @@ const Farms = () => {
     const sorter = {
       recent: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
       name: (a, b) => a.name.localeCompare(b.name),
-      size: (a, b) => (b.sizeAcres || 0) - (a.sizeAcres || 0),
-      fields: (a, b) => (b.fieldsCount || 0) - (a.fieldsCount || 0),
-      yield: (a, b) => (b.yieldKg || 0) - (a.yieldKg || 0),
+      size: (a, b) =>
+        (b.totalArea || 0) * getAreaUnitFactor(b.areaUnit) -
+        (a.totalArea || 0) * getAreaUnitFactor(a.areaUnit),
+      newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
     }[sort];
     if (sorter) out = [...out].sort(sorter);
     return out;
-  }, [farms, typeFilter, statusFilter, search, sort]);
+  }, [decorated, typeFilter, statusFilter, search, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const activePage = Math.min(page, totalPages);
@@ -143,21 +217,32 @@ const Farms = () => {
 
   const handleAdd = () => navigate("/app/farms/new");
 
-  const handleView = (f) => setViewingFarm(f);
-
   const handleEdit = (f) => {
     dispatch(setSelectedFarm(f));
     navigate("/app/farms/edit");
   };
 
-  const handleDelete = async (farm) => {
+  const handleDeactivate = async (farm) => {
     try {
-      await deleteFarm(farm.id).unwrap();
-      toast.success("Farm deleted", {
-        description: `${farm.name} has been removed.`,
+      await inactivateFarm(farm.id).unwrap();
+      toast.success("Farm deactivated", {
+        description: `${farm.name} is now marked inactive.`,
       });
     } catch (err) {
-      toast.error("Could not delete farm", {
+      toast.error("Could not deactivate farm", {
+        description: err?.data?.error?.message || "Please try again.",
+      });
+    }
+  };
+
+  const handleActivate = async (farm) => {
+    try {
+      await activateFarm(farm.id).unwrap();
+      toast.success("Farm reactivated", {
+        description: `${farm.name} is back in the active list.`,
+      });
+    } catch (err) {
+      toast.error("Could not reactivate farm", {
         description: err?.data?.error?.message || "Please try again.",
       });
     }
@@ -174,7 +259,7 @@ const Farms = () => {
           <div className="pattern-contour absolute inset-0 opacity-40 mix-blend-soft-light" />
 
           <div className="relative flex flex-col gap-3 p-4 sm:p-5">
-            {/* Row 1 — title + inline counts | actions */}
+            {/* Row 1 — title + workspace counts | stats + actions */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="relative shrink-0">
@@ -191,30 +276,54 @@ const Farms = () => {
                     <span className="inline-flex items-center gap-1">
                       <span className="size-1.5 rounded-full bg-emerald-500" />
                       <span className="font-semibold text-foreground tabular-nums">
-                        {counts.active ?? 0}
+                        {active}
                       </span>{" "}
                       active
                     </span>
                     <span className="text-muted-foreground/40">·</span>
                     <span className="inline-flex items-center gap-1">
-                      <IconClock className="size-3 text-amber-500" strokeWidth={2} />
+                      <span className="size-1.5 rounded-full bg-muted-foreground/40" />
                       <span className="font-semibold text-foreground tabular-nums">
-                        {counts.planning ?? 0}
+                        {inactive}
                       </span>{" "}
-                      planning
+                      inactive
                     </span>
                     <span className="text-muted-foreground/40">·</span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="font-semibold text-foreground tabular-nums">
-                        {counts.total ?? farms.length}
-                      </span>{" "}
-                      total
+                      <IconRuler2 className="size-3 text-wheat-deep dark:text-wheat" strokeWidth={1.85} />
+                      {combinedArea ? (
+                        <span className="font-semibold text-foreground tabular-nums">
+                          {combinedArea}
+                        </span>
+                      ) : (
+                        "No area recorded"
+                      )}
                     </span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* <div className="hidden items-center gap-2 md:flex">
+                  <HeaderStat
+                    icon={IconTractor}
+                    value={total}
+                    label="Total"
+                    tone="text-sky-warm"
+                  />
+                  <HeaderStat
+                    icon={IconCircleCheck}
+                    value={active}
+                    label="Active"
+                    tone="text-leaf"
+                  />
+                  <HeaderStat
+                    icon={IconCircleOff}
+                    value={inactive}
+                    label="Inactive"
+                    tone="text-muted-foreground"
+                  />
+                </div>*/}
                 {canManageFarms && (
                   <Button
                     onClick={handleAdd}
@@ -238,7 +347,7 @@ const Farms = () => {
                 <Input
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search by name, location or manager…"
+                  placeholder="Search by name, location or notes…"
                   className="pl-9"
                 />
                 {search && (
@@ -268,6 +377,16 @@ const Farms = () => {
                       )}
                     >
                       {s.label}
+                      <span
+                        className={cn(
+                          "inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums",
+                          statusFilter === s.id
+                            ? "bg-background/25 text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {statusCounts[s.id]}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -291,44 +410,47 @@ const Farms = () => {
               </div>
             </div>
 
-            {/* Row 3 — farm-type chips */}
-            <div className="flex flex-wrap items-center gap-2 border-t border-border/30 pt-2.5">
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-                <IconFilter className="size-3" strokeWidth={1.85} />
-                Type
-              </span>
-              <button
-                type="button"
-                onClick={() => onTypeFilterChange("all")}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all",
-                  typeFilter === "all"
-                    ? "border-transparent bg-foreground/90 text-background shadow-sm"
-                    : "border-border/50 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/80 hover:text-foreground"
-                )}
-              >
-                All
-                <span
+            {/* Row 3 — farm-type chips driven by the lookups API */}
+            {!typesLoading && orderedTypes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 border-t border-border/30 pt-2.5">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+                  <IconFilter className="size-3" strokeWidth={1.85} />
+                  Type
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onTypeFilterChange("all")}
                   className={cn(
-                    "ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums",
+                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all",
                     typeFilter === "all"
-                      ? "bg-background/20 text-background"
-                      : "bg-muted text-muted-foreground"
+                      ? "border-transparent bg-foreground/90 text-background shadow-sm"
+                      : "border-border/50 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/80 hover:text-foreground"
                   )}
                 >
-                  {totals.all}
-                </span>
-              </button>
-              {FARM_TYPE_ORDER.map((id) => (
-                <FarmTypeFilterChip
-                  key={id}
-                  farmTypeId={id}
-                  count={totals[id]}
-                  active={typeFilter === id}
-                  onClick={() => onTypeFilterChange(id)}
-                />
-              ))}
-            </div>
+                  All
+                  <span
+                    className={cn(
+                      "ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums",
+                      typeFilter === "all"
+                        ? "bg-background/20 text-background"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {typeCounts.all ?? 0}
+                  </span>
+                </button>
+                {orderedTypes.map((t) => (
+                  <FarmTypeFilterChip
+                    key={t.id}
+                    typeName={t.name}
+                    label={t.displayName || t.name}
+                    count={typeCounts[t.id] ?? 0}
+                    active={typeFilter === t.id}
+                    onClick={() => onTypeFilterChange(t.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </Reveal>
@@ -336,9 +458,20 @@ const Farms = () => {
       {/* ============ Grid region ========================================= */}
       <div className="flex flex-col gap-3 lg:min-h-0 lg:flex-1">
         <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
-          {isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
+          {isError ? (
+            <div className="flex min-h-64 items-center justify-center py-6">
+              <ErrorState
+                variant="error"
+                title="Couldn't load farms"
+                message="The farm list failed to load. Check your connection and try again."
+                onRetry={refetch}
+                retrying={isFetching}
+                className="max-w-lg"
+              />
+            </div>
+          ) : isLoading ? (
+            <div className={GRID_COLS}>
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                 <FarmCardSkeleton key={i} />
               ))}
             </div>
@@ -349,15 +482,15 @@ const Farms = () => {
           ) : (
             <div
               key={`farms-${activePage}-${typeFilter}-${statusFilter}-${search}-${sort}`}
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-1.5"
+              className={cn(GRID_COLS, "mt-1")}
             >
               {pagedFarms.map((f, i) => (
                 <FarmCard
                   key={f.id}
                   farm={f}
                   index={i}
-                  onView={() => handleView(f)}
-                  onDelete={() => handleDelete(f)}
+                  onDeactivate={() => handleDeactivate(f)}
+                  onActivate={() => handleActivate(f)}
                   onEdit={() => handleEdit(f)}
                   canManage={canManageFarms}
                 />
@@ -366,7 +499,7 @@ const Farms = () => {
           )}
         </div>
 
-        {!isLoading && totalPages > 1 && (
+        {!isLoading && !isError && totalPages > 1 && (
           <div className="flex shrink-0 flex-col items-center gap-2 pt-1">
             <Pagination className="justify-center">
               <PaginationContent>
@@ -424,13 +557,6 @@ const Farms = () => {
           </div>
         )}
       </div>
-
-      <FarmDetailsDialog
-        farm={viewingFarm}
-        open={Boolean(viewingFarm)}
-        onOpenChange={(open) => !open && setViewingFarm(null)}
-        canManage={canManageFarms}
-      />
     </div>
   );
 };

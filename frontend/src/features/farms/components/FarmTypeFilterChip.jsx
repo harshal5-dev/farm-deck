@@ -1,8 +1,13 @@
 import { cn } from "@/lib/utils";
 import { getFarmType } from "@/constants/farms";
 
-const FarmTypeFilterChip = ({ farmTypeId, count, active, onClick }) => {
-  const t = getFarmType(farmTypeId);
+/**
+ * Filter chip for a farm-type lookup row. `typeName` is the lookup
+ * `name` (e.g. "greenhouse") used to resolve the visual config;
+ * `label` is the user-facing displayName.
+ */
+const FarmTypeFilterChip = ({ typeName, label, count, active, onClick }) => {
+  const t = getFarmType(typeName);
   const Icon = t.icon;
   return (
     <button
@@ -24,7 +29,7 @@ const FarmTypeFilterChip = ({ farmTypeId, count, active, onClick }) => {
         />
       )}
       <Icon className="size-3.5" strokeWidth={1.85} />
-      {t.label}
+      {label}
       <span
         className={cn(
           "ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums",
