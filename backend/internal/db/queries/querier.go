@@ -11,9 +11,11 @@ import (
 )
 
 type Querier interface {
+	ActivateFarm(ctx context.Context, id uuid.UUID) error
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
 	CreateCredential(ctx context.Context, arg CreateCredentialParams) (Credential, error)
+	CreateFarm(ctx context.Context, arg CreateFarmParams) (Farm, error)
 	CreateMember(ctx context.Context, arg CreateMemberParams) (User, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
@@ -29,10 +31,14 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
+	InactivateFarm(ctx context.Context, id uuid.UUID) error
+	ListFarmTypes(ctx context.Context) ([]FarmType, error)
+	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
 	MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
 	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
+	UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, error)
 	UpdateMember(ctx context.Context, arg UpdateMemberParams) (User, error)
 	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)
 	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)

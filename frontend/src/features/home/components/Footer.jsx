@@ -22,7 +22,7 @@ const Footer = ({ appLink, isAuthenticated = false }) => {
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              A full-stack portfolio project for modern, multi-tenant farm
+              A full-stack portfolio project for modern, multi-workspace farm
               management.
             </p>
           </div>

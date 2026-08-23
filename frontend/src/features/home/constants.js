@@ -81,7 +81,7 @@ export const groups = [
 export const highlights = [
   { label: "Type-safe SQL with sqlc", icon: IconCode },
   { label: "JWT auth + refresh tokens", icon: IconStar },
-  { label: "Row-level tenant isolation", icon: IconCheck },
+  { label: "Row-level workspace isolation", icon: IconCheck },
   { label: "RESTful API design", icon: IconCheck },
   { label: "Optimistic UI updates", icon: IconCheck },
   { label: "Dark / light theming", icon: IconCheck },

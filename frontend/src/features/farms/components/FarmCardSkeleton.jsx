@@ -4,45 +4,50 @@ const FarmCardSkeleton = () => {
   return (
     <div className="glass-card texture-paper relative flex h-full flex-col overflow-hidden rounded-3xl">
       {/* Hero band */}
-      <div className="relative h-24 shrink-0 overflow-hidden">
+      <div className="relative h-20 shrink-0 overflow-hidden">
         <Skeleton className="absolute inset-0 rounded-none" />
       </div>
 
       {/* Body */}
-      <div className="relative flex flex-1 flex-col p-5">
-        {/* Identity row */}
-        <div className="flex items-start gap-3">
-          <Skeleton className="size-14 shrink-0 rounded-full ring-2 ring-card" />
-          <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-32" />
+      <div className="relative flex flex-1 flex-col px-4 pb-3">
+        {/* Identity — tile overlapping the hero */}
+        <div className="flex items-end gap-2.5">
+          <Skeleton className="-mt-6 size-12 shrink-0 rounded-2xl ring-[3px] ring-card" />
+          <div className="min-w-0 flex-1 space-y-1.5 pb-0.5">
+            <Skeleton className="h-4 w-40" />
             <Skeleton className="h-3 w-28" />
-            <div className="flex gap-1.5">
-              <Skeleton className="h-4 w-16 rounded-full" />
-              <Skeleton className="h-4 w-12 rounded-full" />
-            </div>
           </div>
-          <Skeleton className="size-8 shrink-0 rounded-xl" />
         </div>
 
-        {/* Stat tiles */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
+        {/* Pills */}
+        <div className="mt-2.5 flex gap-2">
+          <Skeleton className="h-4.5 w-18 rounded-full" />
+          <Skeleton className="h-4.5 w-16 rounded-full" />
+        </div>
+
+        {/* KPI strip */}
+        <div className="mt-3 grid grid-cols-3 divide-x divide-border/40 rounded-xl border border-border/30 bg-muted/25">
+          {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center gap-2 rounded-xl bg-muted/40 px-2.5 py-2"
+              className="flex flex-col items-center gap-1.5 px-2 py-2"
             >
-              <Skeleton className="size-3.5 shrink-0 rounded" />
-              <div className="flex-1 space-y-1">
-                <Skeleton className="h-2 w-10" />
-                <Skeleton className="h-3 w-14" />
-              </div>
+              <Skeleton className="size-3.5 rounded" />
+              <Skeleton className="h-3 w-12" />
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <div className="mt-auto flex items-center justify-between border-t border-border/30 pt-3">
-          <Skeleton className="h-3 w-40" />
+        {/* Notes teaser */}
+        <Skeleton className="mt-2.5 h-3 w-full" />
+      </div>
+
+      {/* Footer bar */}
+      <div className="relative flex items-center justify-between border-t border-border/40 bg-muted/25 px-3.5 py-2">
+        <Skeleton className="h-3 w-28" />
+        <div className="flex gap-2">
+          <Skeleton className="size-8 rounded-lg" />
+          <Skeleton className="size-8 rounded-lg" />
         </div>
       </div>
     </div>

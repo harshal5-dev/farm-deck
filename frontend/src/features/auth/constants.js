@@ -1,7 +1,7 @@
 import { IconAlertTriangle, IconClockHour4, IconMail } from "@tabler/icons-react";
 
 export const features = [
-  "Multi-tenant farm isolation",
+  "Multi-workspace farm isolation",
   "Track pH, EC & growth cycles",
   "Manage fields, crops & harvests",
   "Soil-type intelligence",

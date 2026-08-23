@@ -1,3 +1,5 @@
+import { getAreaUnitLabel } from "@/constants/farms";
+
 /** Format an ISO date as e.g. "Mar 12, 2024". Returns "—" for empty/invalid input. */
 export function formatDate(iso) {
   if (!iso) return "—";
@@ -41,6 +43,22 @@ export function formatAcres(value) {
   if (Number.isNaN(n)) return "—";
   if (n === 0) return "0";
   return n % 1 === 0 ? `${n}` : n.toFixed(1);
+}
+
+/** "12.5 ac" / "2 ha" — value + normalised unit label, "—" when unset. */
+export function formatArea(value, unit) {
+  if (value === null || value === undefined || value === "") return "—";
+  const n = Number(value);
+  if (Number.isNaN(n)) return "—";
+  return `${formatAcres(n)} ${getAreaUnitLabel(unit)}`.trim();
+}
+
+/** "18.52, 73.86" — null when the farm has no pin. `precision` in decimals. */
+export function formatCoords(latitude, longitude, precision = 4) {
+  const hasLat = latitude !== null && latitude !== undefined;
+  const hasLng = longitude !== null && longitude !== undefined;
+  if (!hasLat || !hasLng) return null;
+  return `${Number(latitude).toFixed(precision)}, ${Number(longitude).toFixed(precision)}`;
 }
 
 /** Build the page-number list with ellipses, e.g. [1, "...", 4, 5, "...", 9]. */

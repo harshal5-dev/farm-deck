@@ -26,25 +26,23 @@ export function FarmTypePill({ farmType, size = "sm", withIcon = true }) {
   );
 }
 
-/** Status pill with a live dot for active farms. */
-export function FarmStatusPill({ status }) {
-  const s = getFarmStatus(status);
+/** Status pill driven by the API's `isActive` flag — live dot when active. */
+export function FarmStatusPill({ active }) {
+  const s = getFarmStatus(active ? "active" : "inactive");
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase backdrop-blur-sm",
         s.chip
       )}
     >
       <span
         className={cn(
           "size-1.5 rounded-full",
-          status === "active"
-            ? "relative flex bg-emerald-500"
-            : s.dot
+          active ? "relative flex bg-emerald-500" : s.dot
         )}
       >
-        {status === "active" && (
+        {active && (
           <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/60" />
         )}
       </span>

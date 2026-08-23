@@ -77,7 +77,7 @@ const Hero = ({ appLink, isAuthenticated = false }) => {
 
           <Reveal delay={160} duration={500}>
             <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-[17px]">
-              Farmdeck is a full-stack, multi-tenant platform for modern
+              Farmdeck is a full-stack, multi-workspace platform for modern
               farming. Track fields, crops, harvests, pH, and EC — all in one
               calm, focused dashboard.
             </p>
@@ -124,7 +124,7 @@ const Hero = ({ appLink, isAuthenticated = false }) => {
             <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               {[
                 { icon: IconShieldLock, label: "JWT auth" },
-                { icon: IconUsers, label: "Multi-tenant" },
+                { icon: IconUsers, label: "Multi-workspace" },
                 { icon: IconDatabase, label: "PostgreSQL" },
                 { icon: IconSparkles, label: "Modern stack" },
               ].map(({ icon: Icon, label }) => (

@@ -87,7 +87,7 @@ const NotFound = () => {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button
                 nativeButton={false}
-                className="group/cta relative h-11 overflow-hidden rounded-xl px-5 text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
+                className="group/cta relative overflow-hidden rounded-xl px-5 text-sm font-semibold shadow-md shadow-leaf/20 transition-all hover:shadow-lg hover:shadow-leaf/30"
                 render={<Link to={homeLink} />}
               >
                 <span
@@ -106,7 +106,7 @@ const NotFound = () => {
               <Button
                 nativeButton={false}
                 variant="outline"
-                className="h-11 gap-2 rounded-xl px-5 text-sm font-semibold"
+                className="gap-2 rounded-xl px-5 text-sm font-semibold"
                 render={<Link to="/" />}
               >
                 <IconArrowLeft className="size-4" strokeWidth={1.85} />

@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
@@ -180,7 +179,7 @@ func (h *UserHandlerImpl) ListMember(ctx *gin.Context) {
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /users/members/{memberId} [patch]
 func (h *UserHandlerImpl) UpdateMember(ctx *gin.Context) {
-	memberID, err := parseMemberID(ctx)
+	memberID, err := ctxutil.ParseParamID(ctx, "memberId")
 	if err != nil {
 		response.BadRequest(ctx, "invalid member id")
 		return
@@ -213,7 +212,7 @@ func (h *UserHandlerImpl) UpdateMember(ctx *gin.Context) {
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /users/members/{memberId} [delete]
 func (h *UserHandlerImpl) DeleteMember(ctx *gin.Context) {
-	memberID, err := parseMemberID(ctx)
+	memberID, err := ctxutil.ParseParamID(ctx, "memberId")
 	if err != nil {
 		response.BadRequest(ctx, "invalid member id")
 		return
@@ -224,8 +223,4 @@ func (h *UserHandlerImpl) DeleteMember(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx, "Member deleted successfully")
-}
-
-func parseMemberID(ctx *gin.Context) (uuid.UUID, error) {
-	return uuid.Parse(ctx.Param("memberId"))
 }

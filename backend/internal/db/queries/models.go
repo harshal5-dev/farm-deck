@@ -18,6 +18,29 @@ type Credential struct {
 	UpdatedAt    time.Time
 }
 
+type Farm struct {
+	ID         uuid.UUID
+	TenantID   uuid.UUID
+	FarmTypeID uuid.UUID
+	Name       string
+	Location   *string
+	Latitude   *float64
+	Longitude  *float64
+	TotalArea  *float64
+	AreaUnit   string
+	Notes      *string
+	IsActive   bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type FarmType struct {
+	ID          uuid.UUID
+	Name        string
+	DisplayName string
+	Description *string
+}
+
 type RefreshToken struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID

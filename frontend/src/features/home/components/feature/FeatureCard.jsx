@@ -70,12 +70,12 @@ const FeatureCard = ({ feature, featured }) => {
           {feature.desc}
         </p>
 
-        {/* Featured: 2-col layout with tenant list mock on the right */}
+        {/* Featured: 2-col layout with workspace list mock on the right */}
         {featured && (
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1.2fr] lg:items-end">
             <div className="flex flex-wrap gap-2">
               {[
-                "Tenant-scoped",
+                "Workspace-scoped",
                 "Row-level security",
                 "Audit log",
                 "Workspace switcher",

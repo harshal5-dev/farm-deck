@@ -95,7 +95,7 @@ const FarmTypeArt = ({ variant, className }) => {
             width="70"
             height="55"
             rx="6"
-            fill="var(--sky-warm)"
+            fill="var(--lagoon)"
             opacity="0.35"
           />
           <rect
@@ -105,7 +105,7 @@ const FarmTypeArt = ({ variant, className }) => {
             height="55"
             rx="6"
             fill="none"
-            stroke="var(--sky-warm)"
+            stroke="var(--lagoon-deep)"
             strokeWidth="2"
             opacity="0.5"
           />
@@ -117,17 +117,17 @@ const FarmTypeArt = ({ variant, className }) => {
               y1={y}
               x2="62"
               y2={y}
-              stroke="var(--leaf)"
+              stroke="var(--lagoon-deep)"
               strokeWidth="2"
               opacity="0.6"
             />
           ))}
         </g>
         {/* divider arrows */}
-        <g transform="translate(108,68)" opacity="0.5">
+        <g transform="translate(108,68)" opacity="0.6">
           <path
             d="M0,0 L14,0 M10,-4 L14,0 L10,4"
-            stroke="var(--clay)"
+            stroke="var(--lagoon)"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -135,7 +135,7 @@ const FarmTypeArt = ({ variant, className }) => {
           />
           <path
             d="M24,0 L10,0 M14,-4 L10,0 L14,4"
-            stroke="var(--clay)"
+            stroke="var(--lagoon)"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"

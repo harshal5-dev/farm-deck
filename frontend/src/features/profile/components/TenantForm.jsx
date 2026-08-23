@@ -21,6 +21,11 @@ import {
 } from "@/components/ui/form";
 import FieldWrapper from "@/components/ui/field-wrapper";
 import LockedField from "@/components/ui/locked-field";
+import {
+  RequiredStar,
+  CharCount,
+  RequiredLegend,
+} from "@/components/ui/field-indicators";
 import WorkspaceIdentityPreview from "./WorkspaceIdentityPreview";
 
 const fieldLabel =
@@ -71,28 +76,32 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                   control={tenantForm.control}
                   name="name"
                   rules={{
-                    required: "Company name is required",
+                    required: "Workspace name is required",
                     minLength: {
                       value: 2,
                       message: "At least 2 characters",
                     },
                     maxLength: {
-                      value: 100,
+                      value: 255,
                       message: "Too long",
                     },
                   }}
                   render={({ field, fieldState }) => (
                     <FormItem className="gap-1.5">
-                      <FormLabel className={fieldLabel}>
-                        Company name
-                      </FormLabel>
+                      <div className="flex items-center justify-between gap-2">
+                        <FormLabel className={fieldLabel}>
+                          Workspace name
+                          <RequiredStar />
+                        </FormLabel>
+                        <CharCount value={watchedNameReal} max={255} />
+                      </div>
                       <FormControl>
                         <FieldWrapper
                           icon={IconBuildingWarehouse}
                           hasError={fieldState.invalid}
                         >
                           <Input
-                            placeholder="Your farm organization name"
+                            placeholder="Your workspace name"
                             autoComplete="organization"
                             className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                             {...field}
@@ -126,9 +135,7 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                         <FormLabel className={fieldLabel}>
                           Description
                         </FormLabel>
-                        <span className="text-[10px] text-muted-foreground/70 tabular-nums">
-                          {field.value?.length ?? 0}/500
-                        </span>
+                        <CharCount value={field.value} max={500} />
                       </div>
                       <FormControl>
                         <FieldWrapper
@@ -145,8 +152,8 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
                         </FieldWrapper>
                       </FormControl>
                       <p className="text-[11px] text-muted-foreground">
-                        A short blurb about your farm organization. Members
-                        see this in their workspace switcher.
+                        A short blurb about your workspace. Members see this
+                        in their workspace switcher.
                       </p>
                       <FormMessage className="text-[11px]" />
                     </FormItem>
@@ -157,19 +164,22 @@ const TenantForm = ({ onTenantSubmit, isSavingTenant, tenantDetails = {} }) => {
 
             {/* ===== Footer ===== */}
             <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-              <p className="text-[11px] text-muted-foreground sm:order-1">
-                {tenantIsDirty ? (
-                  <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                    <span className="size-1.5 rounded-full bg-amber-500" />
-                    Unsaved changes
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
-                    <IconCircleCheckFilled className="size-3 text-leaf" />
-                    All changes saved
-                  </span>
-                )}
-              </p>
+              <div className="text-[11px] text-muted-foreground sm:order-1">
+                <p>
+                  {tenantIsDirty ? (
+                    <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                      <span className="size-1.5 rounded-full bg-amber-500" />
+                      Unsaved changes
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                      <IconCircleCheckFilled className="size-3 text-leaf" />
+                      All changes saved
+                    </span>
+                  )}
+                </p>
+                <RequiredLegend />
+              </div>
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
                 <Button
                   type="button"

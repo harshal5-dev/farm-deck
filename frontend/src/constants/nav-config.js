@@ -2,6 +2,7 @@ import {
   IconBasket,
   IconLayoutDashboard,
   IconLayoutGrid,
+  IconListDetails,
   IconPlant2,
   IconTractor,
   IconUserCircle,
@@ -25,6 +26,7 @@ import { PERMISSIONS } from "./permissions";
  * Visual grouping rationale:
  *   - Overview      — entry point everyone gets
  *   - Farming       — farm/field/crop/harvest resources
+ *   - Reference     — workspace reference data (lookups, future settings)
  *   - Team          — member list & invites (manager+ only)
  *   - Account       — your own profile (everyone, always at the bottom)
  */
@@ -48,7 +50,6 @@ export const NAV_GROUPS = [
         href: "/app/farms",
         icon: IconTractor,
         permission: PERMISSIONS.VIEW_FARMS,
-        comingSoon: true,
       },
       {
         label: "Fields",
@@ -70,6 +71,16 @@ export const NAV_GROUPS = [
         icon: IconBasket,
         permission: PERMISSIONS.VIEW_HARVESTS,
         comingSoon: true,
+      },
+    ],
+  },
+  {
+    label: "Reference",
+    items: [
+      {
+        label: "Lookups",
+        href: "/app/lookups",
+        icon: IconListDetails,
       },
     ],
   },

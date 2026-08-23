@@ -6,6 +6,7 @@ import {
   selectedMemberReducer,
 } from "@/features/members";
 import { farmApi, selectedFarmReducer } from "@/features/farms";
+import { lookupsApi } from "@/features/lookups";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     [ProfileApi.reducerPath]: ProfileApi.reducer,
     [memberApi.reducerPath]: memberApi.reducer,
     [farmApi.reducerPath]: farmApi.reducer,
+    [lookupsApi.reducerPath]: lookupsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -23,6 +25,7 @@ export const store = configureStore({
       ProfileApi.middleware,
       memberApi.middleware,
       farmApi.middleware,
+      lookupsApi.middleware,
     ),
 });
 

@@ -1,7 +1,7 @@
 import { FarmScene } from "@/components/effects";
 
 const WorkspaceIdentityPreview = ({ name, subdomain, description }) => {
-  const displayName = (name || "").trim() || "Your company";
+  const displayName = (name || "").trim() || "Your workspace";
   const displaySub = (subdomain || "").trim() || "your-workspace";
   const initial = (displayName.charAt(0) || "F").toUpperCase();
   const hasDescription = !!description?.trim();

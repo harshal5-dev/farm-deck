@@ -9,14 +9,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
+import { useListFarmTypesQuery } from "@/features/lookups";
 import FarmForm from "../components/farm-form/FarmForm";
 import { useUpdateFarmMutation } from "../farmApi";
-import { getFarmType } from "@/constants/farms";
+import { getFarmType, DEFAULT_AREA_UNIT } from "@/constants/farms";
 import { cn } from "@/lib/utils";
 import {
   clearSelectedFarm,
   selectSelectedFarm,
 } from "../selectedFarmSlice";
+
+/**
+ * Map a stored farm onto the form's field shape. Farm records come from
+ * the API normalised (farmTypeId, totalArea, areaUnit, notes…).
+ */
+const toFormDefaults = (farm) => ({
+  farmTypeId: farm.farmTypeId || "",
+  name: farm.name || "",
+  location: farm.location || "",
+  latitude: farm.latitude != null ? String(farm.latitude) : "",
+  longitude: farm.longitude != null ? String(farm.longitude) : "",
+  totalArea: farm.totalArea != null ? String(farm.totalArea) : "",
+  areaUnit: farm.areaUnit || DEFAULT_AREA_UNIT,
+  notes: farm.notes || "",
+});
 
 const EditFarm = () => {
   const navigate = useNavigate();
@@ -24,6 +40,8 @@ const EditFarm = () => {
   const farm = useSelector(selectSelectedFarm);
   const [updateFarm, { isLoading: submitting }] = useUpdateFarmMutation();
   const { canManageFarms } = usePermissions();
+  const { data: farmTypes = [], isLoading: typesLoading } =
+    useListFarmTypesQuery();
 
   useEffect(() => {
     if (!farm) {
@@ -64,7 +82,10 @@ const EditFarm = () => {
     );
   }
 
-  const t = getFarmType(farm.farmType);
+  // Records reference the type by UUID; resolve its name for the header.
+  const typeName =
+    farm.farmType || farmTypes.find((t) => t.id === farm.farmTypeId)?.name;
+  const t = getFarmType(typeName);
   const TypeIcon = t.icon;
 
   const handleSubmit = async (values) => {
@@ -157,7 +178,7 @@ const EditFarm = () => {
                   Edit farm
                 </h1>
                 <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-                  Update {farm.name}'s type, soil, size & details.
+                  Update {farm.name}'s type, location, pin & details.
                 </p>
               </div>
             </div>
@@ -165,16 +186,19 @@ const EditFarm = () => {
         </div>
       </Reveal>
 
-      {/* ===== Form body ===== */}
+      {/* ===== Form body — waits for farm types so the type chip in the
+             header resolves ===== */}
       <Reveal delay={140} duration={500}>
         <div className="glass-card texture-paper highlight-edge flex flex-col rounded-2xl p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
-          <FarmForm
-            mode="edit"
-            defaultValues={farm}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            submitting={submitting}
-          />
+          {typesLoading ? null : (
+            <FarmForm
+              mode="edit"
+              defaultValues={toFormDefaults(farm)}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              submitting={submitting}
+            />
+          )}
         </div>
       </Reveal>
     </div>

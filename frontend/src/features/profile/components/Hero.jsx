@@ -174,7 +174,7 @@ const Hero = ({ user, isOwner }) => {
                   />
                   {user?.tenantName ||
                     user?.tenantDetails?.name ||
-                    "Your company"}
+                    "Your workspace"}
                 </span>
               </div>
             </div>
@@ -196,7 +196,7 @@ const Hero = ({ user, isOwner }) => {
             />
             <InfoTile
               icon={IconBuildingWarehouse}
-              label="Company"
+              label="Workspace"
               value={
                 user?.tenantName || user?.tenantDetails?.name || "Farm Deck"
               }

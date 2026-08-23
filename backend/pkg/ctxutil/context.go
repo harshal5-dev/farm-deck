@@ -61,3 +61,7 @@ func GetRole(ctx *gin.Context) (string, error) {
 
 	return role, nil
 }
+
+func ParseParamID(ctx *gin.Context, key string) (uuid.UUID, error) {
+	return uuid.Parse(ctx.Param(key))
+}
