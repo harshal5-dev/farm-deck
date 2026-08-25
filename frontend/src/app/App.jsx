@@ -20,6 +20,17 @@ import {
   AddFarm,
   EditFarm,
 } from "@/features/farms";
+import {
+  FieldsList,
+  AddField,
+  EditField,
+} from "@/features/fields";
+import {
+  CropsList,
+  AddCrop,
+  EditCrop,
+} from "@/features/crops";
+import { FarmSetup } from "@/features/setup";
 import { Lookups } from "@/features/lookups";
 import { Home } from "@/features/home";
 import NotFound from "@/pages/NotFound";
@@ -38,6 +49,13 @@ const App = () => {
             <Route path="farms" element={<FarmsList />} />
             <Route path="farms/new" element={<AddFarm />} />
             <Route path="farms/edit" element={<EditFarm />} />
+            <Route path="fields" element={<FieldsList />} />
+            <Route path="fields/new" element={<AddField />} />
+            <Route path="fields/edit" element={<EditField />} />
+            <Route path="crops" element={<CropsList />} />
+            <Route path="crops/new" element={<AddCrop />} />
+            <Route path="crops/edit" element={<EditCrop />} />
+            <Route path="setup" element={<FarmSetup />} />
             <Route path="members" element={<MembersList />} />
             <Route path="members/new" element={<AddMember />} />
             <Route path="members/edit" element={<EditMember />} />

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
-	"github.com/harshal5-dev/farm-deck/backend/pkg/slug"
 )
 
 func TestToUpdateTenantParams(t *testing.T) {
@@ -24,10 +23,6 @@ func TestToUpdateTenantParams(t *testing.T) {
 	}
 	if got.Description == nil || *got.Description != "A description" {
 		t.Errorf("Description: got %v", got.Description)
-	}
-	// Subdomain must be derived from the name via the slug package.
-	if want := slug.GenerateTenantDomain("Alice's Farm"); got.Subdomain != want {
-		t.Errorf("Subdomain: got %q want %q", got.Subdomain, want)
 	}
 }
 

@@ -6,7 +6,8 @@ CREATE TABLE tenants (
     subdomain   VARCHAR(300) UNIQUE NOT NULL,
     description VARCHAR(500),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT tenants_subdomain_slug_chk CHECK (subdomain ~ '^[a-z0-9-]+$')
 );
 
 CREATE TABLE users (

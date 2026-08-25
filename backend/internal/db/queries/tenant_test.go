@@ -136,7 +136,6 @@ func TestQueries_UpdateTenant(t *testing.T) {
 		got, err := q.UpdateTenant(ctx, UpdateTenantParams{
 			ID:          tid,
 			Name:        "New Name",
-			Subdomain:   "new-sub",
 			Description: &desc,
 		})
 		if err != nil {
@@ -152,8 +151,8 @@ func TestQueries_UpdateTenant(t *testing.T) {
 			t.Errorf("Description: got %v", got.Description)
 		}
 
-		// SQL arg order: id, name, subdomain, description.
-		wantArgs := []any{tid, "New Name", "new-sub", &desc}
+		// SQL arg order: id, name, description.
+		wantArgs := []any{tid, "New Name", &desc}
 		if !reflect.DeepEqual(m.lastArgs, wantArgs) {
 			t.Errorf("args: got %v want %v", m.lastArgs, wantArgs)
 		}
@@ -168,13 +167,12 @@ func TestQueries_UpdateTenant(t *testing.T) {
 		_, err := q.UpdateTenant(ctx, UpdateTenantParams{
 			ID:          tid,
 			Name:        "Name",
-			Subdomain:   "sub",
 			Description: nil,
 		})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		wantArgs := []any{tid, "Name", "sub", (*string)(nil)}
+		wantArgs := []any{tid, "Name", (*string)(nil)}
 		if !reflect.DeepEqual(m.lastArgs, wantArgs) {
 			t.Errorf("args: got %v want %v", m.lastArgs, wantArgs)
 		}

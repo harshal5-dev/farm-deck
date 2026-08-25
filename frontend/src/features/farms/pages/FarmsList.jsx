@@ -8,6 +8,7 @@ import {
   IconX,
   IconTractor,
   IconFilter,
+  IconRoute2,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -263,14 +264,25 @@ const Farms = () => {
 
               <div className="flex flex-wrap items-center gap-2">
                 {canManageFarms && (
-                  <Button
-                    onClick={handleAdd}
-                    size="sm"
-                    className="gap-1.5 shadow-md shadow-leaf/25"
-                  >
-                    <IconCirclePlus className="size-4" strokeWidth={1.85} />
-                    Add farm
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => navigate("/app/setup")}
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                    >
+                      <IconRoute2 className="size-4" strokeWidth={1.85} />
+                      Guided setup
+                    </Button>
+                    <Button
+                      onClick={handleAdd}
+                      size="sm"
+                      className="gap-1.5 shadow-md shadow-leaf/25"
+                    >
+                      <IconCirclePlus className="size-4" strokeWidth={1.85} />
+                      Add farm
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

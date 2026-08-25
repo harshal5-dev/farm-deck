@@ -7,8 +7,9 @@ var (
 	ErrCredentialNotFound = errors.New("credential not found")
 
 	// ErrTenantExists ---- tenant errors ---------
-	ErrTenantExists   = errors.New("tenant already exists")
-	ErrTenantNotFound = errors.New("tenant not found")
+	ErrTenantExists    = errors.New("tenant already exists")
+	ErrTenantNotFound  = errors.New("tenant not found")
+	ErrInvalidTenantName = errors.New("tenant name must contain a letter or number")
 
 	// ErrUserExists ---- user errors ---------
 	ErrUserExists   = errors.New("user already exists")

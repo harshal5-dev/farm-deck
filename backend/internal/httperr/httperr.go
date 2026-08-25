@@ -15,6 +15,9 @@ func HandleError(ctx *gin.Context, err error) {
 		errors.Is(err, domain.ErrTenantExists):
 		response.Conflict(ctx, messageOf(err))
 
+	case errors.Is(err, domain.ErrInvalidTenantName):
+		response.BadRequest(ctx, messageOf(err))
+
 	case errors.Is(err, domain.ErrUserNotFound),
 		errors.Is(err, domain.ErrTenantNotFound):
 		response.NotFound(ctx, messageOf(err))
@@ -51,6 +54,7 @@ func messageOf(err error) string {
 	for _, sentinel := range []error{
 		domain.ErrUserExists,
 		domain.ErrTenantExists,
+		domain.ErrInvalidTenantName,
 		domain.ErrUserNotFound,
 		domain.ErrTenantNotFound,
 		domain.ErrInvitationInvalid,

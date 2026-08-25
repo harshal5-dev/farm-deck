@@ -205,7 +205,11 @@ const Hero = ({ user, isOwner }) => {
             <InfoTile
               icon={IconFingerprint}
               label="Subdomain"
-              value={user?.tenantDetails?.subdomain || "—"}
+              value={
+                user?.tenantDetails?.subdomain
+                  ? `${user.tenantDetails.subdomain}.farmdeck.app`
+                  : "—"
+              }
               accent="clay"
               mono
             />

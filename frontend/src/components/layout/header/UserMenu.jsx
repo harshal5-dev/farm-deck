@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -24,9 +24,6 @@ import { cn } from "@/lib/utils";
 import HeaderAvatar from "./HeaderAvatar";
 import MenuIcon from "./MenuIcon";
 
-const stripFarmdeckSuffix = (s) =>
-  (s || "").replace(/\.farmdeck\.app$/i, "");
-
 const UserMenu = ({ user }) => {
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,10 +36,7 @@ const UserMenu = ({ user }) => {
   const RoleIcon = r.icon;
   const workspaceName =
     u.tenantName || u.tenantDetails?.name || "Your workspace";
-  const cleanSubdomain = useMemo(
-    () => stripFarmdeckSuffix(u.tenantDetails?.subdomain),
-    [u.tenantDetails?.subdomain]
-  );
+  const workspaceSlug = u.tenantDetails?.subdomain || "";
 
   const close = () => setMenuOpen(false);
 
@@ -189,9 +183,9 @@ const UserMenu = ({ user }) => {
             <span className="min-w-0 flex-1 truncate font-semibold tracking-tight text-foreground">
               {workspaceName}
             </span>
-            {cleanSubdomain && (
+            {workspaceSlug && (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-leaf/12 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-tight text-leaf lowercase">
-                {cleanSubdomain}.farmdeck.app
+                {workspaceSlug}.farmdeck.app
               </span>
             )}
           </div>

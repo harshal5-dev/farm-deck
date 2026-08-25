@@ -6,6 +6,9 @@ import {
   selectedMemberReducer,
 } from "@/features/members";
 import { farmApi, selectedFarmReducer } from "@/features/farms";
+import { zoneApi, selectedZoneReducer } from "@/features/fields";
+import { cropApi, selectedCropReducer } from "@/features/crops";
+import { setupApi } from "@/features/setup";
 import { lookupsApi } from "@/features/lookups";
 
 export const store = configureStore({
@@ -13,10 +16,15 @@ export const store = configureStore({
     auth: authReducer,
     selectedMember: selectedMemberReducer,
     selectedFarm: selectedFarmReducer,
+    selectedZone: selectedZoneReducer,
+    selectedCrop: selectedCropReducer,
     [authApi.reducerPath]: authApi.reducer,
     [ProfileApi.reducerPath]: ProfileApi.reducer,
     [memberApi.reducerPath]: memberApi.reducer,
     [farmApi.reducerPath]: farmApi.reducer,
+    [zoneApi.reducerPath]: zoneApi.reducer,
+    [cropApi.reducerPath]: cropApi.reducer,
+    [setupApi.reducerPath]: setupApi.reducer,
     [lookupsApi.reducerPath]: lookupsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -25,6 +33,9 @@ export const store = configureStore({
       ProfileApi.middleware,
       memberApi.middleware,
       farmApi.middleware,
+      zoneApi.middleware,
+      cropApi.middleware,
+      setupApi.middleware,
       lookupsApi.middleware,
     ),
 });

@@ -28,8 +28,8 @@ func TestToRegisterUserTxParams(t *testing.T) {
 	if got.TenantInfo.Name != "Alice's Farm" {
 		t.Errorf("TenantInfo.Name = %q", got.TenantInfo.Name)
 	}
-	// Subdomain must be derived from the tenant name via the slug package.
-	wantSub := slug.GenerateTenantDomain("Alice's Farm")
+	// Subdomain must be the bare slug derived from the tenant name.
+	wantSub := slug.GenerateTenantSlug("Alice's Farm")
 	if got.TenantInfo.Subdomain != wantSub {
 		t.Errorf("TenantInfo.Subdomain = %q, want %q", got.TenantInfo.Subdomain, wantSub)
 	}

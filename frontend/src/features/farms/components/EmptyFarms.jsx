@@ -1,7 +1,9 @@
-import { IconTractor, IconCirclePlus } from "@tabler/icons-react";
+import { IconTractor, IconCirclePlus, IconRoute2 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const EmptyFarms = ({ onAdd, canAdd = true }) => {
+  const navigate = useNavigate();
   return (
     <div className="glass-card texture-paper highlight-edge relative w-full max-w-xl overflow-hidden rounded-3xl py-16 text-center">
       <div className="pointer-events-none absolute -top-10 left-1/2 size-48 -translate-x-1/2 rounded-full bg-leaf/10 blur-3xl" />
@@ -23,10 +25,20 @@ const EmptyFarms = ({ onAdd, canAdd = true }) => {
           </p>
         </div>
         {canAdd && onAdd && (
-          <Button onClick={onAdd} className="mt-2 gap-2">
-            <IconCirclePlus className="size-4" strokeWidth={1.85} />
-            Add a farm
-          </Button>
+          <div className="flex flex-col items-center gap-2 sm:flex-row">
+            <Button onClick={onAdd} className="gap-2">
+              <IconCirclePlus className="size-4" strokeWidth={1.85} />
+              Add a farm
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/app/setup")}
+              className="gap-2"
+            >
+              <IconRoute2 className="size-4" strokeWidth={1.85} />
+              or use the guided setup
+            </Button>
+          </div>
         )}
       </div>
     </div>

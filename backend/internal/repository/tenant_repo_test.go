@@ -56,11 +56,10 @@ func TestTenantRepo_CreateTenant(t *testing.T) {
 func TestTenantRepo_UpdateTenant(t *testing.T) {
 	ctx := context.Background()
 	params := db.UpdateTenantParams{
-		ID:        uuidMust("22222222-2222-2222-2222-222222222222"),
-		Name:      "Renamed",
-		Subdomain: "renamed",
+		ID:   uuidMust("22222222-2222-2222-2222-222222222222"),
+		Name: "Renamed",
 	}
-	want := db.Tenant{ID: params.ID, Name: "Renamed", Subdomain: "renamed"}
+	want := db.Tenant{ID: params.ID, Name: "Renamed", Subdomain: "daves"}
 
 	t.Run("returns the store result on success", func(t *testing.T) {
 		store := &mockStore{updateTenant: func(_ context.Context, p db.UpdateTenantParams) (db.Tenant, error) {

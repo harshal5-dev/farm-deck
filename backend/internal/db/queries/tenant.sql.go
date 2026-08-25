@@ -46,23 +46,17 @@ func (q *Queries) CreateTenant(ctx context.Context, arg CreateTenantParams) (Ten
 }
 
 const updateTenant = `-- name: UpdateTenant :one
-UPDATE tenants SET name = $2, subdomain = $3, description = $4, updated_at = now() WHERE id = $1 RETURNING id, name, subdomain, description, created_at, updated_at
+UPDATE tenants SET name = $2, description = $3, updated_at = now() WHERE id = $1 RETURNING id, name, subdomain, description, created_at, updated_at
 `
 
 type UpdateTenantParams struct {
 	ID          uuid.UUID
 	Name        string
-	Subdomain   string
 	Description *string
 }
 
 func (q *Queries) UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error) {
-	row := q.db.QueryRow(ctx, updateTenant,
-		arg.ID,
-		arg.Name,
-		arg.Subdomain,
-		arg.Description,
-	)
+	row := q.db.QueryRow(ctx, updateTenant, arg.ID, arg.Name, arg.Description)
 	var i Tenant
 	err := row.Scan(
 		&i.ID,

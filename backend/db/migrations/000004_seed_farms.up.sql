@@ -1,5 +1,5 @@
 WITH sunrise AS (
-    SELECT id FROM tenants WHERE subdomain = 'sunrise-farms.farmdeck.app' LIMIT 1
+    SELECT id FROM tenants WHERE subdomain = 'sunrise-farms' LIMIT 1
 ),
 ft AS (
     SELECT name, id FROM farm_types WHERE name IN ('indoor', 'outdoor', 'greenhouse', 'mixed')

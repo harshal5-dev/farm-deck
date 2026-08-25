@@ -56,14 +56,12 @@ export const NAV_GROUPS = [
         href: "/app/fields",
         icon: IconLayoutGrid,
         permission: PERMISSIONS.VIEW_FIELDS,
-        comingSoon: true,
       },
       {
         label: "Crops",
         href: "/app/crops",
         icon: IconPlant2,
         permission: PERMISSIONS.VIEW_CROPS,
-        comingSoon: true,
       },
       {
         label: "Harvests",

@@ -1,14 +1,14 @@
 WITH new_tenants AS (
     INSERT INTO tenants (name, subdomain, description)
     VALUES
-        ('Sunrise Farms',    'sunrise-farms.farmdeck.app',    'Family-run organic farm'),
-        ('Green Valley Co.', 'green-valley-co.farmdeck.app',  'Hydroponics and greenhouse operations'),
-        ('Harvest Hub',      'harvest-hub.farmdeck.app',      'Community-supported agriculture')
+        ('Sunrise Farms',    'sunrise-farms',   'Family-run organic farm'),
+        ('Green Valley Co.', 'green-valley-co', 'Hydroponics and greenhouse operations'),
+        ('Harvest Hub',      'harvest-hub',     'Community-supported agriculture')
     RETURNING id, subdomain
 ),
-sunrise AS (SELECT id FROM new_tenants WHERE subdomain = 'sunrise-farms.farmdeck.app'   LIMIT 1),
-green   AS (SELECT id FROM new_tenants WHERE subdomain = 'green-valley-co.farmdeck.app' LIMIT 1),
-harvest AS (SELECT id FROM new_tenants WHERE subdomain = 'harvest-hub.farmdeck.app'     LIMIT 1),
+sunrise AS (SELECT id FROM new_tenants WHERE subdomain = 'sunrise-farms'   LIMIT 1),
+green   AS (SELECT id FROM new_tenants WHERE subdomain = 'green-valley-co' LIMIT 1),
+harvest AS (SELECT id FROM new_tenants WHERE subdomain = 'harvest-hub'     LIMIT 1),
 new_users AS (
     INSERT INTO users (tenant_id, email_id, full_name, profile_picture, role, status, last_active_at, created_at, updated_at)
     VALUES
@@ -45,8 +45,7 @@ new_users AS (
     ((SELECT id FROM harvest), 'joseph.clark@harvesthub.org',    'Joseph Clark',      (ARRAY['farmer','gardener','cow','hen','pig','lamb','horse','bee','fox','scarecrow','mushroom','pumpkin','rooster','goat','owl','strawberry','tomato','wheat'])[1 + floor(random() * 18)::int], 'viewer',  'invited', NULL,                          now() - interval '7 days',   now() - interval '7 days')
     RETURNING id, email_id, status
 )
--- Only 'active' users get a credentials row. Invited users haven't accepted
--- their invite yet, so they have no password set.
+
 INSERT INTO credentials (user_id, email_id, password_hash)
 SELECT
     id,

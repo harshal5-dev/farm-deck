@@ -37,7 +37,7 @@ const FarmIdentityPreview = ({
   const unit = getAreaUnit(areaUnit);
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/40 p-0 shadow-sm backdrop-blur lg:h-full">
+    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/40 p-0 shadow-sm backdrop-blur lg:h-full lg:max-h-[70svh]">
       {/* Top hero band — live FarmTypeArt preview that reacts to the
           selected farm type so the form feels alive as you click between
           cards. */}

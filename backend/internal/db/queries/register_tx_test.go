@@ -57,6 +57,19 @@ func TestSaveTenant(t *testing.T) {
 		}
 	})
 
+	t.Run("rejects an empty subdomain before hitting the database", func(t *testing.T) {
+		m := &mockDBTX{}
+		q := New(m)
+
+		_, err := saveTenant(ctx, q, domain.TenantInfo{Name: "!!!", Subdomain: ""})
+		if !errors.Is(err, domain.ErrInvalidTenantName) {
+			t.Fatalf("expected ErrInvalidTenantName, got %v", err)
+		}
+		if m.queryRowCalls != 0 {
+			t.Errorf("expected no database calls, got %d", m.queryRowCalls)
+		}
+	})
+
 	t.Run("returns ErrTenantExists when subdomain is taken", func(t *testing.T) {
 		m := &mockDBTX{nextRows: []pgx.Row{rowFrom(true)}}
 		q := New(m)

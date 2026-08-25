@@ -40,6 +40,10 @@ func (store *SQLStore) RegisterUserTx(ctx context.Context, arg domain.RegisterUs
 }
 
 func saveTenant(ctx context.Context, q *Queries, arg domain.TenantInfo) (Tenant, error) {
+	if arg.Subdomain == "" {
+		return Tenant{}, domain.ErrInvalidTenantName
+	}
+
 	isTenantExists, err := q.CheckTenantExistsBySubdomain(ctx, arg.Subdomain)
 	if err != nil {
 		return Tenant{}, err

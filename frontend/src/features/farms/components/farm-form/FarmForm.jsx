@@ -85,6 +85,9 @@ const FarmForm = ({
   onSubmit,
   onCancel,
   submitting = false,
+  // Injectable farm-types query — lets the setup wizard feed mock
+  // lookups while every other caller keeps the real API.
+  typesQuery = useListFarmTypesQuery,
 }) => {
   const isEdit = mode === "edit";
 
@@ -95,7 +98,7 @@ const FarmForm = ({
     isLoading: typesLoading,
     isError: typesError,
     refetch: refetchTypes,
-  } = useListFarmTypesQuery();
+  } = typesQuery();
 
   const form = useForm({
     defaultValues: {

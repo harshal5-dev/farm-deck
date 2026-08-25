@@ -13,7 +13,7 @@ import (
 func toRegisterUserTxParams(req RegisterUserRequest, hashedPassword string) domain.RegisterUserTxParams {
 	return domain.RegisterUserTxParams{
 		UserInfo:   domain.UserInfo{FullName: req.FullName, EmailID: req.EmailID},
-		TenantInfo: domain.TenantInfo{Name: req.TenantName, Subdomain: slug.GenerateTenantDomain(req.TenantName)},
+		TenantInfo: domain.TenantInfo{Name: req.TenantName, Subdomain: slug.GenerateTenantSlug(req.TenantName)},
 		Credential: domain.Credential{PasswordHash: hashedPassword, EmailID: req.EmailID},
 	}
 }
