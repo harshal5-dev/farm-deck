@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	db "github.com/harshal5-dev/farm-deck/backend/internal/db/queries"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/jackc/pgx/v5"
@@ -79,33 +78,36 @@ func TestFarmRepo_ListFarms(t *testing.T) {
 		{ID: uuidMust("66666666-6666-6666-6666-666666666666"), Name: "Orchard B", TenantID: tenantID, IsActive: false},
 	}
 
-	t.Run("forwards tenant id and returns the store result", func(t *testing.T) {
-		var gotTenant uuid.UUID
-		store := &mockStore{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.Farm, error) {
-			gotTenant = tID
+	t.Run("forwards params and returns the store result", func(t *testing.T) {
+		var gotParams db.ListFarmsParams
+		store := &mockStore{listFarms: func(_ context.Context, p db.ListFarmsParams) ([]db.Farm, error) {
+			gotParams = p
 			return want, nil
 		}}
 		repo := NewFarmRepo(store)
 
-		got, err := repo.ListFarms(ctx, tenantID)
+		got, err := repo.ListFarms(ctx, tenantID, true)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		if len(got) != len(want) || got[0].ID != want[0].ID {
 			t.Errorf("farms: got %+v want %+v", got, want)
 		}
-		if gotTenant != tenantID {
-			t.Errorf("tenantID not forwarded: got %v want %v", gotTenant, tenantID)
+		if gotParams.TenantID != tenantID {
+			t.Errorf("tenantID not forwarded: got %v want %v", gotParams.TenantID, tenantID)
+		}
+		if !gotParams.IsActive {
+			t.Errorf("IsActive not forwarded: got %v want true", gotParams.IsActive)
 		}
 	})
 
 	t.Run("returns an empty slice when no farms exist", func(t *testing.T) {
-		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+		store := &mockStore{listFarms: func(context.Context, db.ListFarmsParams) ([]db.Farm, error) {
 			return nil, nil
 		}}
 		repo := NewFarmRepo(store)
 
-		got, err := repo.ListFarms(ctx, tenantID)
+		got, err := repo.ListFarms(ctx, tenantID, false)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -116,12 +118,12 @@ func TestFarmRepo_ListFarms(t *testing.T) {
 
 	t.Run("forwards the store error unchanged", func(t *testing.T) {
 		storeErr := errors.New("connection reset")
-		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+		store := &mockStore{listFarms: func(context.Context, db.ListFarmsParams) ([]db.Farm, error) {
 			return nil, storeErr
 		}}
 		repo := NewFarmRepo(store)
 
-		got, err := repo.ListFarms(ctx, tenantID)
+		got, err := repo.ListFarms(ctx, tenantID, true)
 		if !errors.Is(err, storeErr) {
 			t.Fatalf("expected %v, got %v", storeErr, err)
 		}
@@ -134,12 +136,11 @@ func TestFarmRepo_ListFarms(t *testing.T) {
 func TestFarmRepo_UpdateFarm(t *testing.T) {
 	ctx := context.Background()
 	params := db.UpdateFarmParams{
-		ID:         uuidMust("77777777-7777-7777-7777-777777777777"),
-		Name:       "Renamed Orchard",
-		AreaUnit:   "hectares",
-		FarmTypeID: uuidMust("88888888-8888-8888-8888-888888888888"),
+		ID:       uuidMust("77777777-7777-7777-7777-777777777777"),
+		Name:     "Renamed Orchard",
+		AreaUnit: "hectares",
 	}
-	want := db.Farm{ID: params.ID, Name: params.Name, FarmTypeID: params.FarmTypeID, UpdatedAt: time.Now().UTC()}
+	want := db.Farm{ID: params.ID, Name: params.Name, AreaUnit: params.AreaUnit, UpdatedAt: time.Now().UTC()}
 
 	t.Run("forwards params and returns the store result", func(t *testing.T) {
 		var gotParams db.UpdateFarmParams
@@ -206,68 +207,47 @@ func TestFarmRepo_UpdateFarm(t *testing.T) {
 	})
 }
 
-func TestFarmRepo_InactivateFarm(t *testing.T) {
+func TestFarmRepo_ToggleFarmIsActive(t *testing.T) {
 	ctx := context.Background()
 	id := uuidMust("99999999-9999-9999-9999-999999999999")
+	want := db.Farm{ID: id, Name: "Orchard A", IsActive: false}
 
-	t.Run("forwards the id and returns nil on success", func(t *testing.T) {
-		var gotID uuid.UUID
-		store := &mockStore{inactivateFarm: func(_ context.Context, got uuid.UUID) error {
-			gotID = got
-			return nil
+	t.Run("forwards params and returns the store result", func(t *testing.T) {
+		var gotParams db.ToggleFarmIsActiveParams
+		store := &mockStore{toggleFarmIsActive: func(_ context.Context, p db.ToggleFarmIsActiveParams) (db.Farm, error) {
+			gotParams = p
+			return want, nil
 		}}
 		repo := NewFarmRepo(store)
 
-		if err := repo.InactivateFarm(ctx, id); err != nil {
+		got, err := repo.ToggleFarmIsActive(ctx, id, false)
+		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if gotID != id {
-			t.Errorf("id not forwarded: got %v want %v", gotID, id)
+		if got != want {
+			t.Errorf("farm: got %+v want %+v", got, want)
+		}
+		if gotParams.ID != id {
+			t.Errorf("id not forwarded: got %v want %v", gotParams.ID, id)
+		}
+		if gotParams.IsActive {
+			t.Errorf("IsActive not forwarded: got %v want false", gotParams.IsActive)
 		}
 	})
 
 	t.Run("forwards the store error unchanged", func(t *testing.T) {
 		storeErr := errors.New("connection refused")
-		store := &mockStore{inactivateFarm: func(context.Context, uuid.UUID) error {
-			return storeErr
+		store := &mockStore{toggleFarmIsActive: func(context.Context, db.ToggleFarmIsActiveParams) (db.Farm, error) {
+			return db.Farm{}, storeErr
 		}}
 		repo := NewFarmRepo(store)
 
-		if err := repo.InactivateFarm(ctx, id); !errors.Is(err, storeErr) {
+		got, err := repo.ToggleFarmIsActive(ctx, id, true)
+		if !errors.Is(err, storeErr) {
 			t.Fatalf("expected %v, got %v", storeErr, err)
 		}
-	})
-}
-
-func TestFarmRepo_ActivateFarm(t *testing.T) {
-	ctx := context.Background()
-	id := uuidMust("99999999-9999-9999-9999-999999999999")
-
-	t.Run("forwards the id and returns nil on success", func(t *testing.T) {
-		var gotID uuid.UUID
-		store := &mockStore{activateFarm: func(_ context.Context, got uuid.UUID) error {
-			gotID = got
-			return nil
-		}}
-		repo := NewFarmRepo(store)
-
-		if err := repo.ActivateFarm(ctx, id); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if gotID != id {
-			t.Errorf("id not forwarded: got %v want %v", gotID, id)
-		}
-	})
-
-	t.Run("forwards the store error unchanged", func(t *testing.T) {
-		storeErr := errors.New("connection refused")
-		store := &mockStore{activateFarm: func(context.Context, uuid.UUID) error {
-			return storeErr
-		}}
-		repo := NewFarmRepo(store)
-
-		if err := repo.ActivateFarm(ctx, id); !errors.Is(err, storeErr) {
-			t.Fatalf("expected %v, got %v", storeErr, err)
+		if got != (db.Farm{}) {
+			t.Errorf("expected zero-value farm on error, got %+v", got)
 		}
 	})
 }

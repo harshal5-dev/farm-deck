@@ -1,6 +1,9 @@
 import {
   IconBook2,
   IconCategory,
+  IconDroplets,
+  IconGrain,
+  IconLayoutGrid,
   IconRefresh,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -11,8 +14,16 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
-import { useListFarmTypesQuery } from "../lookupsApi";
+import {
+  useListFarmTypesQuery,
+  useListZoneTypesQuery,
+  useListSoilTypesQuery,
+  useListHydroSystemTypesQuery,
+} from "../lookupsApi";
 import FarmTypesView from "./FarmTypesView";
+import ZoneTypesView from "./ZoneTypesView";
+import SoilTypesView from "./SoilTypesView";
+import HydroSystemTypesView from "./HydroSystemTypesView";
 
 const LOOKUP_TABS = [
   {
@@ -21,14 +32,66 @@ const LOOKUP_TABS = [
     icon: IconCategory,
     content: FarmTypesView,
   },
+  {
+    value: "zone-types",
+    label: "Zone type",
+    icon: IconLayoutGrid,
+    content: ZoneTypesView,
+  },
+  {
+    value: "soil-types",
+    label: "Soil type",
+    icon: IconGrain,
+    content: SoilTypesView,
+  },
+  {
+    value: "hydro-system-types",
+    label: "Hydro system",
+    icon: IconDroplets,
+    content: HydroSystemTypesView,
+  },
 ];
 
 const Lookups = () => {
-  const { data: farmTypes = [], refetch: refetchFarmTypes, isFetching } =
-    useListFarmTypesQuery();
+  const {
+    data: farmTypes = [],
+    refetch: refetchFarmTypes,
+    isFetching: isFetchingFarmTypes,
+  } = useListFarmTypesQuery();
+  const {
+    data: zoneTypes = [],
+    refetch: refetchZoneTypes,
+    isFetching: isFetchingZoneTypes,
+  } = useListZoneTypesQuery();
+  const {
+    data: soilTypes = [],
+    refetch: refetchSoilTypes,
+    isFetching: isFetchingSoilTypes,
+  } = useListSoilTypesQuery();
+  const {
+    data: hydroSystemTypes = [],
+    refetch: refetchHydroSystemTypes,
+    isFetching: isFetchingHydroSystemTypes,
+  } = useListHydroSystemTypesQuery();
 
-  const totalEntries = farmTypes.length;
+  const totalEntries =
+    farmTypes.length +
+    zoneTypes.length +
+    soilTypes.length +
+    hydroSystemTypes.length;
   const categoryCount = LOOKUP_TABS.length;
+  const isFetching =
+    isFetchingFarmTypes ||
+    isFetchingZoneTypes ||
+    isFetchingSoilTypes ||
+    isFetchingHydroSystemTypes;
+
+  const refetch = () => {
+    refetchFarmTypes();
+    refetchZoneTypes();
+    refetchSoilTypes();
+    refetchHydroSystemTypes();
+  };
 
   return (
     <div className="flex flex-col gap-4 lg:h-[calc(100svh-6.5rem)] lg:overflow-hidden">
@@ -75,7 +138,7 @@ const Lookups = () => {
 
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => refetchFarmTypes()}
+                onClick={refetch}
                 size="sm"
                 variant="outline"
                 className="gap-1.5"

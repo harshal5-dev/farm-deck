@@ -10,9 +10,9 @@ import (
 
 type FarmService interface {
 	CreateFarm(ctx context.Context, tenantId uuid.UUID, req ManageFarmRequest) error
-	ListFarms(ctx context.Context, tenantId uuid.UUID) (ListFarmResponse, error)
+	ListFarms(ctx context.Context, tenantId uuid.UUID, isActive bool) (ListFarmResponse, error)
 	UpdateFarm(ctx context.Context, farmId uuid.UUID, req ManageFarmRequest) error
-	InactivateFarm(ctx context.Context, farmId uuid.UUID) error
+	DeactivateFarm(ctx context.Context, farmId uuid.UUID) error
 	ActivateFarm(ctx context.Context, farmId uuid.UUID) error
 }
 
@@ -32,8 +32,8 @@ func (s *FarmServiceImpl) CreateFarm(ctx context.Context, tenantId uuid.UUID, re
 	return nil
 }
 
-func (s *FarmServiceImpl) ListFarms(ctx context.Context, tenantId uuid.UUID) (ListFarmResponse, error) {
-	farms, err := s.farmRepo.ListFarms(ctx, tenantId)
+func (s *FarmServiceImpl) ListFarms(ctx context.Context, tenantId uuid.UUID, isActive bool) (ListFarmResponse, error) {
+	farms, err := s.farmRepo.ListFarms(ctx, tenantId, isActive)
 	if err != nil {
 		return ListFarmResponse{}, fmt.Errorf("failed to list farms: %w", err)
 	}
@@ -48,16 +48,16 @@ func (s *FarmServiceImpl) UpdateFarm(ctx context.Context, farmId uuid.UUID, req 
 	return nil
 }
 
-func (s *FarmServiceImpl) InactivateFarm(ctx context.Context, farmId uuid.UUID) error {
-	err := s.farmRepo.InactivateFarm(ctx, farmId)
+func (s *FarmServiceImpl) DeactivateFarm(ctx context.Context, farmId uuid.UUID) error {
+	_, err := s.farmRepo.ToggleFarmIsActive(ctx, farmId, false)
 	if err != nil {
-		return fmt.Errorf("failed to inactivate farm: %w", err)
+		return fmt.Errorf("failed to deactivate farm: %w", err)
 	}
 	return nil
 }
 
 func (s *FarmServiceImpl) ActivateFarm(ctx context.Context, farmId uuid.UUID) error {
-	err := s.farmRepo.ActivateFarm(ctx, farmId)
+	_, err := s.farmRepo.ToggleFarmIsActive(ctx, farmId, true)
 	if err != nil {
 		return fmt.Errorf("failed to activate farm: %w", err)
 	}

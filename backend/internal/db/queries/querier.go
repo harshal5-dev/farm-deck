@@ -11,7 +11,6 @@ import (
 )
 
 type Querier interface {
-	ActivateFarm(ctx context.Context, id uuid.UUID) error
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
 	CreateCredential(ctx context.Context, arg CreateCredentialParams) (Credential, error)
@@ -21,6 +20,9 @@ type Querier interface {
 	CreateTenant(ctx context.Context, arg CreateTenantParams) (Tenant, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserInvitation(ctx context.Context, arg CreateUserInvitationParams) (UserInvitation, error)
+	CreateZone(ctx context.Context, arg CreateZoneParams) (Zone, error)
+	CreateZoneHydroDetails(ctx context.Context, arg CreateZoneHydroDetailsParams) (ZoneHydroDetail, error)
+	CreateZoneSoilDetails(ctx context.Context, arg CreateZoneSoilDetailsParams) (ZoneSoilDetail, error)
 	DeleteCredentialByUserID(ctx context.Context, userID uuid.UUID) error
 	DeleteMember(ctx context.Context, id uuid.UUID) (User, error)
 	GetCredentialByEmail(ctx context.Context, emailID string) (GetCredentialByEmailRow, error)
@@ -31,18 +33,26 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
-	InactivateFarm(ctx context.Context, id uuid.UUID) error
 	ListFarmTypes(ctx context.Context) ([]FarmType, error)
-	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error)
+	ListFarms(ctx context.Context, arg ListFarmsParams) ([]Farm, error)
+	ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
+	ListSoilTypes(ctx context.Context) ([]SoilType, error)
+	ListZoneTypes(ctx context.Context) ([]ZoneType, error)
+	ListZones(ctx context.Context, arg ListZonesParams) ([]ListZonesRow, error)
 	MarkUserInvitationAccepted(ctx context.Context, id uuid.UUID) (UserInvitation, error)
 	RevokeRefreshTokenByHash(ctx context.Context, tokenHash string) error
+	ToggleFarmIsActive(ctx context.Context, arg ToggleFarmIsActiveParams) (Farm, error)
+	ToggleZoneIsActive(ctx context.Context, arg ToggleZoneIsActiveParams) (Zone, error)
 	TouchUserLastActive(ctx context.Context, id uuid.UUID) error
 	UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, error)
 	UpdateMember(ctx context.Context, arg UpdateMemberParams) (User, error)
 	UpdateTenant(ctx context.Context, arg UpdateTenantParams) (Tenant, error)
 	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)
 	UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) (User, error)
+	UpdateZone(ctx context.Context, arg UpdateZoneParams) (Zone, error)
+	UpdateZoneHydroDetails(ctx context.Context, arg UpdateZoneHydroDetailsParams) (ZoneHydroDetail, error)
+	UpdateZoneSoilDetails(ctx context.Context, arg UpdateZoneSoilDetailsParams) (ZoneSoilDetail, error)
 }
 
 var _ Querier = (*Queries)(nil)

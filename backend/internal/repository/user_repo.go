@@ -23,15 +23,15 @@ type UserRepo interface {
 	DeleteMember(ctx context.Context, id uuid.UUID) error
 }
 
-type userRepo struct {
+type UserRepoImpl struct {
 	store db.Store
 }
 
 func NewUserRepo(store db.Store) UserRepo {
-	return &userRepo{store: store}
+	return &UserRepoImpl{store: store}
 }
 
-func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.User, error) {
+func (r *UserRepoImpl) GetUserByEmailID(ctx context.Context, emailID string) (db.User, error) {
 	result, err := r.store.GetUserByEmailID(ctx, emailID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -42,7 +42,7 @@ func (r *userRepo) GetUserByEmailID(ctx context.Context, emailID string) (db.Use
 	return result, nil
 }
 
-func (r *userRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error) {
+func (r *UserRepoImpl) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error) {
 	result, err := r.store.GetUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -53,7 +53,7 @@ func (r *userRepo) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, erro
 	return result, nil
 }
 
-func (r *userRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error) {
+func (r *UserRepoImpl) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.GetUserProfileDetailsRow, error) {
 	result, err := r.store.GetUserProfileDetails(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -64,7 +64,7 @@ func (r *userRepo) GetUserProfileDetails(ctx context.Context, id uuid.UUID) (db.
 	return result, nil
 }
 
-func (r *userRepo) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfileParams) (db.User, error) {
+func (r *UserRepoImpl) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfileParams) (db.User, error) {
 	result, err := r.store.UpdateUserProfile(ctx, arg)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -75,7 +75,7 @@ func (r *userRepo) UpdateUserProfile(ctx context.Context, arg db.UpdateUserProfi
 	return result, nil
 }
 
-func (r *userRepo) CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
+func (r *UserRepoImpl) CreateMember(ctx context.Context, params domain.CreateMemberTxParams) (db.CreateMemberTxResult, error) {
 	result, err := r.store.CreateMemberTx(ctx, params)
 	if err != nil {
 		return db.CreateMemberTxResult{}, err
@@ -83,7 +83,7 @@ func (r *userRepo) CreateMember(ctx context.Context, params domain.CreateMemberT
 	return result, nil
 }
 
-func (r *userRepo) UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) (db.User, error) {
+func (r *UserRepoImpl) UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) (db.User, error) {
 	result, err := r.store.UpdateUserStatus(ctx, db.UpdateUserStatusParams{
 		ID:     id,
 		Status: status,
@@ -97,7 +97,7 @@ func (r *userRepo) UpdateUserStatus(ctx context.Context, id uuid.UUID, status st
 	return result, nil
 }
 
-func (r *userRepo) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeID uuid.UUID) ([]db.User, error) {
+func (r *UserRepoImpl) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeID uuid.UUID) ([]db.User, error) {
 	result, err := r.store.ListMembers(ctx, db.ListMembersParams{
 		TenantID: tenantID,
 		ID:       excludeID,
@@ -109,11 +109,11 @@ func (r *userRepo) ListMembers(ctx context.Context, tenantID uuid.UUID, excludeI
 	return result, nil
 }
 
-func (r *userRepo) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
+func (r *UserRepoImpl) TouchUserLastActive(ctx context.Context, id uuid.UUID) error {
 	return r.store.TouchUserLastActive(ctx, id)
 }
 
-func (r *userRepo) UpdateMember(ctx context.Context, params db.UpdateMemberParams) (db.User, error) {
+func (r *UserRepoImpl) UpdateMember(ctx context.Context, params db.UpdateMemberParams) (db.User, error) {
 	result, err := r.store.UpdateMember(ctx, params)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -124,6 +124,6 @@ func (r *userRepo) UpdateMember(ctx context.Context, params db.UpdateMemberParam
 	return result, nil
 }
 
-func (r *userRepo) DeleteMember(ctx context.Context, id uuid.UUID) error {
+func (r *UserRepoImpl) DeleteMember(ctx context.Context, id uuid.UUID) error {
 	return r.store.DeleteMemberTx(ctx, id)
 }

@@ -11,17 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const activateFarm = `-- name: ActivateFarm :exec
-UPDATE farms
-SET is_active = true
-WHERE id = $1
-`
-
-func (q *Queries) ActivateFarm(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, activateFarm, id)
-	return err
-}
-
 const createFarm = `-- name: CreateFarm :one
 INSERT INTO farms (name, location, latitude, longitude, total_area, area_unit, notes, tenant_id, farm_type_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -71,25 +60,20 @@ func (q *Queries) CreateFarm(ctx context.Context, arg CreateFarmParams) (Farm, e
 	return i, err
 }
 
-const inactivateFarm = `-- name: InactivateFarm :exec
-UPDATE farms
-SET is_active = false
-WHERE id = $1
-`
-
-func (q *Queries) InactivateFarm(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, inactivateFarm, id)
-	return err
-}
-
 const listFarms = `-- name: ListFarms :many
 SELECT id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at FROM farms
 WHERE tenant_id = $1
+AND is_active = $2
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error) {
-	rows, err := q.db.Query(ctx, listFarms, tenantID)
+type ListFarmsParams struct {
+	TenantID uuid.UUID
+	IsActive bool
+}
+
+func (q *Queries) ListFarms(ctx context.Context, arg ListFarmsParams) ([]Farm, error) {
+	rows, err := q.db.Query(ctx, listFarms, arg.TenantID, arg.IsActive)
 	if err != nil {
 		return nil, err
 	}
@@ -122,23 +106,55 @@ func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, er
 	return items, nil
 }
 
+const toggleFarmIsActive = `-- name: ToggleFarmIsActive :one
+UPDATE farms
+SET is_active = $2
+WHERE id = $1
+RETURNING id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at
+`
+
+type ToggleFarmIsActiveParams struct {
+	ID       uuid.UUID
+	IsActive bool
+}
+
+func (q *Queries) ToggleFarmIsActive(ctx context.Context, arg ToggleFarmIsActiveParams) (Farm, error) {
+	row := q.db.QueryRow(ctx, toggleFarmIsActive, arg.ID, arg.IsActive)
+	var i Farm
+	err := row.Scan(
+		&i.ID,
+		&i.TenantID,
+		&i.FarmTypeID,
+		&i.Name,
+		&i.Location,
+		&i.Latitude,
+		&i.Longitude,
+		&i.TotalArea,
+		&i.AreaUnit,
+		&i.Notes,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateFarm = `-- name: UpdateFarm :one
 UPDATE farms
-SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, farm_type_id = $9, updated_at = now()
+SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, updated_at = now()
 WHERE id = $1
 RETURNING id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at
 `
 
 type UpdateFarmParams struct {
-	ID         uuid.UUID
-	Name       string
-	Location   *string
-	Latitude   *float64
-	Longitude  *float64
-	TotalArea  *float64
-	AreaUnit   string
-	Notes      *string
-	FarmTypeID uuid.UUID
+	ID        uuid.UUID
+	Name      string
+	Location  *string
+	Latitude  *float64
+	Longitude *float64
+	TotalArea *float64
+	AreaUnit  string
+	Notes     *string
 }
 
 func (q *Queries) UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, error) {
@@ -151,7 +167,6 @@ func (q *Queries) UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, e
 		arg.TotalArea,
 		arg.AreaUnit,
 		arg.Notes,
-		arg.FarmTypeID,
 	)
 	var i Farm
 	err := row.Scan(

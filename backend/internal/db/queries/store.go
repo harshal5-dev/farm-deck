@@ -17,6 +17,7 @@ type Store interface {
 	CreateRefreshTokenTx(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	AcceptInvitationTx(ctx context.Context, arg domain.AcceptInvitationTxParams) (AcceptInvitationTxResult, error)
 	DeleteMemberTx(ctx context.Context, id uuid.UUID) error
+	CreateZoneTx(ctx context.Context, arg domain.CreateZoneTxParams) (CreateZoneTxResult, error)
 	Close()
 }
 

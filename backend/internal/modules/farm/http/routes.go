@@ -11,6 +11,6 @@ func Register(public, protected *gin.RouterGroup, h farm.FarmHandler) {
 	protectedRoutes.GET("", h.ListFarms)
 	protectedRoutes.POST("", h.CreateFarm)
 	protectedRoutes.PUT("/:id", h.UpdateFarm)
-	protectedRoutes.PATCH("/:id", h.InactivateFarm)
+	protectedRoutes.PATCH("/:id", h.DeactivateFarm)
 	protectedRoutes.PATCH("/:id/activate", h.ActivateFarm)
 }

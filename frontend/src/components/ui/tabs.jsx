@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 /**
  * Tabs — thin styled wrapper over @base-ui/react Tabs.
  *
- * A segmented pill strip. The active tab uses the app's leaf-gradient active
- * language (matching the sidebar nav). base-ui marks the active tab with
- * `data-active` and `aria-selected="true"`.
+ * A compact underline strip: the active tab is marked by an animated
+ * leaf→sage gradient bar that slides in under the label. Inactive tabs
+ * sit transparent on the page background and lift to foreground on hover.
+ * base-ui marks the active tab with `data-active` and
+ * `aria-selected="true"`.
  *
  *   <Tabs defaultValue="details">
  *     <TabsList>
@@ -23,13 +25,17 @@ import { cn } from "@/lib/utils";
  *     `appearance-none` strips that, and the `!` important prefix on the
  *     background utilities locks the colours in so they can't be overridden
  *     by UA stylesheets on hover/focus.
+ *   - The active underline is a `::after` pseudo on the trigger itself, so
+ *     `data-active:after:scale-x-100` animates it in when base-ui sets
+ *     `data-active`. `after:origin-left` keeps the scale anchored at the
+ *     left edge for a natural "wipe" entrance.
  */
 
 function Tabs({ className, ...props }) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-5", className)}
+      className={cn("flex flex-col gap-4", className)}
       {...props}
     />
   );
@@ -40,8 +46,9 @@ function TabsList({ className, ...props }) {
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        // inline segmented control — sits on the page background, not full-width
-        "inline-flex h-auto w-fit flex-wrap items-center gap-1 rounded-2xl border border-border/60 bg-card/60 p-1 shadow-sm backdrop-blur",
+        // underline strip — a single hairline border carries the row,
+        // the tabs sit transparent on the page background.
+        "inline-flex h-auto w-fit items-center gap-0.5 border-b border-border/60",
         className
       )}
       {...props}
@@ -55,27 +62,23 @@ function TabsTrigger({ className, icon: Icon, children, ...props }) {
       data-slot="tabs-trigger"
       className={cn(
         // `appearance-none` strips the OS-native button styling that
-        // Tailwind's preflight re-applies via `appearance: button`. Without
-        // this, `<button>` elements can render with a dark glossy background
-        // on hover/focus in some browsers.
-        "appearance-none relative inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-sm font-medium whitespace-nowrap outline-none transition-all duration-200",
-        // Inactive base — transparent background, muted text. The `!` prefix
-        // is a Tailwind important modifier — it forces these to beat any
-        // UA stylesheet rule for `background-color`.
-        "bg-transparent! text-muted-foreground hover:bg-muted/70! hover:text-foreground!",
-        // Active — solid leaf gradient. base-ui sets `data-active=""` on the
-        // selected tab. `!` so it overrides the hover background even when
-        // both apply.
-        "data-active:bg-linear-to-br! data-active:from-leaf! data-active:to-sage-deep! data-active:text-primary-foreground! data-active:shadow-md data-active:shadow-leaf/30",
-        "data-active:hover:brightness-105",
+        // Tailwind's preflight re-applies via `appearance: button`.
+        "appearance-none relative inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-[13px] font-medium outline-none transition-colors duration-200",
+        // Inactive base — transparent, muted. The `!` prefix forces these
+        // past any UA stylesheet rule for `background-color`.
+        "bg-transparent! text-muted-foreground hover:bg-muted/50! hover:text-foreground!",
+        // Active — foreground text + the gradient underline wipes in.
+        "data-active:text-foreground! data-active:hover:text-foreground!",
         "aria-selected:text-foreground",
-        "focus-visible:ring-[3px]! focus-visible:ring-ring/50!",
+        "focus-visible:ring-[3px]! focus-visible:ring-ring/40! focus-visible:ring-offset-0",
         "disabled:pointer-events-none disabled:opacity-50",
+        // Active underline indicator (leaf→sage gradient, scales in from left).
+        "after:pointer-events-none after:absolute after:inset-x-1 after:bottom-[-1px] after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-linear-to-r after:from-leaf after:to-sage-deep after:transition-transform after:duration-300 after:ease-out data-active:after:scale-x-100",
         className
       )}
       {...props}
     >
-      {Icon && <Icon className="size-4 shrink-0" strokeWidth={1.85} />}
+      {Icon && <Icon className="size-3.5 shrink-0" strokeWidth={1.85} />}
       {children}
     </TabsPrimitive.Tab>
   );

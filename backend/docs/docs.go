@@ -282,7 +282,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Returns every farm belonging to the caller's tenant, along with active/inactive counts.",
+                "description": "Returns every farm belonging to the caller's tenant, along with active/inactive counts. Pass is_active to filter by active state; omit it to return all farms.",
                 "produces": [
                     "application/json"
                 ],
@@ -290,6 +290,14 @@ const docTemplate = `{
                     "farm"
                 ],
                 "summary": "List tenant farms",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Filter by active state. Omit to return all farms (active and inactive).",
+                        "name": "is_active",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "tenant farms with status counts",
@@ -307,6 +315,12 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "is_active must be a boolean",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
                         }
                     },
                     "401": {
@@ -566,6 +580,214 @@ const docTemplate = `{
                         "description": "service is healthy",
                         "schema": {
                             "$ref": "#/definitions/HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lookups/farm-types": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the available farm (growing environment) types, e.g. indoor, outdoor, greenhouse, mixed.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lookup"
+                ],
+                "summary": "List farm types",
+                "responses": {
+                    "200": {
+                        "description": "list of farm types",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/FarmTypeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/lookups/hydro-system-types": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the available hydroponic system types, e.g. NFT, DWC, Ebb \u0026 Flow, aeroponics, drip, Kratky.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lookup"
+                ],
+                "summary": "List hydroponic system types",
+                "responses": {
+                    "200": {
+                        "description": "list of hydroponic system types",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/HydroSystemTypeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/lookups/soil-types": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the available soil types with their water retention and drainage characteristics, e.g. loamy, sandy, clay, silt, sandy loam, clay loam.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lookup"
+                ],
+                "summary": "List soil types",
+                "responses": {
+                    "200": {
+                        "description": "list of soil types",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/SoilTypeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/lookups/zone-types": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the available zone (production area) types within a farm, e.g. soil plot, hydroponic system, aquaponic, mushroom room, along with their cultivation mode.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lookup"
+                ],
+                "summary": "List zone types",
+                "responses": {
+                    "200": {
+                        "description": "list of zone types",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ZoneTypeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
                         }
                     }
                 }
@@ -1122,6 +1344,23 @@ const docTemplate = `{
                 }
             }
         },
+        "FarmTypeResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "HealthResponse": {
             "type": "object",
             "properties": {
@@ -1132,6 +1371,23 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "ok"
+                }
+            }
+        },
+        "HydroSystemTypeResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1314,6 +1570,29 @@ const docTemplate = `{
                 }
             }
         },
+        "SoilTypeResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "drainage": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "waterRetention": {
+                    "type": "string"
+                }
+            }
+        },
         "TenantDetails": {
             "type": "object",
             "properties": {
@@ -1434,6 +1713,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tenantName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ZoneTypeResponse": {
+            "type": "object",
+            "properties": {
+                "cultivationMode": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

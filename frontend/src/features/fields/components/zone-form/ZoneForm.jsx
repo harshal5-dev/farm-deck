@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import SearchableSelect from "@/components/ui/searchable-select";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SoilTypeArt } from "@/components/effects";
+import HydroSystemArt from "../../components/HydroSystemArt";
 import {
   Form,
   FormControl,
@@ -44,11 +47,11 @@ import {
   AREA_UNIT_ORDER,
   DEFAULT_AREA_UNIT,
   getAreaUnit,
+  getSoilType,
 } from "@/constants/farms";
 import {
   GROW_MEDIUM_SUGGESTIONS,
-  ZONE_STATUS_ORDER,
-  getZoneStatus,
+  getHydroSystemType,
 } from "../../constants";
 import {
   useListFarmsForPickerQuery,
@@ -138,7 +141,6 @@ const ZoneForm = ({
       growMedium: defaultValues?.growMedium || "",
       reservoirVolumeLiters: asString(defaultValues?.reservoirVolumeLiters),
       numberOfSlots: asString(defaultValues?.numberOfSlots),
-      zoneStatus: defaultValues?.zoneStatus || "idle",
       area: asString(defaultValues?.area),
       areaUnit: defaultValues?.areaUnit || DEFAULT_AREA_UNIT,
       notes: defaultValues?.notes || "",
@@ -164,7 +166,7 @@ const ZoneForm = ({
       farmId: values.farmId,
       zoneTypeId: values.zoneTypeId,
       name: values.name.trim(),
-      zoneStatus: values.zoneStatus || "idle",
+      zoneStatus: "idle",
       area: toNumberOrNull(values.area),
       areaUnit: values.areaUnit || DEFAULT_AREA_UNIT,
       notes: values.notes.trim() || null,
@@ -234,10 +236,23 @@ const ZoneForm = ({
                 rules={{ required: "Pick the farm this field belongs to" }}
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
-                    <FormLabel className={fieldLabel}>
-                      Farm
-                      <RequiredStar />
-                    </FormLabel>
+                    {/* The farm picker renders a custom trigger (no native
+                        input for FormControl to bind an id to), so a
+                        FormLabel's htmlFor would reference nothing and
+                        trip an a11y warning. Use a plain span label there;
+                        the locked-input branch keeps a real FormLabel so
+                        clicking it focuses the input. */}
+                    {lockFarmId && lockFarmName ? (
+                      <FormLabel className={fieldLabel}>
+                        Farm
+                        <RequiredStar />
+                      </FormLabel>
+                    ) : (
+                      <span className={fieldLabel}>
+                        Farm
+                        <RequiredStar />
+                      </span>
+                    )}
                     <FormControl>
                       {lockFarmId && lockFarmName ? (
                         /* Locked context (setup wizard) — a static display
@@ -252,32 +267,23 @@ const ZoneForm = ({
                           />
                         </FieldWrapper>
                       ) : (
-                        <Select
+                        <SearchableSelect
+                          aria-label="Farm"
+                          leadingIcon={IconTractor}
+                          placeholder={
+                            farmsLoading ? "Loading farms…" : "Select farm"
+                          }
+                          searchPlaceholder="Search farms…"
+                          emptyText="No farms match"
                           value={field.value}
                           onValueChange={field.onChange}
                           disabled={submitting || farmsLoading || !!lockFarmId}
-                        >
-                          <SelectTrigger aria-label="Farm" className="w-full">
-                            <span className="flex min-w-0 items-center gap-2">
-                              <IconTractor
-                                className="size-4 shrink-0 text-leaf"
-                                strokeWidth={1.85}
-                              />
-                              <SelectValue
-                                placeholder={
-                                  farmsLoading ? "Loading farms…" : "Select farm"
-                                }
-                              />
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {farms.map((f) => (
-                              <SelectItem key={f.id} value={f.id}>
-                                {f.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          items={farms.map((f) => ({
+                            value: f.id,
+                            label: f.name,
+                            description: f.farmTypeName,
+                          }))}
+                        />
                       )}
                     </FormControl>
                     <FormMessage className="text-[11px]" />
@@ -381,38 +387,39 @@ const ZoneForm = ({
                         }}
                         render={({ field }) => (
                           <FormItem className="gap-1.5">
-                            <FormLabel className={fieldLabel}>
+                            {/* Plain span, not FormLabel — the picker renders
+                                a custom trigger, so a label's htmlFor would
+                                reference nothing. */}
+                            <span className={fieldLabel}>
                               Soil type
                               <RequiredStar />
-                            </FormLabel>
+                            </span>
                             <FormControl>
-                              <Select
+                              <SearchableSelect
+                                aria-label="Soil type"
+                                leadingIcon={IconGrain}
+                                placeholder="Select soil"
+                                searchPlaceholder="Search soils…"
+                                emptyText="No soils match"
                                 value={field.value}
                                 onValueChange={field.onChange}
                                 disabled={submitting}
-                              >
-                                <SelectTrigger
-                                  aria-label="Soil type"
-                                  className="w-full"
-                                >
-                                  <SelectValue placeholder="Select soil" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {soilTypes.map((s) => (
-                                    <SelectItem key={s.id} value={s.id}>
-                                      <span className="flex items-center gap-2">
-                                        <span className="font-semibold tracking-tight">
-                                          {s.displayName}
-                                        </span>
-                                        <span className="text-[10px] text-muted-foreground">
-                                          {s.waterRetention} retention ·{" "}
-                                          {s.drainage} drainage
-                                        </span>
-                                      </span>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                items={soilTypes.map((s) => {
+                                  const m = getSoilType(s.name);
+                                  return {
+                                    value: s.id,
+                                    label: s.displayName,
+                                    description: `${s.waterRetention} retention · ${s.drainage} drainage`,
+                                    keywords: `${s.name} ${m?.label ?? ""} ${m?.description ?? ""}`,
+                                    thumbnail: (
+                                      <SoilTypeArt
+                                        variant={m.art}
+                                        className="size-full"
+                                      />
+                                    ),
+                                  };
+                                })}
+                              />
                             </FormControl>
                             <FormMessage className="text-[11px]" />
                           </FormItem>
@@ -454,37 +461,39 @@ const ZoneForm = ({
                           }}
                           render={({ field }) => (
                             <FormItem className="gap-1.5">
-                              <FormLabel className={fieldLabel}>
+                              {/* Plain span, not FormLabel — the picker renders
+                                  a custom trigger, so a label's htmlFor would
+                                  reference nothing. */}
+                              <span className={fieldLabel}>
                                 System type
                                 <RequiredStar />
-                              </FormLabel>
+                              </span>
                               <FormControl>
-                                <Select
+                                <SearchableSelect
+                                  aria-label="Hydro system type"
+                                  leadingIcon={IconDroplets}
+                                  placeholder="Select system"
+                                  searchPlaceholder="Search systems…"
+                                  emptyText="No systems match"
                                   value={field.value}
                                   onValueChange={field.onChange}
                                   disabled={submitting}
-                                >
-                                  <SelectTrigger
-                                    aria-label="Hydro system type"
-                                    className="w-full"
-                                  >
-                                    <SelectValue placeholder="Select system" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {hydroSystemTypes.map((h) => (
-                                      <SelectItem key={h.id} value={h.id}>
-                                        <span className="flex items-center gap-2">
-                                          <span className="font-semibold tracking-tight">
-                                            {h.displayName}
-                                          </span>
-                                          <span className="text-[10px] text-muted-foreground">
-                                            {h.name}
-                                          </span>
-                                        </span>
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                  items={hydroSystemTypes.map((h) => {
+                                    const m = getHydroSystemType(h.name);
+                                    return {
+                                      value: h.id,
+                                      label: h.displayName,
+                                      description: m.tagline,
+                                      keywords: `${h.name} ${m?.label ?? ""} ${m?.tagline ?? ""}`,
+                                      thumbnail: (
+                                        <HydroSystemArt
+                                          variant={m.art}
+                                          className="size-full"
+                                        />
+                                      ),
+                                    };
+                                  })}
+                                />
                               </FormControl>
                               <FormMessage className="text-[11px]" />
                             </FormItem>
@@ -633,55 +642,8 @@ const ZoneForm = ({
               </Reveal>
             )}
 
-            {/* Operation — status + area/unit */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <FormField
-                control={form.control}
-                name="zoneStatus"
-                render={({ field }) => (
-                  <FormItem className="gap-1.5">
-                    <FormLabel className={fieldLabel}>Status</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={submitting}
-                      >
-                        <SelectTrigger
-                          aria-label="Zone status"
-                          className="w-full"
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ZONE_STATUS_ORDER.map((id) => {
-                            const s = getZoneStatus(id);
-                            return (
-                              <SelectItem key={id} value={id}>
-                                <span className="flex items-center gap-2">
-                                  <span
-                                    className={cn(
-                                      "size-1.5 rounded-full",
-                                      s.dot
-                                    )}
-                                  />
-                                  <span className="font-semibold tracking-tight">
-                                    {s.label}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {s.description}
-                                  </span>
-                                </span>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
+            {/* Operation — area/unit (status defaults to "idle" on create) */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="area"

@@ -16,8 +16,8 @@ const (
 
 	SlugDomain = "farmdeck.app"
 
-	// DefaultInvitationTokenDuration is how long an invitation stays valid
-	// before it can no longer be accepted. Matches the "+ 7 days" comment in
-	// the user_invitations migration.
 	DefaultInvitationTokenDuration = 7 * 24 * time.Hour
+
+	ZoneTypeSoil  = "soil"
+	ZoneTypeHydro = "hydro"
 )

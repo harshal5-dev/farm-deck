@@ -4,6 +4,8 @@ import {
   IconPlant2,
   IconSun,
   IconBuildingCommunity,
+  IconDroplet,
+  IconGrain,
 } from "@tabler/icons-react";
 
 /**
@@ -129,7 +131,10 @@ export function getFarmType(id) {
 
 /**
  * Soil-type config — paired with SoilTypeArt variants so cards and pickers
- * stay in lockstep with the home-page illustrations.
+ * stay in lockstep with the home-page illustrations. `icon` and `gradient`
+ * drive the lookup card's identity badge (additive — SoilTypeSelect only
+ * reads label/art/description). `getSoilType` falls back to `loam`, so the
+ * backend's `loamy` name resolves to the loam art + tokens cleanly.
  */
 export const SOIL_TYPES = {
   loam: {
@@ -137,48 +142,64 @@ export const SOIL_TYPES = {
     label: "Loam",
     art: "loam",
     description: "Balanced mix — the gold standard for most crops.",
+    icon: IconLeaf,
+    gradient: "from-leaf to-sage-deep",
   },
   sandy_loam: {
     id: "sandy_loam",
     label: "Sandy loam",
     art: "sandy_loam",
     description: "Drains well, easy to work — great for root vegetables.",
+    icon: IconGrain,
+    gradient: "from-wheat to-leaf",
   },
   sandy: {
     id: "sandy",
     label: "Sandy",
     art: "sandy",
     description: "Fast-draining, gritty, warms early in spring.",
+    icon: IconGrain,
+    gradient: "from-wheat to-wheat-deep",
   },
   clay_loam: {
     id: "clay_loam",
     label: "Clay loam",
     art: "clay_loam",
     description: "Rich in nutrients, holds moisture longer.",
+    icon: IconLeaf,
+    gradient: "from-clay to-leaf",
   },
   clay: {
     id: "clay",
     label: "Clay",
     art: "clay",
     description: "Heavy, slow-draining, nutrient-dense.",
+    icon: IconDroplet,
+    gradient: "from-clay to-clay-deep",
   },
   silt: {
     id: "silt",
     label: "Silt",
     art: "silt",
     description: "Smooth and fertile, holds moisture well.",
+    icon: IconDroplet,
+    gradient: "from-sky-warm to-lagoon",
   },
   chalky: {
     id: "chalky",
     label: "Chalky",
     art: "chalky",
     description: "Alkaline and free-draining — lime-rich.",
+    icon: IconGrain,
+    gradient: "from-wheat to-clay",
   },
   peaty: {
     id: "peaty",
     label: "Peaty",
     art: "peaty",
     description: "Acidic, dark, and rich in organic matter.",
+    icon: IconLeaf,
+    gradient: "from-soil to-clay-deep",
   },
 };
 

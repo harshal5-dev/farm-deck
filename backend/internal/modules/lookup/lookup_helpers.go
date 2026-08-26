@@ -18,3 +18,57 @@ func mapToListFarmTypes(farmTypes []db.FarmType) []FarmTypeResponse {
 	}
 	return result
 }
+
+func toZoneTypeResponse(zoneType db.ZoneType) ZoneTypeResponse {
+	return ZoneTypeResponse{
+		ID:              zoneType.ID,
+		Name:            zoneType.Name,
+		DisplayName:     zoneType.DisplayName,
+		CultivationMode: zoneType.CultivationMode,
+		Description:     zoneType.Description,
+	}
+}
+
+func mapToListZoneTypes(zoneTypes []db.ZoneType) []ZoneTypeResponse {
+	result := make([]ZoneTypeResponse, len(zoneTypes))
+	for i, zoneType := range zoneTypes {
+		result[i] = toZoneTypeResponse(zoneType)
+	}
+	return result
+}
+
+func toSoilTypeResponse(soilType db.SoilType) SoilTypeResponse {
+	return SoilTypeResponse{
+		ID:             soilType.ID,
+		Name:           soilType.Name,
+		DisplayName:    soilType.DisplayName,
+		WaterRetention: soilType.WaterRetention,
+		Drainage:       soilType.Drainage,
+		Description:    soilType.Description,
+	}
+}
+
+func mapToListSoilTypes(soilTypes []db.SoilType) []SoilTypeResponse {
+	result := make([]SoilTypeResponse, len(soilTypes))
+	for i, soilType := range soilTypes {
+		result[i] = toSoilTypeResponse(soilType)
+	}
+	return result
+}
+
+func toHydroSystemTypeResponse(hydroSystemType db.HydroSystemType) HydroSystemTypeResponse {
+	return HydroSystemTypeResponse{
+		ID:          hydroSystemType.ID,
+		Name:        hydroSystemType.Name,
+		DisplayName: hydroSystemType.DisplayName,
+		Description: hydroSystemType.Description,
+	}
+}
+
+func mapToListHydroSystemTypes(hydroSystemTypes []db.HydroSystemType) []HydroSystemTypeResponse {
+	result := make([]HydroSystemTypeResponse, len(hydroSystemTypes))
+	for i, hydroSystemType := range hydroSystemTypes {
+		result[i] = toHydroSystemTypeResponse(hydroSystemType)
+	}
+	return result
+}

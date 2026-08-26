@@ -33,10 +33,9 @@ type mockStore struct {
 	revokeRefreshTokenByHash func(ctx context.Context, tokenHash string) error
 	rotateRefreshTokenTx     func(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error)
 	createFarm               func(ctx context.Context, params db.CreateFarmParams) (db.Farm, error)
-	listFarms                func(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error)
+	listFarms                func(ctx context.Context, params db.ListFarmsParams) ([]db.Farm, error)
 	updateFarm               func(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error)
-	inactivateFarm           func(ctx context.Context, id uuid.UUID) error
-	activateFarm             func(ctx context.Context, id uuid.UUID) error
+	toggleFarmIsActive       func(ctx context.Context, params db.ToggleFarmIsActiveParams) (db.Farm, error)
 }
 
 func (m *mockStore) CreateTenant(ctx context.Context, params db.CreateTenantParams) (db.Tenant, error) {
@@ -99,20 +98,16 @@ func (m *mockStore) CreateFarm(ctx context.Context, params db.CreateFarmParams) 
 	return m.createFarm(ctx, params)
 }
 
-func (m *mockStore) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error) {
-	return m.listFarms(ctx, tenantID)
+func (m *mockStore) ListFarms(ctx context.Context, params db.ListFarmsParams) ([]db.Farm, error) {
+	return m.listFarms(ctx, params)
 }
 
 func (m *mockStore) UpdateFarm(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error) {
 	return m.updateFarm(ctx, params)
 }
 
-func (m *mockStore) InactivateFarm(ctx context.Context, id uuid.UUID) error {
-	return m.inactivateFarm(ctx, id)
-}
-
-func (m *mockStore) ActivateFarm(ctx context.Context, id uuid.UUID) error {
-	return m.activateFarm(ctx, id)
+func (m *mockStore) ToggleFarmIsActive(ctx context.Context, params db.ToggleFarmIsActiveParams) (db.Farm, error) {
+	return m.toggleFarmIsActive(ctx, params)
 }
 
 func uuidMust(s string) uuid.UUID { return uuid.MustParse(s) }

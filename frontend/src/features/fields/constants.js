@@ -1,7 +1,10 @@
 import {
+  IconBolt,
+  IconDroplet,
   IconDroplets,
   IconFish,
   IconMushroom,
+  IconRotate,
   IconSeedling,
 } from "@tabler/icons-react";
 
@@ -161,3 +164,66 @@ export const GROW_MEDIUM_SUGGESTIONS = [
   "perlite",
   "50/50 coco-perlite",
 ];
+
+/**
+ * Hydro-system-type config — visual metadata keyed by the lookup `name`
+ * (mirrors `hydro_system_types.name` from the schema). Same structure as
+ * ZONE_TYPES / SOIL_TYPES so the lookup card, badges and pickers all read
+ * from one place. `art` maps to a HydroSystemArt variant.
+ */
+export const HYDRO_SYSTEM_TYPES = {
+  nft: {
+    id: "nft",
+    label: "NFT",
+    tagline: "Flowing nutrient film",
+    icon: IconDroplets,
+    art: "nft",
+    gradient: "from-lagoon to-lagoon-deep",
+  },
+  dwc: {
+    id: "dwc",
+    label: "DWC",
+    tagline: "Deep aerated reservoir",
+    icon: IconDroplet,
+    art: "dwc",
+    gradient: "from-lagoon-deep to-lagoon",
+  },
+  ebb_flow: {
+    id: "ebb_flow",
+    label: "Ebb & Flow",
+    tagline: "Flood & drain cycles",
+    icon: IconRotate,
+    art: "ebb_flow",
+    gradient: "from-sky-warm to-lagoon",
+  },
+  aeroponics: {
+    id: "aeroponics",
+    label: "Aeroponics",
+    tagline: "Roots misted in air",
+    icon: IconBolt,
+    art: "aeroponics",
+    gradient: "from-sky-warm to-lagoon-deep",
+  },
+  drip: {
+    id: "drip",
+    label: "Drip",
+    tagline: "Emitters per plant",
+    icon: IconDroplet,
+    art: "drip",
+    gradient: "from-leaf to-lagoon",
+  },
+  kratky: {
+    id: "kratky",
+    label: "Kratky",
+    tagline: "Passive, no pump",
+    icon: IconDroplets,
+    art: "kratky",
+    gradient: "from-lagoon to-sage-deep",
+  },
+};
+
+export const HYDRO_SYSTEM_ORDER = ["nft", "dwc", "ebb_flow", "aeroponics", "drip", "kratky"];
+
+export function getHydroSystemType(id) {
+  return HYDRO_SYSTEM_TYPES[id] || HYDRO_SYSTEM_TYPES.dwc;
+}

@@ -1,6 +1,8 @@
 package farm
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
@@ -12,7 +14,7 @@ type FarmHandler interface {
 	CreateFarm(ctx *gin.Context)
 	ListFarms(ctx *gin.Context)
 	UpdateFarm(ctx *gin.Context)
-	InactivateFarm(ctx *gin.Context)
+	DeactivateFarm(ctx *gin.Context)
 	ActivateFarm(ctx *gin.Context)
 }
 
@@ -60,11 +62,13 @@ func (h *FarmHandlerImpl) CreateFarm(ctx *gin.Context) {
 
 // ListFarms godoc
 // @Summary      List tenant farms
-// @Description  Returns every farm belonging to the caller's tenant, along with active/inactive counts.
+// @Description  Returns every farm belonging to the caller's tenant, along with active/inactive counts. Pass is_active to filter by active state; omit it to return all farms.
 // @Tags         farm
 // @Produce      json
 // @Security     CookieAuth
+// @Param        is_active query bool false "Filter by active state. Omit to return all farms (active and inactive)."
 // @Success      200 {object} response.APIResponse{data=farm.ListFarmResponse} "tenant farms with status counts"
+// @Failure      400 {object} response.APIError "is_active must be a boolean"
 // @Failure      401 {object} response.APIError "authentication required"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms [get]
@@ -75,7 +79,17 @@ func (h *FarmHandlerImpl) ListFarms(ctx *gin.Context) {
 		return
 	}
 
-	farms, err := h.farmService.ListFarms(ctx, tenantID)
+	activeFilter := false
+	if raw, ok := ctx.GetQuery("is_active"); ok && raw != "" {
+		v, err := strconv.ParseBool(raw)
+		if err != nil {
+			response.BadRequest(ctx, "is_active must be a boolean")
+			return
+		}
+		activeFilter = v
+	}
+
+	farms, err := h.farmService.ListFarms(ctx, tenantID, activeFilter)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
@@ -132,20 +146,20 @@ func (h *FarmHandlerImpl) UpdateFarm(ctx *gin.Context) {
 // @Failure      401 {object} response.APIError "authentication required"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms/{id} [patch]
-func (h *FarmHandlerImpl) InactivateFarm(ctx *gin.Context) {
+func (h *FarmHandlerImpl) DeactivateFarm(ctx *gin.Context) {
 	farmID, err := ctxutil.ParseParamID(ctx, "id")
 	if err != nil {
 		response.BadRequest(ctx, "invalid farm id")
 		return
 	}
 
-	err = h.farmService.InactivateFarm(ctx, farmID)
+	err = h.farmService.DeactivateFarm(ctx, farmID)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
 	}
 
-	response.OK(ctx, "farm inactivated successfully")
+	response.OK(ctx, "farm deactivated successfully")
 }
 
 // ActivateFarm godoc

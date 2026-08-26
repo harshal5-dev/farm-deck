@@ -6,20 +6,17 @@ RETURNING *;
 -- name: ListFarms :many
 SELECT * FROM farms
 WHERE tenant_id = $1
+AND is_active = $2
 ORDER BY created_at DESC;
 
 -- name: UpdateFarm :one
 UPDATE farms
-SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, farm_type_id = $9, updated_at = now()
+SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, updated_at = now()
 WHERE id = $1
 RETURNING *;
 
--- name: InactivateFarm :exec
+-- name: ToggleFarmIsActive :one
 UPDATE farms
-SET is_active = false
-WHERE id = $1;
-
--- name: ActivateFarm :exec
-UPDATE farms
-SET is_active = true
-WHERE id = $1;
+SET is_active = $2
+WHERE id = $1
+RETURNING *;

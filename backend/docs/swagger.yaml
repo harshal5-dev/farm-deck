@@ -104,6 +104,17 @@ definitions:
         example: "2026-08-22T09:00:00Z"
         type: string
     type: object
+  FarmTypeResponse:
+    properties:
+      description:
+        type: string
+      displayName:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   HealthResponse:
     properties:
       service:
@@ -111,6 +122,17 @@ definitions:
         type: string
       status:
         example: ok
+        type: string
+    type: object
+  HydroSystemTypeResponse:
+    properties:
+      description:
+        type: string
+      displayName:
+        type: string
+      id:
+        type: string
+      name:
         type: string
     type: object
   ListFarmResponse:
@@ -239,6 +261,21 @@ definitions:
     - password
     - tenantName
     type: object
+  SoilTypeResponse:
+    properties:
+      description:
+        type: string
+      displayName:
+        type: string
+      drainage:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      waterRetention:
+        type: string
+    type: object
   TenantDetails:
     properties:
       createdAt:
@@ -320,6 +357,19 @@ definitions:
       role:
         type: string
       tenantName:
+        type: string
+    type: object
+  ZoneTypeResponse:
+    properties:
+      cultivationMode:
+        type: string
+      description:
+        type: string
+      displayName:
+        type: string
+      id:
+        type: string
+      name:
         type: string
     type: object
 host: localhost:8083
@@ -510,7 +560,14 @@ paths:
   /farms:
     get:
       description: Returns every farm belonging to the caller's tenant, along with
-        active/inactive counts.
+        active/inactive counts. Pass is_active to filter by active state; omit it
+        to return all farms.
+      parameters:
+      - description: Filter by active state. Omit to return all farms (active and
+          inactive).
+        in: query
+        name: is_active
+        type: boolean
       produces:
       - application/json
       responses:
@@ -523,6 +580,10 @@ paths:
                 data:
                   $ref: '#/definitions/ListFarmResponse'
               type: object
+        "400":
+          description: is_active must be a boolean
+          schema:
+            $ref: '#/definitions/APIError'
         "401":
           description: authentication required
           schema:
@@ -698,6 +759,132 @@ paths:
       summary: Liveness check
       tags:
       - health
+  /lookups/farm-types:
+    get:
+      description: Returns the available farm (growing environment) types, e.g. indoor,
+        outdoor, greenhouse, mixed.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of farm types
+          schema:
+            allOf:
+            - $ref: '#/definitions/APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/FarmTypeResponse'
+                  type: array
+              type: object
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List farm types
+      tags:
+      - lookup
+  /lookups/hydro-system-types:
+    get:
+      description: Returns the available hydroponic system types, e.g. NFT, DWC, Ebb
+        & Flow, aeroponics, drip, Kratky.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of hydroponic system types
+          schema:
+            allOf:
+            - $ref: '#/definitions/APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/HydroSystemTypeResponse'
+                  type: array
+              type: object
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List hydroponic system types
+      tags:
+      - lookup
+  /lookups/soil-types:
+    get:
+      description: Returns the available soil types with their water retention and
+        drainage characteristics, e.g. loamy, sandy, clay, silt, sandy loam, clay
+        loam.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of soil types
+          schema:
+            allOf:
+            - $ref: '#/definitions/APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/SoilTypeResponse'
+                  type: array
+              type: object
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List soil types
+      tags:
+      - lookup
+  /lookups/zone-types:
+    get:
+      description: Returns the available zone (production area) types within a farm,
+        e.g. soil plot, hydroponic system, aquaponic, mushroom room, along with their
+        cultivation mode.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list of zone types
+          schema:
+            allOf:
+            - $ref: '#/definitions/APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ZoneTypeResponse'
+                  type: array
+              type: object
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: List zone types
+      tags:
+      - lookup
   /tenants/me:
     patch:
       consumes:

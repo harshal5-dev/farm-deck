@@ -41,6 +41,13 @@ type FarmType struct {
 	Description *string
 }
 
+type HydroSystemType struct {
+	ID          uuid.UUID
+	Name        string
+	DisplayName string
+	Description *string
+}
+
 type RefreshToken struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
@@ -50,6 +57,15 @@ type RefreshToken struct {
 	UserAgent *string
 	Ip        *string
 	CreatedAt time.Time
+}
+
+type SoilType struct {
+	ID             uuid.UUID
+	Name           string
+	DisplayName    string
+	WaterRetention string
+	Drainage       string
+	Description    *string
 }
 
 type Tenant struct {
@@ -85,4 +101,39 @@ type UserInvitation struct {
 	RevokedAt  *time.Time
 	CreatedBy  uuid.UUID
 	CreatedAt  time.Time
+}
+
+type Zone struct {
+	ID         uuid.UUID
+	FarmID     uuid.UUID
+	TenantID   uuid.UUID
+	ZoneTypeID uuid.UUID
+	Name       string
+	Area       *float64
+	AreaUnit   string
+	Notes      *string
+	IsActive   bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type ZoneHydroDetail struct {
+	ZoneID                uuid.UUID
+	HydroSystemTypeID     uuid.UUID
+	GrowMedium            *string
+	ReservoirVolumeLiters *float64
+	NumberOfSlots         *int32
+}
+
+type ZoneSoilDetail struct {
+	ZoneID     uuid.UUID
+	SoilTypeID uuid.UUID
+}
+
+type ZoneType struct {
+	ID              uuid.UUID
+	Name            string
+	DisplayName     string
+	CultivationMode string
+	Description     *string
 }

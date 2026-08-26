@@ -96,3 +96,64 @@ CREATE TABLE farms (
 );
 CREATE INDEX idx_farms_tenant_active ON farms(tenant_id) WHERE is_active = true;
 CREATE INDEX idx_farms_tenant_all    ON farms(tenant_id);
+
+CREATE TABLE zone_types (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name              VARCHAR(50) UNIQUE NOT NULL,
+    display_name      VARCHAR(100) NOT NULL,
+    cultivation_mode  VARCHAR(20) NOT NULL,     -- drives daily-log shape & detail-table choice
+    description       VARCHAR(1000),
+    CONSTRAINT zone_types_mode_chk CHECK (cultivation_mode IN ('soil','hydro','other'))
+);
+
+CREATE TABLE soil_types (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            VARCHAR(50) UNIQUE NOT NULL,
+    display_name    VARCHAR(100) NOT NULL,
+    water_retention VARCHAR(20) NOT NULL,       -- low | medium | high
+    drainage        VARCHAR(20) NOT NULL,
+    description     VARCHAR(1000)
+);
+
+CREATE TABLE hydro_system_types (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name         VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    description  VARCHAR(1000)
+);
+
+CREATE TABLE zones (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id      UUID NOT NULL REFERENCES farms(id) ON DELETE CASCADE,
+    tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    zone_type_id UUID NOT NULL REFERENCES zone_types(id),
+    name         VARCHAR(255) NOT NULL,
+    area         NUMERIC(12,2),
+    area_unit    VARCHAR(20) NOT NULL DEFAULT 'sq_m',
+    notes        VARCHAR(1000),
+    is_active    BOOLEAN NOT NULL DEFAULT true,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT zones_area_chk CHECK (area IS NULL OR area > 0),
+    CONSTRAINT uq_zones_id_farm UNIQUE (id, farm_id)          -- composite-FK anchor (D11)
+);
+CREATE INDEX idx_zones_farm_tenant_active ON zones(farm_id, tenant_id) WHERE is_active = true;
+CREATE INDEX idx_zones_tenant_active      ON zones(tenant_id)          WHERE is_active = true;
+CREATE UNIQUE INDEX uq_zones_farm_name_live ON zones(farm_id, name)   WHERE is_active = true;
+
+CREATE TABLE zone_soil_details (
+    zone_id      UUID PRIMARY KEY REFERENCES zones(id) ON DELETE CASCADE,
+    soil_type_id UUID NOT NULL REFERENCES soil_types(id)
+);
+CREATE INDEX idx_zsd_soil_type ON zone_soil_details(soil_type_id);
+
+CREATE TABLE zone_hydro_details (
+    zone_id                  UUID PRIMARY KEY REFERENCES zones(id) ON DELETE CASCADE,
+    hydro_system_type_id     UUID NOT NULL REFERENCES hydro_system_types(id),
+    grow_medium              VARCHAR(100),          -- rockwool, coco, LECA, perlite, mixes...
+    reservoir_volume_liters  NUMERIC(10,2),
+    number_of_slots          INTEGER,
+    CONSTRAINT zhd_reservoir_chk CHECK (reservoir_volume_liters IS NULL OR reservoir_volume_liters > 0),
+    CONSTRAINT zhd_slots_chk     CHECK (number_of_slots IS NULL OR number_of_slots > 0)
+);
+CREATE INDEX idx_zhd_hydro_type ON zone_hydro_details(hydro_system_type_id);

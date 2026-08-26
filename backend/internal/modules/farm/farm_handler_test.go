@@ -17,23 +17,23 @@ import (
 
 type fakeFarmService struct {
 	createFarm     func(context.Context, uuid.UUID, ManageFarmRequest) error
-	listFarms      func(context.Context, uuid.UUID) (ListFarmResponse, error)
+	listFarms      func(context.Context, uuid.UUID, bool) (ListFarmResponse, error)
 	updateFarm     func(context.Context, uuid.UUID, ManageFarmRequest) error
-	inactivateFarm func(context.Context, uuid.UUID) error
+	deactivateFarm func(context.Context, uuid.UUID) error
 	activateFarm   func(context.Context, uuid.UUID) error
 }
 
 func (f *fakeFarmService) CreateFarm(ctx context.Context, tID uuid.UUID, r ManageFarmRequest) error {
 	return f.createFarm(ctx, tID, r)
 }
-func (f *fakeFarmService) ListFarms(ctx context.Context, tID uuid.UUID) (ListFarmResponse, error) {
-	return f.listFarms(ctx, tID)
+func (f *fakeFarmService) ListFarms(ctx context.Context, tID uuid.UUID, active bool) (ListFarmResponse, error) {
+	return f.listFarms(ctx, tID, active)
 }
 func (f *fakeFarmService) UpdateFarm(ctx context.Context, id uuid.UUID, r ManageFarmRequest) error {
 	return f.updateFarm(ctx, id, r)
 }
-func (f *fakeFarmService) InactivateFarm(ctx context.Context, id uuid.UUID) error {
-	return f.inactivateFarm(ctx, id)
+func (f *fakeFarmService) DeactivateFarm(ctx context.Context, id uuid.UUID) error {
+	return f.deactivateFarm(ctx, id)
 }
 func (f *fakeFarmService) ActivateFarm(ctx context.Context, id uuid.UUID) error {
 	return f.activateFarm(ctx, id)
@@ -167,7 +167,7 @@ func TestFarmHandler_CreateFarm_ServiceErrorMapped(t *testing.T) {
 }
 
 func TestFarmHandler_ListFarms_NoTenantIDRejected(t *testing.T) {
-	svc := &fakeFarmService{listFarms: func(context.Context, uuid.UUID) (ListFarmResponse, error) {
+	svc := &fakeFarmService{listFarms: func(context.Context, uuid.UUID, bool) (ListFarmResponse, error) {
 		t.Fatal("service must not be called without a tenant id")
 		return ListFarmResponse{}, nil
 	}}
@@ -183,9 +183,12 @@ func TestFarmHandler_ListFarms_NoTenantIDRejected(t *testing.T) {
 
 func TestFarmHandler_ListFarms_Success(t *testing.T) {
 	tenantID := uuidMust("11111111-1111-1111-1111-111111111111")
-	svc := &fakeFarmService{listFarms: func(_ context.Context, tID uuid.UUID) (ListFarmResponse, error) {
+	svc := &fakeFarmService{listFarms: func(_ context.Context, tID uuid.UUID, active bool) (ListFarmResponse, error) {
 		if tID != tenantID {
 			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
+		}
+		if !active {
+			t.Errorf("active filter not forwarded: got %v want true", active)
 		}
 		return ListFarmResponse{
 			Total:    2,
@@ -199,7 +202,7 @@ func TestFarmHandler_ListFarms_Success(t *testing.T) {
 	}}
 	h := NewFarmHandler(svc)
 
-	ctx, w := newJSONCtx(http.MethodGet, "/farms", "")
+	ctx, w := newJSONCtx(http.MethodGet, "/farms?is_active=true", "")
 	withTenantID(ctx, tenantID)
 	h.ListFarms(ctx)
 
@@ -225,7 +228,7 @@ func TestFarmHandler_ListFarms_Success(t *testing.T) {
 }
 
 func TestFarmHandler_ListFarms_ServiceErrorMapped(t *testing.T) {
-	svc := &fakeFarmService{listFarms: func(context.Context, uuid.UUID) (ListFarmResponse, error) {
+	svc := &fakeFarmService{listFarms: func(context.Context, uuid.UUID, bool) (ListFarmResponse, error) {
 		return ListFarmResponse{}, errors.New("db down")
 	}}
 	h := NewFarmHandler(svc)
@@ -322,25 +325,25 @@ func TestFarmHandler_UpdateFarm_NotFoundMapped(t *testing.T) {
 	}
 }
 
-func TestFarmHandler_InactivateFarm_InvalidFarmIDRejected(t *testing.T) {
-	svc := &fakeFarmService{inactivateFarm: func(context.Context, uuid.UUID) error {
+func TestFarmHandler_DeactivateFarm_InvalidFarmIDRejected(t *testing.T) {
+	svc := &fakeFarmService{deactivateFarm: func(context.Context, uuid.UUID) error {
 		t.Fatal("service must not be called with an invalid farm id")
 		return nil
 	}}
 	h := NewFarmHandler(svc)
 
 	ctx, w := newJSONCtx(http.MethodPatch, "/farms/not-a-uuid", "")
-	h.InactivateFarm(ctx)
+	h.DeactivateFarm(ctx)
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status: got %d want 400", w.Code)
 	}
 }
 
-func TestFarmHandler_InactivateFarm_Success(t *testing.T) {
+func TestFarmHandler_DeactivateFarm_Success(t *testing.T) {
 	farmID := uuidMust("33333333-3333-3333-3333-333333333333")
 	called := false
-	svc := &fakeFarmService{inactivateFarm: func(_ context.Context, id uuid.UUID) error {
+	svc := &fakeFarmService{deactivateFarm: func(_ context.Context, id uuid.UUID) error {
 		called = true
 		if id != farmID {
 			t.Errorf("id forwarded: got %v want %v", id, farmID)
@@ -351,28 +354,28 @@ func TestFarmHandler_InactivateFarm_Success(t *testing.T) {
 
 	ctx, w := newJSONCtx(http.MethodPatch, "/farms/"+farmID.String(), "")
 	withFarmID(ctx, farmID)
-	h.InactivateFarm(ctx)
+	h.DeactivateFarm(ctx)
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("status: got %d want 200 (body=%s)", w.Code, w.Body.String())
 	}
-	if !strings.Contains(w.Body.String(), "farm inactivated successfully") {
+	if !strings.Contains(w.Body.String(), "farm deactivated successfully") {
 		t.Errorf("expected success message, got %s", w.Body.String())
 	}
 	if !called {
-		t.Error("expected InactivateFarm to be called")
+		t.Error("expected DeactivateFarm to be called")
 	}
 }
 
-func TestFarmHandler_InactivateFarm_ServiceErrorMapped(t *testing.T) {
-	svc := &fakeFarmService{inactivateFarm: func(context.Context, uuid.UUID) error {
+func TestFarmHandler_DeactivateFarm_ServiceErrorMapped(t *testing.T) {
+	svc := &fakeFarmService{deactivateFarm: func(context.Context, uuid.UUID) error {
 		return errors.New("db down")
 	}}
 	h := NewFarmHandler(svc)
 
 	ctx, w := newJSONCtx(http.MethodPatch, "/farms/33333333-3333-3333-3333-333333333333", "")
 	withFarmID(ctx, uuidMust("33333333-3333-3333-3333-333333333333"))
-	h.InactivateFarm(ctx)
+	h.DeactivateFarm(ctx)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("status: got %d want 500 (body=%s)", w.Code, w.Body.String())

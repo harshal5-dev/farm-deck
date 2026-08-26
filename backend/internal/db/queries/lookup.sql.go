@@ -37,3 +37,93 @@ func (q *Queries) ListFarmTypes(ctx context.Context) ([]FarmType, error) {
 	}
 	return items, nil
 }
+
+const listHydroSystemTypes = `-- name: ListHydroSystemTypes :many
+SELECT id, name, display_name, description FROM hydro_system_types  ORDER BY name
+`
+
+func (q *Queries) ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, error) {
+	rows, err := q.db.Query(ctx, listHydroSystemTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []HydroSystemType
+	for rows.Next() {
+		var i HydroSystemType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DisplayName,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSoilTypes = `-- name: ListSoilTypes :many
+SELECT id, name, display_name, water_retention, drainage, description FROM soil_types ORDER BY name
+`
+
+func (q *Queries) ListSoilTypes(ctx context.Context) ([]SoilType, error) {
+	rows, err := q.db.Query(ctx, listSoilTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SoilType
+	for rows.Next() {
+		var i SoilType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DisplayName,
+			&i.WaterRetention,
+			&i.Drainage,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listZoneTypes = `-- name: ListZoneTypes :many
+SELECT id, name, display_name, cultivation_mode, description FROM zone_types ORDER BY name
+`
+
+func (q *Queries) ListZoneTypes(ctx context.Context) ([]ZoneType, error) {
+	rows, err := q.db.Query(ctx, listZoneTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ZoneType
+	for rows.Next() {
+		var i ZoneType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DisplayName,
+			&i.CultivationMode,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
