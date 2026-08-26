@@ -1,5 +1,5 @@
 -- name: ListFarmTypes :many
-SELECT * FROM farm_types ORDER BY name;
+SELECT * FROM farm_types ORDER BY name DESC;
 
 -- name: ListSoilTypes :many
 SELECT * FROM soil_types ORDER BY name;

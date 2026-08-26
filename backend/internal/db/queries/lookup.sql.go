@@ -10,7 +10,7 @@ import (
 )
 
 const listFarmTypes = `-- name: ListFarmTypes :many
-SELECT id, name, display_name, description FROM farm_types ORDER BY name
+SELECT id, name, display_name, description FROM farm_types ORDER BY name DESC
 `
 
 func (q *Queries) ListFarmTypes(ctx context.Context) ([]FarmType, error) {
