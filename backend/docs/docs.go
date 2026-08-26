@@ -343,7 +343,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Creates a farm owned by the caller's tenant. Authorization is gated by the workspace.manage permission at the route level.",
+                "description": "Creates a farm owned by the caller's tenant. Authorization is gated by the farms.manage permission at the route level.",
                 "consumes": [
                     "application/json"
                 ],
@@ -384,6 +384,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/APIError"
                         }
                     },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -400,7 +406,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Updates the farm with the given id. Authorization is gated by the workspace.manage permission at the route level.",
+                "description": "Updates the farm with the given id. Includes changing the farm type. Authorization is gated by the farms.manage permission and scoped to the caller's tenant.",
                 "consumes": [
                     "application/json"
                 ],
@@ -448,6 +454,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/APIError"
                         }
                     },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
                     "404": {
                         "description": "farm not found",
                         "schema": {
@@ -468,7 +480,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Soft-deactivates the farm with the given id (sets is_active=false). Authorization is gated by the workspace.manage permission at the route level.",
+                "description": "Soft-deactivates the farm with the given id (sets is_active=false). Authorization is gated by the farms.manage permission and scoped to the caller's tenant.",
                 "produces": [
                     "application/json"
                 ],
@@ -504,6 +516,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/APIError"
                         }
                     },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "farm not found",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
                     "500": {
                         "description": "internal server error",
                         "schema": {
@@ -520,7 +544,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Reactivates the farm with the given id (sets is_active=true). Authorization is gated by the workspace.manage permission at the route level.",
+                "description": "Reactivates the farm with the given id (sets is_active=true). Authorization is gated by the farms.manage permission and scoped to the caller's tenant.",
                 "produces": [
                     "application/json"
                 ],
@@ -552,6 +576,18 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "farm not found",
                         "schema": {
                             "$ref": "#/definitions/APIError"
                         }
@@ -1193,6 +1229,69 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/zones": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Creates a zone (field) on a farm owned by the caller's tenant. The zone type's cultivation mode drives which detail section is required — soil zones carry soil type details, hydro zones carry hydroponic system details. Authorization is gated by the fields.manage permission at the route level.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Create a new zone",
+                "parameters": [
+                    {
+                        "description": "Zone create payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "zone created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "validation error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1276,6 +1375,58 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "string"
+                }
+            }
+        },
+        "CreateZoneRequest": {
+            "type": "object",
+            "required": [
+                "areaUnit",
+                "farmID",
+                "name",
+                "zoneTypeID",
+                "zoneTypeName"
+            ],
+            "properties": {
+                "area": {
+                    "type": "number",
+                    "example": 12.5
+                },
+                "areaUnit": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2,
+                    "example": "acres"
+                },
+                "farmID": {
+                    "type": "string",
+                    "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "hydroSystemTypeDetails": {
+                    "$ref": "#/definitions/HydroSystemTypeRequest"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 2,
+                    "example": "Greenfield Orchard"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "North-facing slope, drip irrigation installed"
+                },
+                "soilTypeDetails": {
+                    "$ref": "#/definitions/SoilTypeRequest"
+                },
+                "zoneTypeID": {
+                    "type": "string",
+                    "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "zoneTypeName": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 2,
+                    "example": "soil"
                 }
             }
         },
@@ -1371,6 +1522,27 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "ok"
+                }
+            }
+        },
+        "HydroSystemTypeRequest": {
+            "type": "object",
+            "properties": {
+                "growMedium": {
+                    "type": "string",
+                    "example": "perlite"
+                },
+                "hydroSystemTypeID": {
+                    "type": "string",
+                    "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "numberOfSlots": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "reservoirVolumeLiters": {
+                    "type": "number",
+                    "example": 100000
                 }
             }
         },
@@ -1567,6 +1739,15 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 2
+                }
+            }
+        },
+        "SoilTypeRequest": {
+            "type": "object",
+            "properties": {
+                "soilTypeID": {
+                    "type": "string",
+                    "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 }
             }
         },

@@ -18,19 +18,19 @@ import { clearSelectedZone, selectSelectedZone } from "../selectedZoneSlice";
  * arrive decorated from the list (zoneType lookup row included).
  */
 const toFormDefaults = (zone) => ({
-  farmId: zone.farmId || "",
+  farmId: zone.farmID || "",
   name: zone.name || "",
-  zoneTypeId: zone.zoneTypeId || "",
-  soilTypeId: zone.soilDetails?.soilTypeId || "",
-  hydroSystemTypeId: zone.hydroDetails?.hydroSystemTypeId || "",
-  growMedium: zone.hydroDetails?.growMedium || "",
+  zoneTypeId: zone.zoneTypeID || "",
+  soilTypeId: zone.soilTypeDetails?.soilTypeID || "",
+  hydroSystemTypeId: zone.hydroSystemTypeDetails?.hydroSystemTypeID || "",
+  growMedium: zone.hydroSystemTypeDetails?.growMedium || "",
   reservoirVolumeLiters:
-    zone.hydroDetails?.reservoirVolumeLiters != null
-      ? String(zone.hydroDetails.reservoirVolumeLiters)
+    zone.hydroSystemTypeDetails?.reservoirVolumeLiters != null
+      ? String(zone.hydroSystemTypeDetails.reservoirVolumeLiters)
       : "",
   numberOfSlots:
-    zone.hydroDetails?.numberOfSlots != null
-      ? String(zone.hydroDetails.numberOfSlots)
+    zone.hydroSystemTypeDetails?.numberOfSlots != null
+      ? String(zone.hydroSystemTypeDetails.numberOfSlots)
       : "",
   zoneStatus: zone.zoneStatus || "idle",
   area: zone.area != null ? String(zone.area) : "",
@@ -88,7 +88,7 @@ const EditField = () => {
   // Records reference the type by UUID; resolve its name for the header.
   const typeName =
     zone.zoneType?.name ||
-    zoneTypes.find((t) => t.id === zone.zoneTypeId)?.name;
+    zoneTypes.find((t) => t.id === zone.zoneTypeID)?.name;
   const t = getZoneType(typeName);
   const TypeIcon = t.icon;
 

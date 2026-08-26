@@ -63,17 +63,11 @@ func (q *Queries) CreateFarm(ctx context.Context, arg CreateFarmParams) (Farm, e
 const listFarms = `-- name: ListFarms :many
 SELECT id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at FROM farms
 WHERE tenant_id = $1
-AND is_active = $2
 ORDER BY created_at DESC
 `
 
-type ListFarmsParams struct {
-	TenantID uuid.UUID
-	IsActive bool
-}
-
-func (q *Queries) ListFarms(ctx context.Context, arg ListFarmsParams) ([]Farm, error) {
-	rows, err := q.db.Query(ctx, listFarms, arg.TenantID, arg.IsActive)
+func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error) {
+	rows, err := q.db.Query(ctx, listFarms, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -110,16 +104,18 @@ const toggleFarmIsActive = `-- name: ToggleFarmIsActive :one
 UPDATE farms
 SET is_active = $2
 WHERE id = $1
+AND tenant_id = $3
 RETURNING id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at
 `
 
 type ToggleFarmIsActiveParams struct {
 	ID       uuid.UUID
 	IsActive bool
+	TenantID uuid.UUID
 }
 
 func (q *Queries) ToggleFarmIsActive(ctx context.Context, arg ToggleFarmIsActiveParams) (Farm, error) {
-	row := q.db.QueryRow(ctx, toggleFarmIsActive, arg.ID, arg.IsActive)
+	row := q.db.QueryRow(ctx, toggleFarmIsActive, arg.ID, arg.IsActive, arg.TenantID)
 	var i Farm
 	err := row.Scan(
 		&i.ID,
@@ -141,20 +137,23 @@ func (q *Queries) ToggleFarmIsActive(ctx context.Context, arg ToggleFarmIsActive
 
 const updateFarm = `-- name: UpdateFarm :one
 UPDATE farms
-SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, updated_at = now()
+SET name = $2, location = $3, latitude = $4, longitude = $5, total_area = $6, area_unit = $7, notes = $8, farm_type_id = $9, updated_at = now()
 WHERE id = $1
+AND tenant_id = $10
 RETURNING id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at
 `
 
 type UpdateFarmParams struct {
-	ID        uuid.UUID
-	Name      string
-	Location  *string
-	Latitude  *float64
-	Longitude *float64
-	TotalArea *float64
-	AreaUnit  string
-	Notes     *string
+	ID         uuid.UUID
+	Name       string
+	Location   *string
+	Latitude   *float64
+	Longitude  *float64
+	TotalArea  *float64
+	AreaUnit   string
+	Notes      *string
+	FarmTypeID uuid.UUID
+	TenantID   uuid.UUID
 }
 
 func (q *Queries) UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, error) {
@@ -167,6 +166,8 @@ func (q *Queries) UpdateFarm(ctx context.Context, arg UpdateFarmParams) (Farm, e
 		arg.TotalArea,
 		arg.AreaUnit,
 		arg.Notes,
+		arg.FarmTypeID,
+		arg.TenantID,
 	)
 	var i Farm
 	err := row.Scan(

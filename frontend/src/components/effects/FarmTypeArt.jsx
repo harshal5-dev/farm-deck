@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
  * FarmTypeArt — small decorative SVG motifs, one per farm type, used as the
  * header banner of each farm-type card. Each draws a distinctive scene.
  *
- * `variant`: "outdoor" | "greenhouse" | "mixed" | "indoor" | "vertical"
+ * `variant`: "outdoor" | "greenhouse" | "mixed" | "indoor"
  */
 const FarmTypeArt = ({ variant, className }) => {
   const art = {
@@ -212,65 +212,6 @@ const FarmTypeArt = ({ variant, className }) => {
               ))}
             </g>
           ))}
-        </g>
-      </>
-    ),
-    vertical: (
-      <>
-        {/* multi-tier tower structure */}
-        <g transform="translate(30, 18)">
-          {[0, 1, 2, 3].map((tier) => (
-            <g key={tier} transform={`translate(0,${tier * 22})`}>
-              <rect
-                x="0"
-                y="0"
-                width="180"
-                height="20"
-                rx="4"
-                fill="var(--sage)"
-                opacity={0.35 - tier * 0.06}
-              />
-              <rect
-                x="0"
-                y="0"
-                width="180"
-                height="20"
-                rx="4"
-                fill="none"
-                stroke="var(--sage-deep)"
-                strokeWidth="1.5"
-                opacity={0.4 - tier * 0.06}
-              />
-              {/* plants on tier */}
-              <g fill="var(--leaf)" opacity={0.6 + tier * 0.08}>
-                {[20, 50, 80, 110, 140].map((px, i) => (
-                  <circle
-                    key={px}
-                    cx={px}
-                    cy={10}
-                    r={2.5 + (i % 3) * 1.5}
-                  />
-                ))}
-              </g>
-              {/* LED strip under each tier (except bottom) */}
-              {tier < 3 && (
-                <rect
-                  x="0"
-                  y="20"
-                  width="180"
-                  height="2"
-                  rx="1"
-                  fill="var(--wheat)"
-                  opacity="0.7"
-                />
-              )}
-            </g>
-          ))}
-        </g>
-        {/* side support beams */}
-        <g stroke="var(--soil)" strokeWidth="2.5" opacity="0.25" fill="none">
-          <line x1="32" y1="20" x2="32" y2="108" />
-          <line x1="208" y1="20" x2="208" y2="108" />
         </g>
       </>
     ),

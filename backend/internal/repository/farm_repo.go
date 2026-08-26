@@ -12,9 +12,9 @@ import (
 
 type FarmRepo interface {
 	CreateFarm(ctx context.Context, params db.CreateFarmParams) (db.Farm, error)
-	ListFarms(ctx context.Context, tenantID uuid.UUID, isActive bool) ([]db.Farm, error)
+	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error)
 	UpdateFarm(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error)
-	ToggleFarmIsActive(ctx context.Context, farmID uuid.UUID, isActive bool) (db.Farm, error)
+	ToggleFarmIsActive(ctx context.Context, farmID uuid.UUID, tenantID uuid.UUID, isActive bool) (db.Farm, error)
 }
 
 type FarmRepoImpl struct {
@@ -29,8 +29,8 @@ func (r *FarmRepoImpl) CreateFarm(ctx context.Context, params db.CreateFarmParam
 	return r.store.CreateFarm(ctx, params)
 }
 
-func (r *FarmRepoImpl) ListFarms(ctx context.Context, tenantID uuid.UUID, isActive bool) ([]db.Farm, error) {
-	return r.store.ListFarms(ctx, db.ListFarmsParams{TenantID: tenantID, IsActive: isActive})
+func (r *FarmRepoImpl) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error) {
+	return r.store.ListFarms(ctx, tenantID)
 }
 
 func (r *FarmRepoImpl) UpdateFarm(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error) {
@@ -44,6 +44,17 @@ func (r *FarmRepoImpl) UpdateFarm(ctx context.Context, params db.UpdateFarmParam
 	return farm, nil
 }
 
-func (r *FarmRepoImpl) ToggleFarmIsActive(ctx context.Context, farmID uuid.UUID, isActive bool) (db.Farm, error) {
-	return r.store.ToggleFarmIsActive(ctx, db.ToggleFarmIsActiveParams{ID: farmID, IsActive: isActive})
+func (r *FarmRepoImpl) ToggleFarmIsActive(ctx context.Context, farmID uuid.UUID, tenantID uuid.UUID, isActive bool) (db.Farm, error) {
+	farm, err := r.store.ToggleFarmIsActive(ctx, db.ToggleFarmIsActiveParams{
+		ID:       farmID,
+		IsActive: isActive,
+		TenantID: tenantID,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.Farm{}, domain.ErrFarmNotFound
+		}
+		return db.Farm{}, err
+	}
+	return farm, nil
 }

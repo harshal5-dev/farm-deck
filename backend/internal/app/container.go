@@ -9,6 +9,7 @@ import (
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/lookup"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/tenant"
 	"github.com/harshal5-dev/farm-deck/backend/internal/modules/user"
+	"github.com/harshal5-dev/farm-deck/backend/internal/modules/zone"
 	"github.com/harshal5-dev/farm-deck/backend/internal/repository"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/mailer"
 )
@@ -20,6 +21,7 @@ type Services struct {
 	Tenant tenant.TenantService
 	Lookup lookup.LookupService
 	Farm   farm.FarmService
+	Zone   zone.ZoneService
 }
 
 type Handlers struct {
@@ -28,6 +30,7 @@ type Handlers struct {
 	Tenant tenant.TenantHandler
 	Lookup lookup.LookupHandler
 	Farm   farm.FarmHandler
+	Zone   zone.ZoneHandler
 }
 
 type Repositories struct {
@@ -38,6 +41,7 @@ type Repositories struct {
 	Invitation   repository.InvitationRepo
 	Lookup       repository.LookupRepo
 	Farm         repository.FarmRepo
+	Zone         repository.ZoneRepo
 }
 
 type Container struct {
@@ -63,6 +67,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		Invitation:   repository.NewInvitationRepo(store),
 		Lookup:       repository.NewLookupRepo(store),
 		Farm:         repository.NewFarmRepo(store),
+		Zone:         repository.NewZoneRepo(store),
 	}
 
 	container.Mailer = mailer.NewAsyncMailer(
@@ -84,6 +89,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		Tenant: tenant.NewTenantService(container.Repositories.Tenant),
 		Lookup: lookup.NewLookupService(container.Repositories.Lookup),
 		Farm:   farm.NewFarmService(container.Repositories.Farm),
+		Zone:   zone.NewZoneService(container.Repositories.Zone),
 	}
 
 	container.Handlers = Handlers{
@@ -92,6 +98,7 @@ func NewContainer(cfg config.Config, store db.Store) *Container {
 		Tenant: tenant.NewTenantHandler(container.Services.Tenant),
 		Lookup: lookup.NewLookupHandler(container.Services.Lookup),
 		Farm:   farm.NewFarmHandler(container.Services.Farm),
+		Zone:   zone.NewZoneHandler(container.Services.Zone),
 	}
 
 	return container

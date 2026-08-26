@@ -34,7 +34,7 @@ type Querier interface {
 	GetUserInvitationByTokenHash(ctx context.Context, tokenHash string) (UserInvitation, error)
 	GetUserProfileDetails(ctx context.Context, id uuid.UUID) (GetUserProfileDetailsRow, error)
 	ListFarmTypes(ctx context.Context) ([]FarmType, error)
-	ListFarms(ctx context.Context, arg ListFarmsParams) ([]Farm, error)
+	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error)
 	ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]User, error)
 	ListSoilTypes(ctx context.Context) ([]SoilType, error)

@@ -1,12 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   IconArrowLeft,
   IconTractor,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useListFarmTypesQuery } from "@/features/lookups";
@@ -42,6 +51,12 @@ const EditFarm = () => {
   const { canManageFarms } = usePermissions();
   const { data: farmTypes = [], isLoading: typesLoading } =
     useListFarmTypesQuery();
+
+  // The form is uncontrolled from our side — we only peek at values via
+  // watch. To detect a type change we keep a small in-memory copy of the
+  // "pending" submit and open a modal when the user chose a different
+  // farm type than the original record.
+  const [pendingValues, setPendingValues] = useState(null);
 
   useEffect(() => {
     if (!farm) {
@@ -88,7 +103,21 @@ const EditFarm = () => {
   const t = getFarmType(typeName);
   const TypeIcon = t.icon;
 
-  const handleSubmit = async (values) => {
+  // Display names for the modal — sourced from the same lookup the picker
+  // renders, with a fallback to "the new type" if the list hasn't loaded.
+  const originalType =
+    farmTypes.find((x) => x.id === farm.farmTypeId)?.displayName || typeName;
+  const newType = (() => {
+    const id = pendingValues?.farmTypeId;
+    return (
+      farmTypes.find((x) => x.id === id)?.displayName || "the new farm type"
+    );
+  })();
+
+  const typeChanged =
+    !!pendingValues && pendingValues.farmTypeId !== farm.farmTypeId;
+
+  const commitUpdate = async (values) => {
     try {
       await updateFarm({
         id: farm.id,
@@ -104,6 +133,14 @@ const EditFarm = () => {
         description: err?.data?.error?.message || "Please try again.",
       });
     }
+  };
+
+  const handleSubmit = (values) => {
+    if (values.farmTypeId !== farm.farmTypeId) {
+      setPendingValues(values);
+      return;
+    }
+    commitUpdate(values);
   };
 
   const handleCancel = () => {
@@ -201,6 +238,62 @@ const EditFarm = () => {
           )}
         </div>
       </Reveal>
+
+      {/* ===== Farm-type change confirmation =====
+             Opens when the user picks a different type than the original
+             record. Plain modal — no reason field — but a short warning
+             copy so the user knows the change affects zones / reports. */}
+      <Dialog
+        open={typeChanged}
+        onOpenChange={(open) => {
+          if (!open) setPendingValues(null);
+        }}
+      >
+        <DialogContent size="sm">
+          <DialogHeader>
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/12 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/25">
+                <IconAlertTriangle
+                  className="size-4.5"
+                  strokeWidth={1.85}
+                />
+              </div>
+              <div className="min-w-0">
+                <DialogTitle>Change farm type?</DialogTitle>
+                <DialogDescription>
+                  You're switching <span className="font-semibold">{farm.name}</span>{" "}
+                  from{" "}
+                  <span className="font-semibold">{originalType}</span> to{" "}
+                  <span className="font-semibold">{newType}</span>. This affects how
+                  zones, irrigation and reports are interpreted for this farm.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setPendingValues(null)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                const values = pendingValues;
+                setPendingValues(null);
+                if (values) commitUpdate(values);
+              }}
+              disabled={submitting}
+              className="gap-2 shadow-md shadow-leaf/20"
+            >
+              Change type
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

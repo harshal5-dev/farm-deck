@@ -136,8 +136,9 @@ export async function listFarmTypesMock() {
 let zoneRows = [
   {
     id: "zone-beefsteak-1",
-    farmId: "farm-skagit",
-    zoneTypeId: "zt-soil",
+    farmID: "farm-skagit",
+    zoneTypeID: "zt-soil",
+    zoneTypeName: "soil",
     name: "Beefsteak High-Wire Bay 1",
     area: 4200,
     areaUnit: "sq_m",
@@ -147,13 +148,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(2),
     createdAt: daysAgo(410),
     updatedAt: hoursAgo(20),
-    soilDetails: { soilTypeId: "st-clay-loam" },
-    hydroDetails: null,
+    soilTypeDetails: { soilTypeID: "st-clay-loam" },
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-cucumber-east",
-    farmId: "farm-skagit",
-    zoneTypeId: "zt-hydro",
+    farmID: "farm-skagit",
+    zoneTypeID: "zt-hydro",
+    zoneTypeName: "hydro",
     name: "Cucumber Troughs East",
     area: 980,
     areaUnit: "sq_m",
@@ -163,9 +165,9 @@ let zoneRows = [
     statusChangedAt: daysAgo(12),
     createdAt: daysAgo(380),
     updatedAt: daysAgo(5),
-    soilDetails: null,
-    hydroDetails: {
-      hydroSystemTypeId: "hs-drip",
+    soilTypeDetails: null,
+    hydroSystemTypeDetails: {
+      hydroSystemTypeID: "hs-drip",
       growMedium: "rockwool",
       reservoirVolumeLiters: 5400,
       numberOfSlots: 120,
@@ -173,8 +175,9 @@ let zoneRows = [
   },
   {
     id: "zone-tilapia-raceways",
-    farmId: "farm-snake",
-    zoneTypeId: "zt-aquaponic",
+    farmID: "farm-snake",
+    zoneTypeID: "zt-aquaponic",
+    zoneTypeName: "aquaponic",
     name: "Tilapia Raceway Bank",
     area: 650,
     areaUnit: "sq_m",
@@ -184,13 +187,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(30),
     createdAt: daysAgo(600),
     updatedAt: daysAgo(9),
-    soilDetails: null,
-    hydroDetails: null,
+    soilTypeDetails: null,
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-butterhead-raft-3",
-    farmId: "farm-snake",
-    zoneTypeId: "zt-hydro",
+    farmID: "farm-snake",
+    zoneTypeID: "zt-hydro",
+    zoneTypeName: "hydro",
     name: "Butterhead Raft 3",
     area: 220,
     areaUnit: "sq_m",
@@ -200,9 +204,9 @@ let zoneRows = [
     statusChangedAt: daysAgo(1),
     createdAt: daysAgo(220),
     updatedAt: hoursAgo(3),
-    soilDetails: null,
-    hydroDetails: {
-      hydroSystemTypeId: "hs-dwc",
+    soilTypeDetails: null,
+    hydroSystemTypeDetails: {
+      hydroSystemTypeID: "hs-dwc",
       growMedium: null,
       reservoirVolumeLiters: 18000,
       numberOfSlots: 480,
@@ -210,8 +214,9 @@ let zoneRows = [
   },
   {
     id: "zone-honeycrisp-a",
-    farmId: "farm-yakima",
-    zoneTypeId: "zt-soil",
+    farmID: "farm-yakima",
+    zoneTypeID: "zt-soil",
+    zoneTypeName: "soil",
     name: "Honeycrisp Block A",
     area: 18,
     areaUnit: "acre",
@@ -221,13 +226,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(45),
     createdAt: daysAgo(1200),
     updatedAt: daysAgo(14),
-    soilDetails: { soilTypeId: "st-sandy-loam" },
-    hydroDetails: null,
+    soilTypeDetails: { soilTypeID: "st-sandy-loam" },
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-gala-b",
-    farmId: "farm-yakima",
-    zoneTypeId: "zt-soil",
+    farmID: "farm-yakima",
+    zoneTypeID: "zt-soil",
+    zoneTypeName: "soil",
     name: "Gala Block B",
     area: 14,
     areaUnit: "acre",
@@ -237,13 +243,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(4),
     createdAt: daysAgo(1200),
     updatedAt: daysAgo(4),
-    soilDetails: { soilTypeId: "st-sandy-loam" },
-    hydroDetails: null,
+    soilTypeDetails: { soilTypeID: "st-sandy-loam" },
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-marion-west",
-    farmId: "farm-willamette",
-    zoneTypeId: "zt-soil",
+    farmID: "farm-willamette",
+    zoneTypeID: "zt-soil",
+    zoneTypeName: "soil",
     name: "Marion Trellis West",
     area: 7,
     areaUnit: "acre",
@@ -253,13 +260,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(60),
     createdAt: daysAgo(900),
     updatedAt: daysAgo(21),
-    soilDetails: { soilTypeId: "st-silt" },
-    hydroDetails: null,
+    soilTypeDetails: { soilTypeID: "st-silt" },
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-blueberry-east",
-    farmId: "farm-willamette",
-    zoneTypeId: "zt-soil",
+    farmID: "farm-willamette",
+    zoneTypeID: "zt-soil",
+    zoneTypeName: "soil",
     name: "Blueberry East",
     area: 3.5,
     areaUnit: "acre",
@@ -269,13 +277,14 @@ let zoneRows = [
     statusChangedAt: daysAgo(60),
     createdAt: daysAgo(700),
     updatedAt: daysAgo(11),
-    soilDetails: { soilTypeId: "st-loam" },
-    hydroDetails: null,
+    soilTypeDetails: { soilTypeID: "st-loam" },
+    hydroSystemTypeDetails: null,
   },
   {
     id: "zone-mushroom-1",
-    farmId: "farm-skagit",
-    zoneTypeId: "zt-mushroom",
+    farmID: "farm-skagit",
+    zoneTypeID: "zt-mushroom",
+    zoneTypeName: "mushroom",
     name: "Mushroom Room 1",
     area: 45,
     areaUnit: "sq_m",
@@ -285,8 +294,8 @@ let zoneRows = [
     statusChangedAt: daysAgo(200),
     createdAt: daysAgo(500),
     updatedAt: daysAgo(200),
-    soilDetails: null,
-    hydroDetails: null,
+    soilTypeDetails: null,
+    hydroSystemTypeDetails: null,
   },
 ];
 
@@ -312,11 +321,11 @@ const findZoneType = (id) => zoneTypeRows.find((t) => t.id === id);
  * Enforce `uq_zones_farm_name_live` — an active zone name must be
  * unique within its farm. Returns an error object when taken.
  */
-const checkNameConflict = (farmId, name, { exceptId = null } = {}) => {
+const checkNameConflict = (farmID, name, { exceptId = null } = {}) => {
   const clash = zoneRows.find(
     (z) =>
       z.id !== exceptId &&
-      z.farmId === farmId &&
+      z.farmID === farmID &&
       z.isActive &&
       z.name.toLowerCase() === name.toLowerCase()
   );
@@ -331,15 +340,15 @@ const checkNameConflict = (farmId, name, { exceptId = null } = {}) => {
  * Enforce the `assert_zone_cultivation_mode` trigger — detail rows
  * must match the zone type's cultivation mode.
  */
-const checkModeMatch = (zoneTypeId, soilDetails, hydroDetails) => {
-  const mode = findZoneType(zoneTypeId)?.cultivationMode;
-  if (mode === "soil" && hydroDetails) {
+const checkModeMatch = (zoneTypeID, soilTypeDetails, hydroSystemTypeDetails) => {
+  const mode = findZoneType(zoneTypeID)?.cultivationMode;
+  if (mode === "soil" && hydroSystemTypeDetails) {
     return apiError(400, "A soil zone cannot carry hydroponic details.");
   }
-  if (mode === "hydro" && soilDetails) {
+  if (mode === "hydro" && soilTypeDetails) {
     return apiError(400, "A hydroponic zone cannot carry soil details.");
   }
-  if (mode === "other" && (soilDetails || hydroDetails)) {
+  if (mode === "other" && (soilTypeDetails || hydroSystemTypeDetails)) {
     return apiError(400, "This zone type does not take soil or hydro details yet.");
   }
   return null;
@@ -348,16 +357,17 @@ const checkModeMatch = (zoneTypeId, soilDetails, hydroDetails) => {
 /** Compose the stored row shape (adds farmName for display). */
 const withFarmName = (zone) => ({
   ...zone,
-  farmName: farmRows.find((f) => f.id === zone.farmId)?.name ?? null,
+  farmName: farmRows.find((f) => f.id === zone.farmID)?.name ?? null,
 });
 
 /** Parse the form payload into a storable zone shape. */
 const toStoredZone = (input) => {
-  const zoneType = findZoneType(input.zoneTypeId);
+  const zoneType = findZoneType(input.zoneTypeID);
   const mode = zoneType?.cultivationMode ?? "other";
   return {
-    farmId: input.farmId,
-    zoneTypeId: input.zoneTypeId,
+    farmID: input.farmID,
+    zoneTypeID: input.zoneTypeID,
+    zoneTypeName: input.zoneTypeName ?? zoneType?.name ?? null,
     name: String(input.name || "").trim(),
     area:
       input.area === null || input.area === undefined || input.area === ""
@@ -366,8 +376,14 @@ const toStoredZone = (input) => {
     areaUnit: input.areaUnit || "sq_m",
     notes: input.notes?.trim() ? input.notes.trim() : null,
     zoneStatus: input.zoneStatus || "idle",
-    soilDetails: mode === "soil" && input.soilDetails ? { ...input.soilDetails } : null,
-    hydroDetails: mode === "hydro" && input.hydroDetails ? { ...input.hydroDetails } : null,
+    soilTypeDetails:
+      mode === "soil" && input.soilTypeDetails
+        ? { ...input.soilTypeDetails }
+        : null,
+    hydroSystemTypeDetails:
+      mode === "hydro" && input.hydroSystemTypeDetails
+        ? { ...input.hydroSystemTypeDetails }
+        : null,
   };
 };
 
@@ -399,16 +415,16 @@ export async function createZone(input) {
   if (!stored.name || stored.name.length < 2) {
     throw apiError(400, "Field name must be at least 2 characters.");
   }
-  if (!stored.farmId) throw apiError(400, "Pick the farm this field belongs to.");
-  if (!stored.zoneTypeId) throw apiError(400, "Pick a zone type.");
+  if (!stored.farmID) throw apiError(400, "Pick the farm this field belongs to.");
+  if (!stored.zoneTypeID) throw apiError(400, "Pick a zone type.");
 
-  const conflict = checkNameConflict(stored.farmId, stored.name);
+  const conflict = checkNameConflict(stored.farmID, stored.name);
   if (conflict) throw conflict;
 
   const modeError = checkModeMatch(
-    stored.zoneTypeId,
-    stored.soilDetails,
-    stored.hydroDetails
+    stored.zoneTypeID,
+    stored.soilTypeDetails,
+    stored.hydroSystemTypeDetails
   );
   if (modeError) throw modeError;
 
@@ -434,13 +450,13 @@ export async function updateZone({ id, ...patch }) {
     throw apiError(400, "Field name must be at least 2 characters.");
   }
 
-  const conflict = checkNameConflict(stored.farmId, stored.name, { exceptId: id });
+  const conflict = checkNameConflict(stored.farmID, stored.name, { exceptId: id });
   if (conflict) throw conflict;
 
   const modeError = checkModeMatch(
-    stored.zoneTypeId,
-    stored.soilDetails,
-    stored.hydroDetails
+    stored.zoneTypeID,
+    stored.soilTypeDetails,
+    stored.hydroSystemTypeDetails
   );
   if (modeError) throw modeError;
 
@@ -472,7 +488,7 @@ export async function activateZone(id) {
   const zone = zoneRows.find((z) => z.id === id);
   if (!zone) throw apiError(404, "That field no longer exists.");
 
-  const conflict = checkNameConflict(zone.farmId, zone.name, { exceptId: id });
+  const conflict = checkNameConflict(zone.farmID, zone.name, { exceptId: id });
   if (conflict) {
     // Mirrors the reactivation edge case: a new zone took the name
     // while this one was archived (uq_zones_farm_name_live).

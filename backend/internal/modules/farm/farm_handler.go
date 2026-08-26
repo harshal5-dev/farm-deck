@@ -1,8 +1,6 @@
 package farm
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/internal/response"
@@ -28,7 +26,7 @@ func NewFarmHandler(farmService FarmService) FarmHandler {
 
 // CreateFarm godoc
 // @Summary      Create a new farm
-// @Description  Creates a farm owned by the caller's tenant. Authorization is gated by the workspace.manage permission at the route level.
+// @Description  Creates a farm owned by the caller's tenant. Authorization is gated by the farms.manage permission at the route level.
 // @Tags         farm
 // @Accept       json
 // @Produce      json
@@ -37,6 +35,7 @@ func NewFarmHandler(farmService FarmService) FarmHandler {
 // @Success      200 {object} response.APIResponse "farm created successfully"
 // @Failure      400 {object} response.APIError "validation error"
 // @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms [post]
 func (h *FarmHandlerImpl) CreateFarm(ctx *gin.Context) {
@@ -79,17 +78,7 @@ func (h *FarmHandlerImpl) ListFarms(ctx *gin.Context) {
 		return
 	}
 
-	activeFilter := false
-	if raw, ok := ctx.GetQuery("is_active"); ok && raw != "" {
-		v, err := strconv.ParseBool(raw)
-		if err != nil {
-			response.BadRequest(ctx, "is_active must be a boolean")
-			return
-		}
-		activeFilter = v
-	}
-
-	farms, err := h.farmService.ListFarms(ctx, tenantID, activeFilter)
+	farms, err := h.farmService.ListFarms(ctx, tenantID)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
@@ -100,7 +89,7 @@ func (h *FarmHandlerImpl) ListFarms(ctx *gin.Context) {
 
 // UpdateFarm godoc
 // @Summary      Update a farm
-// @Description  Updates the farm with the given id. Authorization is gated by the workspace.manage permission at the route level.
+// @Description  Updates the farm with the given id. Includes changing the farm type. Authorization is gated by the farms.manage permission and scoped to the caller's tenant.
 // @Tags         farm
 // @Accept       json
 // @Produce      json
@@ -110,10 +99,17 @@ func (h *FarmHandlerImpl) ListFarms(ctx *gin.Context) {
 // @Success      200 {object} response.APIResponse "farm updated successfully"
 // @Failure      400 {object} response.APIError "invalid farm id or validation error"
 // @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
 // @Failure      404 {object} response.APIError "farm not found"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms/{id} [put]
 func (h *FarmHandlerImpl) UpdateFarm(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
 	farmID, err := ctxutil.ParseParamID(ctx, "id")
 	if err != nil {
 		response.BadRequest(ctx, "invalid farm id")
@@ -125,7 +121,7 @@ func (h *FarmHandlerImpl) UpdateFarm(ctx *gin.Context) {
 		return
 	}
 
-	err = h.farmService.UpdateFarm(ctx, farmID, req)
+	err = h.farmService.UpdateFarm(ctx, tenantID, farmID, req)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
@@ -136,7 +132,7 @@ func (h *FarmHandlerImpl) UpdateFarm(ctx *gin.Context) {
 
 // InactivateFarm godoc
 // @Summary      Inactivate a farm
-// @Description  Soft-deactivates the farm with the given id (sets is_active=false). Authorization is gated by the workspace.manage permission at the route level.
+// @Description  Soft-deactivates the farm with the given id (sets is_active=false). Authorization is gated by the farms.manage permission and scoped to the caller's tenant.
 // @Tags         farm
 // @Produce      json
 // @Security     CookieAuth
@@ -144,16 +140,24 @@ func (h *FarmHandlerImpl) UpdateFarm(ctx *gin.Context) {
 // @Success      200 {object} response.APIResponse "farm inactivated successfully"
 // @Failure      400 {object} response.APIError "invalid farm id"
 // @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
+// @Failure      404 {object} response.APIError "farm not found"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms/{id} [patch]
 func (h *FarmHandlerImpl) DeactivateFarm(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
 	farmID, err := ctxutil.ParseParamID(ctx, "id")
 	if err != nil {
 		response.BadRequest(ctx, "invalid farm id")
 		return
 	}
 
-	err = h.farmService.DeactivateFarm(ctx, farmID)
+	err = h.farmService.DeactivateFarm(ctx, tenantID, farmID)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return
@@ -164,7 +168,7 @@ func (h *FarmHandlerImpl) DeactivateFarm(ctx *gin.Context) {
 
 // ActivateFarm godoc
 // @Summary      Activate a farm
-// @Description  Reactivates the farm with the given id (sets is_active=true). Authorization is gated by the workspace.manage permission at the route level.
+// @Description  Reactivates the farm with the given id (sets is_active=true). Authorization is gated by the farms.manage permission and scoped to the caller's tenant.
 // @Tags         farm
 // @Produce      json
 // @Security     CookieAuth
@@ -172,16 +176,24 @@ func (h *FarmHandlerImpl) DeactivateFarm(ctx *gin.Context) {
 // @Success      200 {object} response.APIResponse "farm activated successfully"
 // @Failure      400 {object} response.APIError "invalid farm id"
 // @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
+// @Failure      404 {object} response.APIError "farm not found"
 // @Failure      500 {object} response.APIError "internal server error"
 // @Router       /farms/{id}/activate [patch]
 func (h *FarmHandlerImpl) ActivateFarm(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
 	farmID, err := ctxutil.ParseParamID(ctx, "id")
 	if err != nil {
 		response.BadRequest(ctx, "invalid farm id")
 		return
 	}
 
-	err = h.farmService.ActivateFarm(ctx, farmID)
+	err = h.farmService.ActivateFarm(ctx, tenantID, farmID)
 	if err != nil {
 		httperr.HandleError(ctx, err)
 		return

@@ -57,6 +57,46 @@ definitions:
       userId:
         type: string
     type: object
+  CreateZoneRequest:
+    properties:
+      area:
+        example: 12.5
+        type: number
+      areaUnit:
+        example: acres
+        maxLength: 50
+        minLength: 2
+        type: string
+      farmID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      hydroSystemTypeDetails:
+        $ref: '#/definitions/HydroSystemTypeRequest'
+      name:
+        example: Greenfield Orchard
+        maxLength: 255
+        minLength: 2
+        type: string
+      notes:
+        example: North-facing slope, drip irrigation installed
+        type: string
+      soilTypeDetails:
+        $ref: '#/definitions/SoilTypeRequest'
+      zoneTypeID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      zoneTypeName:
+        example: soil
+        maxLength: 255
+        minLength: 2
+        type: string
+    required:
+    - areaUnit
+    - farmID
+    - name
+    - zoneTypeID
+    - zoneTypeName
+    type: object
   ErrorDetail:
     properties:
       code:
@@ -123,6 +163,21 @@ definitions:
       status:
         example: ok
         type: string
+    type: object
+  HydroSystemTypeRequest:
+    properties:
+      growMedium:
+        example: perlite
+        type: string
+      hydroSystemTypeID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      numberOfSlots:
+        example: 10
+        type: integer
+      reservoirVolumeLiters:
+        example: 100000
+        type: number
     type: object
   HydroSystemTypeResponse:
     properties:
@@ -260,6 +315,12 @@ definitions:
     - fullName
     - password
     - tenantName
+    type: object
+  SoilTypeRequest:
+    properties:
+      soilTypeID:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
     type: object
   SoilTypeResponse:
     properties:
@@ -601,7 +662,7 @@ paths:
       consumes:
       - application/json
       description: Creates a farm owned by the caller's tenant. Authorization is gated
-        by the workspace.manage permission at the route level.
+        by the farms.manage permission at the route level.
       parameters:
       - description: Farm create payload
         in: body
@@ -624,6 +685,10 @@ paths:
           description: authentication required
           schema:
             $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
         "500":
           description: internal server error
           schema:
@@ -636,7 +701,8 @@ paths:
   /farms/{id}:
     patch:
       description: Soft-deactivates the farm with the given id (sets is_active=false).
-        Authorization is gated by the workspace.manage permission at the route level.
+        Authorization is gated by the farms.manage permission and scoped to the caller's
+        tenant.
       parameters:
       - description: Farm ID
         in: path
@@ -658,6 +724,14 @@ paths:
           description: authentication required
           schema:
             $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: farm not found
+          schema:
+            $ref: '#/definitions/APIError'
         "500":
           description: internal server error
           schema:
@@ -670,8 +744,9 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updates the farm with the given id. Authorization is gated by the
-        workspace.manage permission at the route level.
+      description: Updates the farm with the given id. Includes changing the farm
+        type. Authorization is gated by the farms.manage permission and scoped to
+        the caller's tenant.
       parameters:
       - description: Farm ID
         in: path
@@ -699,6 +774,10 @@ paths:
           description: authentication required
           schema:
             $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
         "404":
           description: farm not found
           schema:
@@ -715,7 +794,7 @@ paths:
   /farms/{id}/activate:
     patch:
       description: Reactivates the farm with the given id (sets is_active=true). Authorization
-        is gated by the workspace.manage permission at the route level.
+        is gated by the farms.manage permission and scoped to the caller's tenant.
       parameters:
       - description: Farm ID
         in: path
@@ -735,6 +814,14 @@ paths:
             $ref: '#/definitions/APIError'
         "401":
           description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
+        "404":
+          description: farm not found
           schema:
             $ref: '#/definitions/APIError'
         "500":
@@ -1142,6 +1229,49 @@ paths:
       summary: Update a tenant member
       tags:
       - user
+  /zones:
+    post:
+      consumes:
+      - application/json
+      description: Creates a zone (field) on a farm owned by the caller's tenant.
+        The zone type's cultivation mode drives which detail section is required —
+        soil zones carry soil type details, hydro zones carry hydroponic system details.
+        Authorization is gated by the fields.manage permission at the route level.
+      parameters:
+      - description: Zone create payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/CreateZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: zone created successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Create a new zone
+      tags:
+      - zone
 schemes:
 - http
 - https

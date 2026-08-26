@@ -54,13 +54,13 @@ import {
   getHydroSystemType,
 } from "../../constants";
 import {
-  useListFarmsForPickerQuery,
   useListZoneTypesQuery,
   useListSoilTypesQuery,
   useListHydroSystemTypesQuery,
 } from "../../zoneApi";
 import ZoneIdentityPreview from "./ZoneIdentityPreview";
 import ZoneTypeCard from "./ZoneTypeCard";
+import { useListFarmsQuery } from "@/features/farms";
 
 const fieldLabel =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
@@ -126,8 +126,9 @@ const ZoneForm = ({
   // picker stores the row's UUID, matching the zones.zone_type_id FK.
   const { data: zoneTypes = [], isLoading: typesLoading } =
     useListZoneTypesQuery();
-  const { data: farms = [], isLoading: farmsLoading } =
-    useListFarmsForPickerQuery();
+  const { data: { farms = [] } = {}, isLoading: farmsLoading } =
+    useListFarmsQuery();
+  console.log(farms, "farms");
   const { data: soilTypes = [] } = useListSoilTypesQuery();
   const { data: hydroSystemTypes = [] } = useListHydroSystemTypesQuery();
 
@@ -159,43 +160,47 @@ const ZoneForm = ({
     const zoneType = zoneTypes.find((t) => t.id === values.zoneTypeId);
     const m = zoneType?.cultivationMode;
 
-    // Compose the detail payload for the zone's cultivation mode —
-    // the DB trigger (assert_zone_cultivation_mode) rejects a mismatch,
-    // and the mock honours the same rule.
+    // Wire shape matches the API contract — capitalised IDs, the
+    // zone-type slug in `zoneTypeName`, and mode-specific detail
+    // blocks named after their domain (`soilTypeDetails`,
+    // `hydroSystemTypeDetails`). The DB trigger
+    // (assert_zone_cultivation_mode) rejects a mismatch and the mock
+    // honours the same rule.
     await onSubmit({
-      farmId: values.farmId,
-      zoneTypeId: values.zoneTypeId,
-      name: values.name.trim(),
-      zoneStatus: "idle",
       area: toNumberOrNull(values.area),
       areaUnit: values.areaUnit || DEFAULT_AREA_UNIT,
-      notes: values.notes.trim() || null,
-      soilDetails:
-        m === "soil" && values.soilTypeId
-          ? { soilTypeId: values.soilTypeId }
-          : null,
-      hydroDetails:
+      farmID: values.farmId,
+      hydroSystemTypeDetails:
         m === "hydro" && values.hydroSystemTypeId
           ? {
-              hydroSystemTypeId: values.hydroSystemTypeId,
               growMedium: values.growMedium.trim() || null,
-              reservoirVolumeLiters: toNumberOrNull(
-                values.reservoirVolumeLiters
-              ),
+              hydroSystemTypeID: values.hydroSystemTypeId,
               numberOfSlots:
                 values.numberOfSlots === "" || values.numberOfSlots == null
                   ? null
                   : Number(values.numberOfSlots),
+              reservoirVolumeLiters: toNumberOrNull(
+                values.reservoirVolumeLiters
+              ),
             }
           : null,
+      name: values.name.trim(),
+      notes: values.notes.trim() || null,
+      soilTypeDetails:
+        m === "soil" && values.soilTypeId
+          ? { soilTypeID: values.soilTypeId }
+          : null,
+      zoneTypeID: values.zoneTypeId,
+      zoneTypeName: zoneType?.name ?? null,
     });
   };
 
-  const sectionTitle = (Icon, title, hint) => (
+  const sectionTitle = (Icon, title, hint, required = false) => (
     <div className="mb-1.5 flex items-center justify-between gap-2">
       <span className={cn("flex items-center gap-1.5", fieldLabel)}>
         <Icon className="size-3.5" strokeWidth={1.75} />
         {title}
+        {required && <RequiredStar />}
       </span>
       {hint && (
         <span className="text-[10px] font-medium text-muted-foreground/70">
@@ -333,7 +338,7 @@ const ZoneForm = ({
               rules={{ required: "Pick a zone type" }}
               render={({ field }) => (
                 <div>
-                  {sectionTitle(IconPlant2, "Zone type")}
+                  {sectionTitle(IconPlant2, "Zone type", undefined, true)}
                   {typesLoading ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {Array.from({ length: 4 }).map((_, i) => (
@@ -450,108 +455,125 @@ const ZoneForm = ({
                         "zone_hydro_details"
                       )}
                       <div className="flex flex-col gap-3">
-                        <FormField
-                          control={form.control}
-                          name="hydroSystemTypeId"
-                          rules={{
-                            validate: (v) =>
-                              cultivationMode === "hydro" && !v
-                                ? "Pick the system type"
-                                : true,
-                          }}
-                          render={({ field }) => (
-                            <FormItem className="gap-1.5">
-                              {/* Plain span, not FormLabel — the picker renders
-                                  a custom trigger, so a label's htmlFor would
-                                  reference nothing. */}
-                              <span className={fieldLabel}>
-                                System type
-                                <RequiredStar />
-                              </span>
-                              <FormControl>
-                                <SearchableSelect
-                                  aria-label="Hydro system type"
-                                  leadingIcon={IconDroplets}
-                                  placeholder="Select system"
-                                  searchPlaceholder="Search systems…"
-                                  emptyText="No systems match"
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                  disabled={submitting}
-                                  items={hydroSystemTypes.map((h) => {
-                                    const m = getHydroSystemType(h.name);
-                                    return {
-                                      value: h.id,
-                                      label: h.displayName,
-                                      description: m.tagline,
-                                      keywords: `${h.name} ${m?.label ?? ""} ${m?.tagline ?? ""}`,
-                                      thumbnail: (
-                                        <HydroSystemArt
-                                          variant={m.art}
-                                          className="size-full"
-                                        />
-                                      ),
-                                    };
-                                  })}
-                                />
-                              </FormControl>
-                              <FormMessage className="text-[11px]" />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="growMedium"
-                          rules={{
-                            maxLength: {
-                              value: MEDIUM_MAX,
-                              message: "Too long",
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <FormItem className="gap-1.5">
-                              <FormLabel className={fieldLabel}>
-                                Grow medium
-                              </FormLabel>
-                              <FormControl>
-                                <FieldWrapper
-                                  icon={IconGrain}
-                                  hasError={fieldState.invalid}
-                                >
-                                  <Input
-                                    placeholder="e.g. 50/50 coco-perlite"
-                                    className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                                    {...field}
-                                  />
-                                </FieldWrapper>
-                              </FormControl>
-                              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                {GROW_MEDIUM_SUGGESTIONS.map((m) => (
-                                  <button
-                                    key={m}
-                                    type="button"
+                        {/* System type + Grow medium — side by side on desktop,
+                            stacked on mobile. Both columns are kept the same
+                            height (label + input only) so the next 2-col row
+                            (Reservoir / Plant slots) aligns cleanly beneath
+                            them. */}
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-end">
+                          <FormField
+                            control={form.control}
+                            name="hydroSystemTypeId"
+                            rules={{
+                              validate: (v) =>
+                                cultivationMode === "hydro" && !v
+                                  ? "Pick the system type"
+                                  : true,
+                            }}
+                            render={({ field }) => (
+                              <FormItem className="gap-1.5">
+                                {/* Plain span, not FormLabel — the picker renders
+                                    a custom trigger, so a label's htmlFor would
+                                    reference nothing. */}
+                                <span className={fieldLabel}>
+                                  System type
+                                  <RequiredStar />
+                                </span>
+                                <FormControl>
+                                  <SearchableSelect
+                                    aria-label="Hydro system type"
+                                    leadingIcon={IconDroplets}
+                                    placeholder="Select system"
+                                    searchPlaceholder="Search systems…"
+                                    emptyText="No systems match"
+                                    value={field.value}
+                                    onValueChange={field.onChange}
                                     disabled={submitting}
-                                    onClick={() =>
-                                      form.setValue("growMedium", m, {
-                                        shouldDirty: true,
-                                      })
-                                    }
-                                    className={cn(
-                                      "rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors",
-                                      field.value === m
-                                        ? "border-lagoon/40 bg-lagoon/15 text-lagoon-deep dark:text-lagoon"
-                                        : "border-border/50 bg-card/40 text-muted-foreground hover:border-border hover:text-foreground"
-                                    )}
+                                    items={hydroSystemTypes.map((h) => {
+                                      const m = getHydroSystemType(h.name);
+                                      return {
+                                        value: h.id,
+                                        label: h.displayName,
+                                        description: m.tagline,
+                                        keywords: `${h.name} ${m?.label ?? ""} ${m?.tagline ?? ""}`,
+                                        thumbnail: (
+                                          <HydroSystemArt
+                                            variant={m.art}
+                                            className="size-full"
+                                          />
+                                        ),
+                                      };
+                                    })}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-[11px]" />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="growMedium"
+                            rules={{
+                              maxLength: {
+                                value: MEDIUM_MAX,
+                                message: "Too long",
+                              },
+                            }}
+                            render={({ field, fieldState }) => (
+                              <FormItem className="gap-1.5">
+                                <FormLabel className={fieldLabel}>
+                                  Grow medium
+                                </FormLabel>
+                                <FormControl>
+                                  <FieldWrapper
+                                    icon={IconGrain}
+                                    hasError={fieldState.invalid}
                                   >
-                                    {m}
-                                  </button>
-                                ))}
-                              </div>
-                              <FormMessage className="text-[11px]" />
-                            </FormItem>
-                          )}
-                        />
+                                    <Input
+                                      placeholder="e.g. 50/50 coco-perlite"
+                                      className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                                      {...field}
+                                    />
+                                  </FieldWrapper>
+                                </FormControl>
+                                <FormMessage className="text-[11px]" />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Grow-medium suggestions — right-aligned row beneath the two
+                            fields. Keeps the chips visually associated with
+                            the Grow-medium column on the right. */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-[10px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+                            Grow Medium
+                          </span>
+                          {GROW_MEDIUM_SUGGESTIONS.map((m) => {
+                            const current = watched.growMedium === m;
+                            return (
+                              <button
+                                key={m}
+                                type="button"
+                                disabled={submitting}
+                                onClick={() =>
+                                  form.setValue("growMedium", m, {
+                                    shouldDirty: true,
+                                  })
+                                }
+                                className={cn(
+                                  "rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors",
+                                  current
+                                    ? "border-lagoon/40 bg-lagoon/15 text-lagoon-deep dark:text-lagoon"
+                                    : "border-border/50 bg-card/40 text-muted-foreground hover:border-border hover:text-foreground"
+                                )}
+                              >
+                                {m}
+                              </button>
+                            );
+                          })}
+                        </div>
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <FormField

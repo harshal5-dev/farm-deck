@@ -198,24 +198,24 @@ const ZoneCard = ({
             )}
             {isHydro && (
               <>
-                {zone.hydroDetails?.growMedium && (
+                {zone.hydroSystemTypeDetails?.growMedium && (
                   <DetailChip tone="border-lagoon/30 bg-lagoon/10 text-lagoon-deep dark:text-lagoon">
-                    {zone.hydroDetails.growMedium}
+                    {zone.hydroSystemTypeDetails.growMedium}
                   </DetailChip>
                 )}
-                {zone.hydroDetails?.reservoirVolumeLiters != null && (
+                {zone.hydroSystemTypeDetails?.reservoirVolumeLiters != null && (
                   <DetailChip>
-                    {formatLiters(zone.hydroDetails.reservoirVolumeLiters)}
+                    {formatLiters(zone.hydroSystemTypeDetails.reservoirVolumeLiters)}
                   </DetailChip>
                 )}
-                {zone.hydroDetails?.numberOfSlots != null && (
+                {zone.hydroSystemTypeDetails?.numberOfSlots != null && (
                   <DetailChip>
-                    {zone.hydroDetails.numberOfSlots} slots
+                    {zone.hydroSystemTypeDetails.numberOfSlots} slots
                   </DetailChip>
                 )}
-                {!zone.hydroDetails?.growMedium &&
-                  zone.hydroDetails?.reservoirVolumeLiters == null &&
-                  zone.hydroDetails?.numberOfSlots == null && (
+                {!zone.hydroSystemTypeDetails?.growMedium &&
+                  zone.hydroSystemTypeDetails?.reservoirVolumeLiters == null &&
+                  zone.hydroSystemTypeDetails?.numberOfSlots == null && (
                     <DetailChip>No rig details yet</DetailChip>
                   )}
               </>

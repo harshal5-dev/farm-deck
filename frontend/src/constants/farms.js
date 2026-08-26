@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 
 /**
- * Farm-type config — single source of truth for the five farm types.
+ * Farm-type config — single source of truth for the four farm types.
  * Mirrors the structure of `./roles.js` so farm cards, filter chips,
  * type pickers, and dialogs all read from the same place.
  *
@@ -93,24 +93,6 @@ export const FARM_TYPES = {
     gradient: "from-wheat to-wheat-deep",
     chip: "from-wheat/25 to-wheat/5 text-wheat-deep dark:text-wheat ring-wheat/25",
   },
-  vertical: {
-    id: "vertical",
-    label: "Vertical",
-    tagline: "Stacked tiers",
-    description:
-      "Multi-tier vertical farms that maximize yield per square foot in tight footprints.",
-    icon: IconLeaf,
-    art: "vertical",
-    accent: "clay",
-    text: "text-clay-deep dark:text-clay",
-    textBright: "text-clay",
-    bg: "bg-clay/12 dark:bg-clay/15",
-    bgSoft: "bg-clay/8",
-    ring: "ring-clay/40",
-    border: "border-clay/30",
-    gradient: "from-clay via-clay-deep to-clay",
-    chip: "from-clay/25 to-clay/5 text-clay-deep dark:text-clay ring-clay/30",
-  },
 };
 
 /**
@@ -122,7 +104,6 @@ export const FARM_TYPE_ORDER = [
   "greenhouse",
   "mixed",
   "indoor",
-  "vertical",
 ];
 
 export function getFarmType(id) {

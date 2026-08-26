@@ -11,6 +11,7 @@ import (
 	lookuphttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/lookup/http"
 	tenanthttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/tenant/http"
 	userhttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/user/http"
+	zonehttp "github.com/harshal5-dev/farm-deck/backend/internal/modules/zone/http"
 )
 
 func (server *Server) setupRoutes(router *gin.Engine) {
@@ -38,4 +39,5 @@ func (server *Server) setupRoutes(router *gin.Engine) {
 	tenanthttp.Register(public, protected, server.container.Handlers.Tenant)
 	lookuphttp.Register(public, protected, server.container.Handlers.Lookup)
 	farmhttp.Register(public, protected, server.container.Handlers.Farm)
+	zonehttp.Register(public, protected, server.container.Handlers.Zone)
 }

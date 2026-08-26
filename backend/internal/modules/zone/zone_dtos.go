@@ -14,8 +14,8 @@ type CreateZoneRequest struct {
 	Notes                  *string                `json:"notes" example:"North-facing slope, drip irrigation installed"`
 	FarmID                 uuid.UUID              `json:"farmID" binding:"required" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
 	ZoneTypeID             uuid.UUID              `json:"zoneTypeID" binding:"required" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
-	SoilTypeDetails        SoilTypeRequest        `json:"soilTypeDetails" example:""`
-	HydroSystemTypeDetails HydroSystemTypeRequest `json:"hydroSystemTypeDetails" example:""`
+	SoilTypeDetails        SoilTypeRequest        `json:"soilTypeDetails"`
+	HydroSystemTypeDetails HydroSystemTypeRequest `json:"hydroSystemTypeDetails"`
 }
 
 type UpdateZoneRequest struct {
@@ -23,8 +23,8 @@ type UpdateZoneRequest struct {
 	Name                   string                 `json:"name" binding:"required,min=2,max=255" example:"Greenfield Orchard"`
 	AreaUnit               string                 `json:"areaUnit" binding:"required,min=2,max=50" example:"acres"`
 	Notes                  *string                `json:"notes" example:"North-facing slope, drip irrigation installed"`
-	SoilTypeDetails        SoilTypeRequest        `json:"soilTypeDetails" example:"{}"`
-	HydroSystemTypeDetails HydroSystemTypeRequest `json:"hydroSystemTypeDetails" example:"{}"`
+	SoilTypeDetails        SoilTypeRequest        `json:"soilTypeDetails"`
+	HydroSystemTypeDetails HydroSystemTypeRequest `json:"hydroSystemTypeDetails"`
 }
 
 type SoilTypeRequest struct {

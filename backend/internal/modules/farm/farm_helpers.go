@@ -19,16 +19,18 @@ func toCreateFarmParams(tenantID uuid.UUID, req ManageFarmRequest) db.CreateFarm
 	}
 }
 
-func toUpdateFarmParams(id uuid.UUID, req ManageFarmRequest) db.UpdateFarmParams {
+func toUpdateFarmParams(id, tenantID uuid.UUID, req ManageFarmRequest) db.UpdateFarmParams {
 	return db.UpdateFarmParams{
-		ID:        id,
-		Name:      req.Name,
-		Location:  req.Location,
-		Latitude:  req.Latitude,
-		Longitude: req.Longitude,
-		TotalArea: req.TotalArea,
-		AreaUnit:  req.AreaUnit,
-		Notes:     req.Notes,
+		ID:         id,
+		Name:       req.Name,
+		Location:   req.Location,
+		Latitude:   req.Latitude,
+		Longitude:  req.Longitude,
+		TotalArea:  req.TotalArea,
+		AreaUnit:   req.AreaUnit,
+		Notes:      req.Notes,
+		FarmTypeID: req.FarmTypeID,
+		TenantID:   tenantID,
 	}
 }
 

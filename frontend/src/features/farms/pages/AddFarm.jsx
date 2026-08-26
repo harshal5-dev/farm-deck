@@ -16,15 +16,13 @@ const AddFarm = () => {
   const { canManageFarms } = usePermissions();
   const [createFarm, { isLoading }] = useCreateFarmMutation();
 
-  // Only roles that can manage farms should reach this form. Bounce
-  // anyone else back to the list so a typed URL never exposes the form.
   if (!canManageFarms) return <Navigate to="/app/farms" replace />;
 
   const handleSubmit = async (values) => {
     try {
-      const created = await createFarm(values).unwrap();
+      await createFarm(values).unwrap();
       toast.success("Farm added", {
-        description: `${created.name} is now part of the workspace.`,
+        description: `${values.name} is now part of the workspace.`,
       });
       navigate("/app/farms", { replace: true });
     } catch (err) {

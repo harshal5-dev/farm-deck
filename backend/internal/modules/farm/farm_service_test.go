@@ -14,23 +14,23 @@ import (
 
 type mockFarmRepo struct {
 	repository.FarmRepo
-	createFarm       func(context.Context, db.CreateFarmParams) (db.Farm, error)
-	listFarms        func(context.Context, uuid.UUID, bool) ([]db.Farm, error)
-	updateFarm       func(context.Context, db.UpdateFarmParams) (db.Farm, error)
-	toggleFarmIsActive func(context.Context, uuid.UUID, bool) (db.Farm, error)
+	createFarm         func(context.Context, db.CreateFarmParams) (db.Farm, error)
+	listFarms          func(context.Context, uuid.UUID) ([]db.Farm, error)
+	updateFarm         func(context.Context, db.UpdateFarmParams) (db.Farm, error)
+	toggleFarmIsActive func(context.Context, uuid.UUID, uuid.UUID, bool) (db.Farm, error)
 }
 
 func (m *mockFarmRepo) CreateFarm(ctx context.Context, p db.CreateFarmParams) (db.Farm, error) {
 	return m.createFarm(ctx, p)
 }
-func (m *mockFarmRepo) ListFarms(ctx context.Context, tID uuid.UUID, active bool) ([]db.Farm, error) {
-	return m.listFarms(ctx, tID, active)
+func (m *mockFarmRepo) ListFarms(ctx context.Context, tID uuid.UUID) ([]db.Farm, error) {
+	return m.listFarms(ctx, tID)
 }
 func (m *mockFarmRepo) UpdateFarm(ctx context.Context, p db.UpdateFarmParams) (db.Farm, error) {
 	return m.updateFarm(ctx, p)
 }
-func (m *mockFarmRepo) ToggleFarmIsActive(ctx context.Context, id uuid.UUID, active bool) (db.Farm, error) {
-	return m.toggleFarmIsActive(ctx, id, active)
+func (m *mockFarmRepo) ToggleFarmIsActive(ctx context.Context, id, tID uuid.UUID, active bool) (db.Farm, error) {
+	return m.toggleFarmIsActive(ctx, id, tID, active)
 }
 
 func validRequest() ManageFarmRequest {
@@ -123,18 +123,15 @@ func TestFarmService_ListFarms_MapsAndCounts(t *testing.T) {
 		{ID: uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard C", AreaUnit: "acres", IsActive: false, CreatedAt: now, UpdatedAt: now},
 	}
 
-	repo := &mockFarmRepo{listFarms: func(_ context.Context, tID uuid.UUID, active bool) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.Farm, error) {
 		if tID != tenantID {
 			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
-		}
-		if !active {
-			t.Errorf("active filter forwarded: got %v want true", active)
 		}
 		return farms, nil
 	}}
 	svc := NewFarmService(repo)
 
-	got, err := svc.ListFarms(context.Background(), tenantID, true)
+	got, err := svc.ListFarms(context.Background(), tenantID)
 	if err != nil {
 		t.Fatalf("ListFarms: %v", err)
 	}
@@ -165,12 +162,12 @@ func TestFarmService_ListFarms_MapsAndCounts(t *testing.T) {
 }
 
 func TestFarmService_ListFarms_EmptyListYieldsZeroCounts(t *testing.T) {
-	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID, bool) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
 		return nil, nil
 	}}
 	svc := NewFarmService(repo)
 
-	got, err := svc.ListFarms(context.Background(), uuidMust("44444444-4444-4444-4444-444444444444"), false)
+	got, err := svc.ListFarms(context.Background(), uuidMust("44444444-4444-4444-4444-444444444444"))
 	if err != nil {
 		t.Fatalf("ListFarms: %v", err)
 	}
@@ -184,12 +181,12 @@ func TestFarmService_ListFarms_EmptyListYieldsZeroCounts(t *testing.T) {
 
 func TestFarmService_ListFarms_RepoErrorPropagates(t *testing.T) {
 	storeErr := errors.New("db down")
-	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID, bool) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
 		return nil, storeErr
 	}}
 	svc := NewFarmService(repo)
 
-	_, err := svc.ListFarms(context.Background(), uuid.Nil, true)
+	_, err := svc.ListFarms(context.Background(), uuid.Nil)
 	if !errors.Is(err, storeErr) {
 		t.Errorf("expected %v, got %v", storeErr, err)
 	}
@@ -197,9 +194,10 @@ func TestFarmService_ListFarms_RepoErrorPropagates(t *testing.T) {
 
 func TestFarmService_UpdateFarm_ForwardsParamsAndWrapsError(t *testing.T) {
 	farmID := uuidMust("88888888-8888-8888-8888-888888888888")
+	tenantID := uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 	req := validRequest()
 
-	t.Run("success forwards the id and the rest of the request", func(t *testing.T) {
+	t.Run("success forwards the id, tenant id and the rest of the request", func(t *testing.T) {
 		var gotParams db.UpdateFarmParams
 		repo := &mockFarmRepo{updateFarm: func(_ context.Context, p db.UpdateFarmParams) (db.Farm, error) {
 			gotParams = p
@@ -207,18 +205,24 @@ func TestFarmService_UpdateFarm_ForwardsParamsAndWrapsError(t *testing.T) {
 		}}
 		svc := NewFarmService(repo)
 
-		if err := svc.UpdateFarm(context.Background(), farmID, req); err != nil {
+		if err := svc.UpdateFarm(context.Background(), tenantID, farmID, req); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		if gotParams.ID != farmID {
 			t.Errorf("ID: got %v want %v", gotParams.ID, farmID)
 		}
+		if gotParams.TenantID != tenantID {
+			t.Errorf("TenantID: got %v want %v", gotParams.TenantID, tenantID)
+		}
 		if gotParams.Name != req.Name {
 			t.Errorf("Name: got %q want %q", gotParams.Name, req.Name)
 		}
-	if gotParams.AreaUnit != req.AreaUnit {
-		t.Errorf("AreaUnit: got %q want %q", gotParams.AreaUnit, req.AreaUnit)
-	}
+		if gotParams.FarmTypeID != req.FarmTypeID {
+			t.Errorf("FarmTypeID: got %v want %v (the type update must be forwarded)", gotParams.FarmTypeID, req.FarmTypeID)
+		}
+		if gotParams.AreaUnit != req.AreaUnit {
+			t.Errorf("AreaUnit: got %q want %q", gotParams.AreaUnit, req.AreaUnit)
+		}
 	})
 
 	t.Run("repo error is wrapped and ErrFarmNotFound is preserved", func(t *testing.T) {
@@ -227,7 +231,7 @@ func TestFarmService_UpdateFarm_ForwardsParamsAndWrapsError(t *testing.T) {
 		}}
 		svc := NewFarmService(repo)
 
-		err := svc.UpdateFarm(context.Background(), farmID, req)
+		err := svc.UpdateFarm(context.Background(), tenantID, farmID, req)
 		if !errors.Is(err, domain.ErrFarmNotFound) {
 			t.Fatalf("expected ErrFarmNotFound, got %v", err)
 		}
@@ -240,7 +244,7 @@ func TestFarmService_UpdateFarm_ForwardsParamsAndWrapsError(t *testing.T) {
 		}}
 		svc := NewFarmService(repo)
 
-		err := svc.UpdateFarm(context.Background(), farmID, req)
+		err := svc.UpdateFarm(context.Background(), tenantID, farmID, req)
 		if !errors.Is(err, storeErr) {
 			t.Errorf("expected wrapped %v, got %v", storeErr, err)
 		}
@@ -249,22 +253,27 @@ func TestFarmService_UpdateFarm_ForwardsParamsAndWrapsError(t *testing.T) {
 
 func TestFarmService_DeactivateFarm_ForwardsIDAndWrapsError(t *testing.T) {
 	farmID := uuidMust("99999999-9999-9999-9999-999999999999")
+	tenantID := uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 
-	t.Run("success forwards the id", func(t *testing.T) {
-		var gotID uuid.UUID
+	t.Run("success forwards the id and tenant id", func(t *testing.T) {
+		var gotID, gotTenantID uuid.UUID
 		var gotActive bool
-		repo := &mockFarmRepo{toggleFarmIsActive: func(_ context.Context, id uuid.UUID, active bool) (db.Farm, error) {
+		repo := &mockFarmRepo{toggleFarmIsActive: func(_ context.Context, id, tID uuid.UUID, active bool) (db.Farm, error) {
 			gotID = id
+			gotTenantID = tID
 			gotActive = active
 			return db.Farm{ID: id, IsActive: active}, nil
 		}}
 		svc := NewFarmService(repo)
 
-		if err := svc.DeactivateFarm(context.Background(), farmID); err != nil {
+		if err := svc.DeactivateFarm(context.Background(), tenantID, farmID); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		if gotID != farmID {
 			t.Errorf("id forwarded: got %v want %v", gotID, farmID)
+		}
+		if gotTenantID != tenantID {
+			t.Errorf("tenant id forwarded: got %v want %v", gotTenantID, tenantID)
 		}
 		if gotActive {
 			t.Errorf("active forwarded: got %v want false", gotActive)
@@ -273,12 +282,12 @@ func TestFarmService_DeactivateFarm_ForwardsIDAndWrapsError(t *testing.T) {
 
 	t.Run("repo error is wrapped", func(t *testing.T) {
 		storeErr := errors.New("connection refused")
-		repo := &mockFarmRepo{toggleFarmIsActive: func(context.Context, uuid.UUID, bool) (db.Farm, error) {
+		repo := &mockFarmRepo{toggleFarmIsActive: func(context.Context, uuid.UUID, uuid.UUID, bool) (db.Farm, error) {
 			return db.Farm{}, storeErr
 		}}
 		svc := NewFarmService(repo)
 
-		err := svc.DeactivateFarm(context.Background(), farmID)
+		err := svc.DeactivateFarm(context.Background(), tenantID, farmID)
 		if !errors.Is(err, storeErr) {
 			t.Errorf("expected wrapped %v, got %v", storeErr, err)
 		}
@@ -287,22 +296,27 @@ func TestFarmService_DeactivateFarm_ForwardsIDAndWrapsError(t *testing.T) {
 
 func TestFarmService_ActivateFarm_ForwardsIDAndWrapsError(t *testing.T) {
 	farmID := uuidMust("99999999-9999-9999-9999-999999999999")
+	tenantID := uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 
-	t.Run("success forwards the id", func(t *testing.T) {
-		var gotID uuid.UUID
+	t.Run("success forwards the id and tenant id", func(t *testing.T) {
+		var gotID, gotTenantID uuid.UUID
 		var gotActive bool
-		repo := &mockFarmRepo{toggleFarmIsActive: func(_ context.Context, id uuid.UUID, active bool) (db.Farm, error) {
+		repo := &mockFarmRepo{toggleFarmIsActive: func(_ context.Context, id, tID uuid.UUID, active bool) (db.Farm, error) {
 			gotID = id
+			gotTenantID = tID
 			gotActive = active
 			return db.Farm{ID: id, IsActive: active}, nil
 		}}
 		svc := NewFarmService(repo)
 
-		if err := svc.ActivateFarm(context.Background(), farmID); err != nil {
+		if err := svc.ActivateFarm(context.Background(), tenantID, farmID); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		if gotID != farmID {
 			t.Errorf("id forwarded: got %v want %v", gotID, farmID)
+		}
+		if gotTenantID != tenantID {
+			t.Errorf("tenant id forwarded: got %v want %v", gotTenantID, tenantID)
 		}
 		if !gotActive {
 			t.Errorf("active forwarded: got %v want true", gotActive)
@@ -311,12 +325,12 @@ func TestFarmService_ActivateFarm_ForwardsIDAndWrapsError(t *testing.T) {
 
 	t.Run("repo error is wrapped", func(t *testing.T) {
 		storeErr := errors.New("connection refused")
-		repo := &mockFarmRepo{toggleFarmIsActive: func(context.Context, uuid.UUID, bool) (db.Farm, error) {
+		repo := &mockFarmRepo{toggleFarmIsActive: func(context.Context, uuid.UUID, uuid.UUID, bool) (db.Farm, error) {
 			return db.Farm{}, storeErr
 		}}
 		svc := NewFarmService(repo)
 
-		err := svc.ActivateFarm(context.Background(), farmID)
+		err := svc.ActivateFarm(context.Background(), tenantID, farmID)
 		if !errors.Is(err, storeErr) {
 			t.Errorf("expected wrapped %v, got %v", storeErr, err)
 		}
