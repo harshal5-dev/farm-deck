@@ -21,7 +21,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getFarmType } from "@/constants/farms";
 import {
   formatArea,
   formatCoords,
@@ -29,11 +28,11 @@ import {
   formatRelative,
 } from "../lib/format";
 import { FarmTypePill, FarmStatusPill } from "./pills";
+import { getFarmType } from "../../../constants/farms";
 
 const iconAction =
   "inline-flex size-8 items-center justify-center rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
-/** One cell of the KPI strip: colored icon, bold value, tiny label. */
 const StatCell = ({ icon: Icon, value, label, tone }) => (
   <div className="flex min-w-0 flex-col items-center gap-0.5 px-2 py-2 text-center">
     <Icon className={cn("size-3.5 shrink-0", tone)} strokeWidth={1.85} />
@@ -46,11 +45,6 @@ const StatCell = ({ icon: Icon, value, label, tone }) => (
   </div>
 );
 
-/**
- * FarmCard — tall list card. Deep FarmTypeArt hero band, a large
- * gradient type tile overlapping it, roomier type, and a divided KPI
- * strip (area · coordinates · added) above the footer action bar.
- */
 const FarmCard = ({
   farm,
   index,
@@ -60,7 +54,7 @@ const FarmCard = ({
   canManage = true,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const t = getFarmType(farm.farmType);
+  const t = getFarmType(farm.farmTypeName);
   const TypeIcon = t.icon;
   const coords = formatCoords(farm.latitude, farm.longitude, 2);
 
@@ -97,7 +91,7 @@ const FarmCard = ({
             <FarmStatusPill active={farm.isActive} />
           </div>
           <div className="absolute top-3 left-3">
-            <FarmTypePill farmType={farm.farmType} size="sm" />
+            <FarmTypePill farmType={farm.farmTypeName} displayName={farm.farmTypeDisplayName} size="sm" />
           </div>
         </div>
 

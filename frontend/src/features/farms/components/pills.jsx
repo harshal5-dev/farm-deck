@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { getFarmType, getFarmStatus } from "@/constants/farms";
 
 /** Compact gradient pill showing a farm's type (icon + label). */
-export function FarmTypePill({ farmType, size = "sm", withIcon = true }) {
+export function FarmTypePill({ farmType, size = "sm", displayName, withIcon = true }) {
   const t = getFarmType(farmType);
   const Icon = t.icon;
   return (
@@ -21,7 +21,7 @@ export function FarmTypePill({ farmType, size = "sm", withIcon = true }) {
           strokeWidth={2.2}
         />
       )}
-      {t.label}
+      {displayName}
     </span>
   );
 }

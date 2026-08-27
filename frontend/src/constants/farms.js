@@ -8,25 +8,9 @@ import {
   IconGrain,
 } from "@tabler/icons-react";
 
-/**
- * Farm-type config — single source of truth for the four farm types.
- * Mirrors the structure of `./roles.js` so farm cards, filter chips,
- * type pickers, and dialogs all read from the same place.
- *
- * Each farm type gets:
- *  - a Tabler icon
- *  - a Tailwind palette (text/bg/ring/border + gradient)
- *  - a one-line description for tooltips / dialogs
- *  - the FarmTypeArt variant used as the hero illustration
- *  - a friendly "tagline" used on the picker cards
- */
 export const FARM_TYPES = {
   outdoor: {
     id: "outdoor",
-    label: "Outdoor",
-    tagline: "Open-field cultivation",
-    description:
-      "Traditional fields under the open sky — sun-grown row crops, orchards, and pasture.",
     icon: IconSun,
     art: "outdoor",
     accent: "leaf",
@@ -41,10 +25,6 @@ export const FARM_TYPES = {
   },
   greenhouse: {
     id: "greenhouse",
-    label: "Greenhouse",
-    tagline: "Polytunnel & glasshouse",
-    description:
-      "Covered structures that extend the season and protect crops from weather extremes.",
     icon: IconBuildingCommunity,
     art: "greenhouse",
     accent: "sky",
@@ -59,10 +39,6 @@ export const FARM_TYPES = {
   },
   mixed: {
     id: "mixed",
-    label: "Mixed",
-    tagline: "Indoor + outdoor combo",
-    description:
-      "A blend of indoor propagation and outdoor finishing — best of both environments.",
     icon: IconPlant2,
     art: "mixed",
     accent: "lagoon",
@@ -77,10 +53,6 @@ export const FARM_TYPES = {
   },
   indoor: {
     id: "indoor",
-    label: "Indoor",
-    tagline: "Climate-controlled rooms",
-    description:
-      "Fully enclosed grow rooms with LED lighting and tight environmental control.",
     icon: IconBuildingWarehouse,
     art: "indoor",
     accent: "wheat",
@@ -95,16 +67,6 @@ export const FARM_TYPES = {
   },
 };
 
-/**
- * Order the farm-type chips appear in: filter chips, form picker, etc.
- * Outdoor first because it's the most common in the demo data.
- */
-export const FARM_TYPE_ORDER = [
-  "outdoor",
-  "greenhouse",
-  "mixed",
-  "indoor",
-];
 
 export function getFarmType(id) {
   return FARM_TYPES[id] || FARM_TYPES.outdoor;
@@ -256,16 +218,6 @@ export function getAreaUnitLabel(unit) {
     AREA_UNITS[key] || AREA_UNITS[key.replace(/\s+/g, "_")] ||
     AREA_UNITS[key.replace(/s$/, "")];
   return direct?.label ?? String(unit);
-}
-
-/** Square-metre conversion factor for an `areaUnit` string (1 when unknown). */
-export function getAreaUnitFactor(unit) {
-  if (!unit) return 1;
-  const key = String(unit).trim().toLowerCase();
-  const direct =
-    AREA_UNITS[key] || AREA_UNITS[key.replace(/\s+/g, "_")] ||
-    AREA_UNITS[key.replace(/s$/, "")];
-  return direct?.factor ?? 1;
 }
 
 /**

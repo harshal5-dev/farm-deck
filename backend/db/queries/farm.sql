@@ -4,7 +4,8 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- name: ListFarms :many
-SELECT * FROM farms
+SELECT f.*, ft.name AS farm_type_name, ft.display_name AS farm_type_display_name FROM farms f
+JOIN farm_types ft ON f.farm_type_id = ft.id
 WHERE tenant_id = $1
 ORDER BY created_at DESC;
 

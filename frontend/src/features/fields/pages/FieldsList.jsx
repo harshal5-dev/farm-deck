@@ -31,7 +31,6 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { getAreaUnitFactor } from "@/constants/farms";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { ZONE_TYPE_ORDER } from "../constants";
 import {
@@ -150,9 +149,6 @@ const FieldsList = () => {
     const sorter = {
       recent: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
       name: (a, b) => a.name.localeCompare(b.name),
-      size: (a, b) =>
-        (b.area || 0) * getAreaUnitFactor(b.areaUnit) -
-        (a.area || 0) * getAreaUnitFactor(a.areaUnit),
       newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
     }[sort];
     if (sorter) out = [...out].sort(sorter);

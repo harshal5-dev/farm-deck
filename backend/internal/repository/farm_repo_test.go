@@ -74,14 +74,14 @@ func TestFarmRepo_CreateFarm(t *testing.T) {
 func TestFarmRepo_ListFarms(t *testing.T) {
 	ctx := context.Background()
 	tenantID := uuidMust("44444444-4444-4444-4444-444444444444")
-	want := []db.Farm{
-		{ID: uuidMust("55555555-5555-5555-5555-555555555555"), Name: "Orchard A", TenantID: tenantID, IsActive: true},
-		{ID: uuidMust("66666666-6666-6666-6666-666666666666"), Name: "Orchard B", TenantID: tenantID, IsActive: false},
+	want := []db.ListFarmsRow{
+		{ID: uuidMust("55555555-5555-5555-5555-555555555555"), Name: "Orchard A", TenantID: tenantID, IsActive: true, FarmTypeName: "Outdoor"},
+		{ID: uuidMust("66666666-6666-6666-6666-666666666666"), Name: "Orchard B", TenantID: tenantID, IsActive: false, FarmTypeName: "Indoor"},
 	}
 
 	t.Run("forwards tenant id and returns the store result", func(t *testing.T) {
 		var gotTenant uuid.UUID
-		store := &mockStore{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.Farm, error) {
+		store := &mockStore{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.ListFarmsRow, error) {
 			gotTenant = tID
 			return want, nil
 		}}
@@ -100,7 +100,7 @@ func TestFarmRepo_ListFarms(t *testing.T) {
 	})
 
 	t.Run("returns an empty slice when no farms exist", func(t *testing.T) {
-		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.ListFarmsRow, error) {
 			return nil, nil
 		}}
 		repo := NewFarmRepo(store)
@@ -116,7 +116,7 @@ func TestFarmRepo_ListFarms(t *testing.T) {
 
 	t.Run("forwards the store error unchanged", func(t *testing.T) {
 		storeErr := errors.New("connection reset")
-		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+		store := &mockStore{listFarms: func(context.Context, uuid.UUID) ([]db.ListFarmsRow, error) {
 			return nil, storeErr
 		}}
 		repo := NewFarmRepo(store)

@@ -83,6 +83,6 @@ export const baseQuery = async (args, api, extraOptions) => {
   return result;
 };
 
-export const transformResult = (result) => {
-  return result?.data;
+export const transformResult = (result = { data: {} }) => {
+  return result.data;
 };

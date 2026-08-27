@@ -15,7 +15,7 @@ import (
 type mockFarmRepo struct {
 	repository.FarmRepo
 	createFarm         func(context.Context, db.CreateFarmParams) (db.Farm, error)
-	listFarms          func(context.Context, uuid.UUID) ([]db.Farm, error)
+	listFarms          func(context.Context, uuid.UUID) ([]db.ListFarmsRow, error)
 	updateFarm         func(context.Context, db.UpdateFarmParams) (db.Farm, error)
 	toggleFarmIsActive func(context.Context, uuid.UUID, uuid.UUID, bool) (db.Farm, error)
 }
@@ -23,7 +23,7 @@ type mockFarmRepo struct {
 func (m *mockFarmRepo) CreateFarm(ctx context.Context, p db.CreateFarmParams) (db.Farm, error) {
 	return m.createFarm(ctx, p)
 }
-func (m *mockFarmRepo) ListFarms(ctx context.Context, tID uuid.UUID) ([]db.Farm, error) {
+func (m *mockFarmRepo) ListFarms(ctx context.Context, tID uuid.UUID) ([]db.ListFarmsRow, error) {
 	return m.listFarms(ctx, tID)
 }
 func (m *mockFarmRepo) UpdateFarm(ctx context.Context, p db.UpdateFarmParams) (db.Farm, error) {
@@ -117,13 +117,13 @@ func TestFarmService_ListFarms_MapsAndCounts(t *testing.T) {
 	lat, lon, area := 18.5204, 73.8567, 12.5
 	location := "Pune, MH"
 
-	farms := []db.Farm{
-		{ID: uuidMust("55555555-5555-5555-5555-555555555555"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard A", AreaUnit: "acres", IsActive: true, CreatedAt: now, UpdatedAt: now, Latitude: &lat, Longitude: &lon, TotalArea: &area, Location: &location},
-		{ID: uuidMust("66666666-6666-6666-6666-666666666666"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard B", AreaUnit: "hectares", IsActive: true, CreatedAt: now, UpdatedAt: now},
-		{ID: uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard C", AreaUnit: "acres", IsActive: false, CreatedAt: now, UpdatedAt: now},
+	farms := []db.ListFarmsRow{
+		{ID: uuidMust("55555555-5555-5555-5555-555555555555"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard A", AreaUnit: "acres", IsActive: true, CreatedAt: now, UpdatedAt: now, Latitude: &lat, Longitude: &lon, TotalArea: &area, Location: &location, FarmTypeName: "Outdoor"},
+		{ID: uuidMust("66666666-6666-6666-6666-666666666666"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard B", AreaUnit: "hectares", IsActive: true, CreatedAt: now, UpdatedAt: now, FarmTypeName: "Indoor"},
+		{ID: uuidMust("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), TenantID: tenantID, FarmTypeID: uuidMust("77777777-7777-7777-7777-777777777777"), Name: "Orchard C", AreaUnit: "acres", IsActive: false, CreatedAt: now, UpdatedAt: now, FarmTypeName: "Greenhouse"},
 	}
 
-	repo := &mockFarmRepo{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(_ context.Context, tID uuid.UUID) ([]db.ListFarmsRow, error) {
 		if tID != tenantID {
 			t.Errorf("tenantID forwarded: got %v want %v", tID, tenantID)
 		}
@@ -162,7 +162,7 @@ func TestFarmService_ListFarms_MapsAndCounts(t *testing.T) {
 }
 
 func TestFarmService_ListFarms_EmptyListYieldsZeroCounts(t *testing.T) {
-	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.ListFarmsRow, error) {
 		return nil, nil
 	}}
 	svc := NewFarmService(repo)
@@ -181,7 +181,7 @@ func TestFarmService_ListFarms_EmptyListYieldsZeroCounts(t *testing.T) {
 
 func TestFarmService_ListFarms_RepoErrorPropagates(t *testing.T) {
 	storeErr := errors.New("db down")
-	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.Farm, error) {
+	repo := &mockFarmRepo{listFarms: func(context.Context, uuid.UUID) ([]db.ListFarmsRow, error) {
 		return nil, storeErr
 	}}
 	svc := NewFarmService(repo)

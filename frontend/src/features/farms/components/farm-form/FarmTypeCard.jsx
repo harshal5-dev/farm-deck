@@ -3,13 +3,6 @@ import { FarmTypeArt } from "@/components/effects";
 import { cn } from "@/lib/utils";
 import { IconCheck } from "@tabler/icons-react";
 
-/**
- * Selectable card for one farm type from the lookups API
- * (`{ id, name, displayName, description }`). The selected value is the
- * row's UUID (`farms.farm_type_id` FK); visual meta — icon, art variant,
- * palette — is derived from the type's `name` via the local FARM_TYPES
- * config, falling back to the Outdoor palette for unknown names.
- */
 const FarmTypeCard = ({ farmType, selected, onSelect, disabled }) => {
   const t = getFarmType(farmType?.name);
   const Icon = t.icon;
@@ -37,8 +30,6 @@ const FarmTypeCard = ({ farmType, selected, onSelect, disabled }) => {
           )}
         />
         <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
-        {/* Top-left type icon badge — solid gradient circle so the white
-            icon stays crisp in light theme (no translucency/blur) */}
         <div className="absolute top-2 left-2">
           <span
             className={cn(

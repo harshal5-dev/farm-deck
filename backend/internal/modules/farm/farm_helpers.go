@@ -34,24 +34,26 @@ func toUpdateFarmParams(id, tenantID uuid.UUID, req ManageFarmRequest) db.Update
 	}
 }
 
-func toFarmInfo(farm db.Farm) FarmInfo {
+func toFarmInfo(farm db.ListFarmsRow) FarmInfo {
 	return FarmInfo{
-		ID:         farm.ID,
-		Name:       farm.Name,
-		Location:   farm.Location,
-		Latitude:   farm.Latitude,
-		Longitude:  farm.Longitude,
-		TotalArea:  farm.TotalArea,
-		AreaUnit:   farm.AreaUnit,
-		Notes:      farm.Notes,
-		FarmTypeID: farm.FarmTypeID,
-		CreatedAt:  farm.CreatedAt,
-		UpdatedAt:  farm.UpdatedAt,
-		IsActive:   farm.IsActive,
+		ID:                  farm.ID,
+		Name:                farm.Name,
+		Location:            farm.Location,
+		Latitude:            farm.Latitude,
+		Longitude:           farm.Longitude,
+		TotalArea:           farm.TotalArea,
+		AreaUnit:            farm.AreaUnit,
+		Notes:               farm.Notes,
+		FarmTypeID:          farm.FarmTypeID,
+		FarmTypeName:        farm.FarmTypeName,
+		FarmTypeDisplayName: farm.FarmTypeDisplayName,
+		CreatedAt:           farm.CreatedAt,
+		UpdatedAt:           farm.UpdatedAt,
+		IsActive:            farm.IsActive,
 	}
 }
 
-func mapToListFarmResponse(farms []db.Farm) ListFarmResponse {
+func mapToListFarmResponse(farms []db.ListFarmsRow) ListFarmResponse {
 	total := len(farms)
 	active := 0
 	inactive := 0

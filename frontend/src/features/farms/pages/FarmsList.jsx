@@ -13,13 +13,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Reveal } from "@/components/effects";
 import ErrorState from "@/components/ui/error-state";
 import {
@@ -31,10 +24,6 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import {
-  FARM_TYPE_ORDER,
-  getAreaUnitFactor,
-} from "@/constants/farms";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useListFarmTypesQuery } from "@/features/lookups";
 import {
@@ -56,13 +45,6 @@ const STATUS_OPTIONS = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
   { id: "inactive", label: "Inactive" },
-];
-
-const SORT_OPTIONS = [
-  { id: "recent", label: "Recently updated" },
-  { id: "name", label: "Name (A → Z)" },
-  { id: "size", label: "Largest area" },
-  { id: "newest", label: "Newest added" },
 ];
 
 const Farms = () => {
@@ -87,42 +69,20 @@ const Farms = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
 
-  const decorated = useMemo(() => {
-    const typeById = new Map(farmTypes.map((t) => [t.id, t.name]));
-    return farms.map((f) => ({
-      ...f,
-      farmType: typeById.get(f.farmTypeId),
-    }));
-  }, [farms, farmTypes]);
-
-  // Lookup rows ordered like the visual config (unknown types last).
-  const orderedTypes = useMemo(() => {
-    const rank = (name) => {
-      const idx = FARM_TYPE_ORDER.indexOf(name);
-      return idx === -1 ? FARM_TYPE_ORDER.length : idx;
-    };
-    return [...farmTypes].sort((a, b) =>
-      rank(a.name) === rank(b.name)
-        ? a.displayName.localeCompare(b.displayName)
-        : rank(a.name) - rank(b.name)
-    );
-  }, [farmTypes]);
-
   const typeCounts = useMemo(() => {
-    const counts = { all: decorated.length };
-    decorated.forEach((f) => {
-      counts[f.farmTypeId] = (counts[f.farmTypeId] || 0) + 1;
+    const counts = { all: farms.length };
+    farms.forEach((f) => {
+      counts[f.farmTypeName] = (counts[f.farmTypeName] || 0) + 1;
     });
     return counts;
-  }, [decorated]);
+  }, [farms]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    let out = decorated.filter((f) => {
-      if (typeFilter !== "all" && f.farmTypeId !== typeFilter) return false;
+    let out = farms.filter((f) => {
+      if (typeFilter !== "all" && f.farmTypeName !== typeFilter) return false;
       if (statusFilter === "active" && !f.isActive) return false;
       if (statusFilter === "inactive" && f.isActive) return false;
       if (q) {
@@ -132,17 +92,8 @@ const Farms = () => {
       return true;
     });
 
-    const sorter = {
-      recent: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
-      name: (a, b) => a.name.localeCompare(b.name),
-      size: (a, b) =>
-        (b.totalArea || 0) * getAreaUnitFactor(b.areaUnit) -
-        (a.totalArea || 0) * getAreaUnitFactor(a.areaUnit),
-      newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-    }[sort];
-    if (sorter) out = [...out].sort(sorter);
     return out;
-  }, [decorated, typeFilter, statusFilter, search, sort]);
+  }, [farms, typeFilter, statusFilter, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const activePage = Math.min(page, totalPages);
@@ -152,8 +103,7 @@ const Farms = () => {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, activePage]);
 
-  // Permission gate — bounce anyone without `view_farms` straight back
-  // to the dashboard.
+
   if (!canViewFarms) return <Navigate to="/app" replace />;
 
   const pageItems = buildPageList(activePage, totalPages);
@@ -165,16 +115,13 @@ const Farms = () => {
     setTypeFilter(next);
     setPage(1);
   };
+
   const onStatusFilterChange = (next) => {
     setStatusFilter(next);
     setPage(1);
   };
   const onSearchChange = (next) => {
     setSearch(next);
-    setPage(1);
-  };
-  const onSortChange = (next) => {
-    setSort(next);
     setPage(1);
   };
 
@@ -330,28 +277,11 @@ const Farms = () => {
                     </button>
                   ))}
                 </div>
-
-                <Select value={sort} onValueChange={onSortChange}>
-                  <SelectTrigger
-                    size="sm"
-                    aria-label="Sort farms"
-                    className="h-9 min-w-38"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="end">
-                    {SORT_OPTIONS.map((o) => (
-                      <SelectItem key={o.id} value={o.id}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
             {/* Row 3 — farm-type chips driven by the lookups API */}
-            {!typesLoading && orderedTypes.length > 0 && (
+            {!typesLoading && farmTypes.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 border-t border-border/30 pt-2.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
                   <IconFilter className="size-3" strokeWidth={1.85} />
@@ -379,14 +309,14 @@ const Farms = () => {
                     {typeCounts.all ?? 0}
                   </span>
                 </button>
-                {orderedTypes.map((t) => (
+                {farmTypes.map((t) => (
                   <FarmTypeFilterChip
                     key={t.id}
                     typeName={t.name}
                     label={t.displayName || t.name}
-                    count={typeCounts[t.id] ?? 0}
-                    active={typeFilter === t.id}
-                    onClick={() => onTypeFilterChange(t.id)}
+                    count={typeCounts[t.name] ?? 0}
+                    active={typeFilter === t.name}
+                    onClick={() => onTypeFilterChange(t.name)}
                   />
                 ))}
               </div>
@@ -421,7 +351,7 @@ const Farms = () => {
             </div>
           ) : (
             <div
-              key={`farms-${activePage}-${typeFilter}-${statusFilter}-${search}-${sort}`}
+              key={`farms-${activePage}-${typeFilter}-${statusFilter}-${search}`}
               className={cn(GRID_COLS, "mt-1")}
             >
               {pagedFarms.map((f, i) => (

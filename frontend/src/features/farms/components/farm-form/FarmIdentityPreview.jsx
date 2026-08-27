@@ -4,17 +4,6 @@ import { FarmTypeArt } from "@/components/effects";
 import { getAreaUnit, getFarmType } from "@/constants/farms";
 import { FarmTypePill } from "../pills";
 
-/**
- * Live identity preview for the farm form, driven by watched form
- * values. Mirrors the new farms payload: name + location text, the
- * selected farm type (by name, for styling), the optional pin, and
- * total area with its unit. Per docs/GEOLOCATION_DESIGN.md coordinates
- * are never rendered back as numbers — only a pinned/not-pinned state.
- *
- * Full-height card on desktop: the identity cluster centers in the
- * space under the hero band while the area/pin summary anchors to the
- * bottom, so the left column stays balanced next to the tall form.
- */
 const FarmIdentityPreview = ({
   name,
   location,
@@ -79,13 +68,9 @@ const FarmIdentityPreview = ({
                 )}
               />
 
-              {/* Avatar — gradient shell around a frosted-glass core with
-                  the type icon in its accent color. The inner tint wash +
-                  top specular shine keep it feeling like a polished app
-                  icon in both light and dark themes. */}
               <div
                 className={cn(
-                  "relative size-20 rounded-full bg-linear-to-br p-[3px] shadow-lg",
+                  "relative size-20 rounded-full bg-linear-to-br p-0.75 shadow-lg",
                   t.gradient
                 )}
               >

@@ -12,7 +12,7 @@ import (
 
 type FarmRepo interface {
 	CreateFarm(ctx context.Context, params db.CreateFarmParams) (db.Farm, error)
-	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error)
+	ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.ListFarmsRow, error)
 	UpdateFarm(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error)
 	ToggleFarmIsActive(ctx context.Context, farmID uuid.UUID, tenantID uuid.UUID, isActive bool) (db.Farm, error)
 }
@@ -29,7 +29,7 @@ func (r *FarmRepoImpl) CreateFarm(ctx context.Context, params db.CreateFarmParam
 	return r.store.CreateFarm(ctx, params)
 }
 
-func (r *FarmRepoImpl) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error) {
+func (r *FarmRepoImpl) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.ListFarmsRow, error) {
 	return r.store.ListFarms(ctx, tenantID)
 }
 

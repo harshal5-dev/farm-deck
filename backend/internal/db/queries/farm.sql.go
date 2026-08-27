@@ -7,6 +7,7 @@ package queries
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -61,20 +62,39 @@ func (q *Queries) CreateFarm(ctx context.Context, arg CreateFarmParams) (Farm, e
 }
 
 const listFarms = `-- name: ListFarms :many
-SELECT id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at FROM farms
+SELECT f.id, f.tenant_id, f.farm_type_id, f.name, f.location, f.latitude, f.longitude, f.total_area, f.area_unit, f.notes, f.is_active, f.created_at, f.updated_at, ft.name AS farm_type_name, ft.display_name AS farm_type_display_name FROM farms f
+JOIN farm_types ft ON f.farm_type_id = ft.id
 WHERE tenant_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, error) {
+type ListFarmsRow struct {
+	ID                  uuid.UUID
+	TenantID            uuid.UUID
+	FarmTypeID          uuid.UUID
+	Name                string
+	Location            *string
+	Latitude            *float64
+	Longitude           *float64
+	TotalArea           *float64
+	AreaUnit            string
+	Notes               *string
+	IsActive            bool
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	FarmTypeName        string
+	FarmTypeDisplayName string
+}
+
+func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]ListFarmsRow, error) {
 	rows, err := q.db.Query(ctx, listFarms, tenantID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Farm
+	var items []ListFarmsRow
 	for rows.Next() {
-		var i Farm
+		var i ListFarmsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TenantID,
@@ -89,6 +109,8 @@ func (q *Queries) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]Farm, er
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.FarmTypeName,
+			&i.FarmTypeDisplayName,
 		); err != nil {
 			return nil, err
 		}

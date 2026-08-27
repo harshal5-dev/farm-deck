@@ -33,7 +33,7 @@ type mockStore struct {
 	revokeRefreshTokenByHash func(ctx context.Context, tokenHash string) error
 	rotateRefreshTokenTx     func(ctx context.Context, arg domain.RotateRefreshTokenTxParams) (db.RotateRefreshTokenTxResult, error)
 	createFarm         func(ctx context.Context, params db.CreateFarmParams) (db.Farm, error)
-	listFarms          func(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error)
+	listFarms          func(ctx context.Context, tenantID uuid.UUID) ([]db.ListFarmsRow, error)
 	updateFarm         func(ctx context.Context, params db.UpdateFarmParams) (db.Farm, error)
 	toggleFarmIsActive func(ctx context.Context, params db.ToggleFarmIsActiveParams) (db.Farm, error)
 }
@@ -98,7 +98,7 @@ func (m *mockStore) CreateFarm(ctx context.Context, params db.CreateFarmParams) 
 	return m.createFarm(ctx, params)
 }
 
-func (m *mockStore) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.Farm, error) {
+func (m *mockStore) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.ListFarmsRow, error) {
 	return m.listFarms(ctx, tenantID)
 }
 
