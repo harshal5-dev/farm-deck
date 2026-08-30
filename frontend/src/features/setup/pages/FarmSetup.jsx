@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useCreateZoneMutation } from "@/features/fields/zoneApi";
-import { useCreateCropMutation } from "@/features/crops/cropApi";
+import { useCreateCycleMutation } from "@/features/crops/cropApi";
 import SetupStepper from "../components/SetupStepper";
 import SetupSuccess from "../components/SetupSuccess";
 import { FarmStep, FieldsStep, CropsStep, SetupFooter } from "../components/SetupSteps";
@@ -56,7 +56,7 @@ const FarmSetup = () => {
   // Add-many step mutations, lifted here so the pinned SetupFooter can
   // drive the Add button (loading state + requestSubmit on the form).
   const [createZone, { isLoading: creatingZone }] = useCreateZoneMutation();
-  const [createCrop, { isLoading: creatingCrop }] = useCreateCropMutation();
+  const [createCycle, { isLoading: creatingCrop }] = useCreateCycleMutation();
   const zoneFormRef = useRef(null);
   const cropFormRef = useRef(null);
 
@@ -81,13 +81,13 @@ const FarmSetup = () => {
 
   const handleCreateCrop = async (values) => {
     try {
-      const crop = await createCrop(values).unwrap();
-      toast.success("Crop planned", {
-        description: `${crop.name} is set up on ${crop.zoneName}.`,
+      const cycle = await createCycle(values).unwrap();
+      toast.success("Cycle planned", {
+        description: `${cycle.name ?? cycle.cropName} is set up on ${cycle.zoneName}.`,
       });
-      setCrops((prev) => [...prev, crop]);
+      setCrops((prev) => [...prev, cycle]);
     } catch (err) {
-      toast.error("Could not add crop", {
+      toast.error("Could not add cycle", {
         description: err?.data?.error?.message || "Please try again.",
       });
     }

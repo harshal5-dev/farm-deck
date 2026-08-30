@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 import { getCropType } from "../constants";
 
 /**
- * Filter chip for a crop-type lookup row. `typeName` is the lookup
- * `name` used to resolve the visual config; `label` is displayName.
+ * Filter chip for a crop CATEGORY (the `crops.category` enum). Visual
+ * metadata is keyed off the category via CROP_TYPES.
  */
-const CropTypeFilterChip = ({ typeName, label, count, active, onClick }) => {
-  const t = getCropType(typeName);
+const CropTypeFilterChip = ({ category, label, count, active, onClick }) => {
+  const t = getCropType(category);
   const Icon = t.icon;
   return (
     <button

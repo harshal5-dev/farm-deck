@@ -13,12 +13,19 @@ import { cn } from "@/lib/utils";
  * @param {"center"|"start"}  align       Vertical alignment of the leading
  *                                        icon — "start" for multi-line
  *                                        controls (textareas).
+ * @param {boolean}           compact     When true, the wrapper is shorter
+ *                                        and tighter — used by inline
+ *                                        min/max range inputs and other
+ *                                        compact contexts.
+ * @param {string}            className   Extra classes appended last.
  */
 const FieldWrapper = ({
   icon: Icon,
   trailing,
   hasError,
   align = "center",
+  compact = false,
+  className,
   children,
 }) => {
   const start = align === "start";
@@ -30,13 +37,16 @@ const FieldWrapper = ({
         "focus-within:border-leaf/60 focus-within:bg-card/80 focus-within:ring-leaf/30",
         hasError &&
           "border-destructive/60 ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/30",
-        start ? "items-start py-1" : "items-center"
+        start ? "items-start py-1" : "items-center",
+        compact && "px-2 py-0",
+        className
       )}
     >
       {Icon && (
         <Icon
           className={cn(
             "size-4 shrink-0 transition-colors",
+            compact && "size-3.5",
             start && "mt-2",
             hasError ? "text-destructive" : "text-muted-foreground"
           )}

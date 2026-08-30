@@ -1,5 +1,9 @@
 import { cn } from "@/lib/utils";
-import { getCropType, getCropStatus } from "../constants";
+import {
+  getCropType,
+  getCropStatus,
+  getGrowthStage,
+} from "../constants";
 
 /** Compact gradient pill showing a crop's type (icon + label). */
 export function CropTypePill({ typeName, size = "sm", withIcon = true }) {
@@ -26,7 +30,8 @@ export function CropTypePill({ typeName, size = "sm", withIcon = true }) {
   );
 }
 
-/** Lifecycle status pill — planned → sown → growing → ready → done. */
+/** Lifecycle status pill — planned → seeding → growing → flowering
+ *  → harvested → completed (plus failed/cancelled). */
 export function CropStatusPill({ status, withIcon = true }) {
   const s = getCropStatus(status);
   const Icon = s.icon;
@@ -38,6 +43,31 @@ export function CropStatusPill({ status, withIcon = true }) {
       )}
     >
       {withIcon && <Icon className="size-3" strokeWidth={2.1} />}
+      {s.label}
+    </span>
+  );
+}
+
+/** Fine-grained growth stage pill — seedling/vegetative/flowering/
+ *  fruiting/harvest. Pairs with the coarser status above. */
+export function GrowthStagePill({ stage, withIcon = true, size = "sm" }) {
+  const s = getGrowthStage(stage);
+  const Icon = s.icon;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border font-semibold tracking-wide uppercase",
+        s.chip,
+        size === "xs" && "px-1.5 py-0.5 text-[9px]",
+        size === "sm" && "px-2 py-0.5 text-[10px]"
+      )}
+    >
+      {withIcon && (
+        <Icon
+          className={cn(size === "xs" ? "size-2.5" : "size-3")}
+          strokeWidth={2.1}
+        />
+      )}
       {s.label}
     </span>
   );

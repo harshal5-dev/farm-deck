@@ -29,7 +29,19 @@ import {
   CropsList,
   AddCrop,
   EditCrop,
+  AddCycle,
+  EditCycle,
 } from "@/features/crops";
+import {
+  DailyLogsList,
+  AddDailyLog,
+  EditDailyLog,
+} from "@/features/daily-logs";
+import {
+  HarvestsList,
+  AddHarvest,
+  EditHarvest,
+} from "@/features/harvests";
 import { FarmSetup } from "@/features/setup";
 import { Lookups } from "@/features/lookups";
 import { Home } from "@/features/home";
@@ -52,9 +64,21 @@ const App = () => {
             <Route path="fields" element={<FieldsList />} />
             <Route path="fields/new" element={<AddField />} />
             <Route path="fields/edit" element={<EditField />} />
-            <Route path="crops" element={<CropsList />} />
-            <Route path="crops/new" element={<AddCrop />} />
-            <Route path="crops/edit" element={<EditCrop />} />
+<Route path="crops" element={<CropsList />} />
+          {/* Catalog (crops table) routes */}
+          <Route path="crops/catalog/new" element={<AddCrop />} />
+          <Route path="crops/edit-crop" element={<EditCrop />} />
+          {/* Cycle routes */}
+          <Route path="crops/cycle/new" element={<AddCycle />} />
+          <Route path="crops/cycle/edit" element={<EditCycle />} />
+          {/* Daily-log routes — nested under each cycle */}
+          <Route path="crops/cycle/:cycleId/logs" element={<DailyLogsList />} />
+          <Route path="crops/cycle/:cycleId/logs/new" element={<AddDailyLog />} />
+          <Route path="crops/cycle/:cycleId/logs/edit" element={<EditDailyLog />} />
+          {/* Harvest routes */}
+          <Route path="harvests" element={<HarvestsList />} />
+          <Route path="harvests/new" element={<AddHarvest />} />
+          <Route path="harvests/edit" element={<EditHarvest />} />
             <Route path="setup" element={<FarmSetup />} />
             <Route path="members" element={<MembersList />} />
             <Route path="members/new" element={<AddMember />} />

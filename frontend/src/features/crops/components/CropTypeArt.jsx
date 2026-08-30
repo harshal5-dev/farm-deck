@@ -3,9 +3,11 @@ import { cn } from "@/lib/utils";
 /**
  * CropTypeArt — decorative SVG scenes, one per crop CATEGORY (plant
  * family), drawn in the same language as FarmTypeArt/ZoneTypeArt.
- * Six scenes cover the whole crop catalog.
+ * Six scenes cover the whole crop catalog:
  *
- * `variant`: "leafy" | "fruiting" | "herb" | "root" | "vine" | "fungi"
+ *   `variant`: "leafy_green" | "fruiting" | "herb" | "root" | "microgreen" | "other"
+ *
+ * Mirrors the `crops.category` CHECK constraint from the DB schema.
  */
 
 /** A lettuce-style rosette: layered leaf circles around a heart. */
@@ -35,9 +37,9 @@ const herbLeaf = (x, y, a, len, key) => (
 
 const art = {
   /* ------------------------------------------------------------------ */
-  /*  Leafy — lettuce rosettes in a row under a soft sun                */
+  /*  Leafy green — lettuce rosettes in a row under a soft sun          */
   /* ------------------------------------------------------------------ */
-  leafy: (
+  leafy_green: (
     <>
       <circle cx="200" cy="32" r="14" fill="var(--wheat)" opacity="0.65" />
       {rosette(40, 74, 1)}
@@ -161,41 +163,61 @@ const art = {
   ),
 
   /* ------------------------------------------------------------------ */
-  /*  Vine — a trellised cane with berry clusters                        */
+  /*  Microgreen — dense, low trays with tiny cotyledon leaves          */
   /* ------------------------------------------------------------------ */
-  vine: (
+  microgreen: (
     <>
-      <circle cx="200" cy="28" r="13" fill="var(--wheat)" opacity="0.65" />
-      {/* trellis wires */}
-      <line x1="10" y1="42" x2="230" y2="42" stroke="var(--soil)" strokeWidth="1.8" opacity="0.3" />
-      <line x1="10" y1="70" x2="230" y2="70" stroke="var(--soil)" strokeWidth="1.8" opacity="0.3" />
-      {/* main cane */}
+      <circle cx="200" cy="28" r="11" fill="var(--wheat)" opacity="0.55" />
+      {/* trays */}
+      {[20, 100, 180].map((x, i) => (
+        <g key={`tr-${x}`}>
+          <rect
+            x={x}
+            y="78"
+            width="55"
+            height="14"
+            rx="2.5"
+            fill="var(--soil)"
+            opacity={0.28 - i * 0.04}
+          />
+          {/* dense sprout tufts — 4 small leaves per tray */}
+          {[6, 18, 30, 42].map((dx, k) => (
+            <g key={`s-${x}-${k}`}>
+              <line
+                x1={x + dx}
+                y1="78"
+                x2={x + dx}
+                y2="62"
+                stroke="var(--leaf)"
+                strokeWidth="1.4"
+                opacity="0.75"
+                strokeLinecap="round"
+              />
+              <ellipse
+                cx={x + dx - 2.2}
+                cy="60"
+                rx="4"
+                ry="2"
+                fill="var(--leaf)"
+                opacity="0.7"
+                transform={`rotate(-22 ${x + dx - 2.2} 60)`}
+              />
+              <ellipse
+                cx={x + dx + 2.2}
+                cy="60"
+                rx="4"
+                ry="2"
+                fill="var(--leaf)"
+                opacity="0.7"
+                transform={`rotate(22 ${x + dx + 2.2} 60)`}
+              />
+            </g>
+          ))}
+        </g>
+      ))}
+      {/* table edge */}
       <path
-        d="M120,98 C112,80 130,66 118,50 C110,38 124,28 120,18"
-        stroke="var(--lagoon-deep)"
-        strokeWidth="2.5"
-        fill="none"
-        opacity="0.6"
-        strokeLinecap="round"
-      />
-      {/* canes leaves */}
-      <g fill="var(--leaf)" opacity="0.6">
-        <ellipse cx="100" cy="60" rx="9" ry="5" transform="rotate(-24 100 60)" />
-        <ellipse cx="140" cy="52" rx="9" ry="5" transform="rotate(24 140 52)" />
-        <ellipse cx="104" cy="34" rx="8" ry="4.5" transform="rotate(-24 104 34)" />
-        <ellipse cx="138" cy="28" rx="8" ry="4.5" transform="rotate(24 138 28)" />
-      </g>
-      {/* berry clusters */}
-      <g fill="var(--lagoon-deep)" opacity="0.75">
-        <circle cx="96" cy="70" r="3.4" />
-        <circle cx="104" cy="74" r="3" />
-        <circle cx="99" cy="78" r="2.6" />
-        <circle cx="138" cy="70" r="3.4" />
-        <circle cx="146" cy="74" r="3" />
-        <circle cx="141" cy="78" r="2.6" />
-      </g>
-      <path
-        d="M0,96 C70,92 160,98 240,94 L240,120 L0,120 Z"
+        d="M0,94 C70,90 160,98 240,94 L240,120 L0,120 Z"
         fill="var(--sage)"
         opacity="0.3"
       />
@@ -203,41 +225,37 @@ const art = {
   ),
 
   /* ------------------------------------------------------------------ */
-  /*  Fungi — a moonlit cluster on a dark bed                            */
+  /*  Other / specialty — a tall orchard tree (covers orchards + fungi) */
   /* ------------------------------------------------------------------ */
-  fungi: (
+  other: (
     <>
-      <rect x="0" y="0" width="240" height="120" fill="var(--soil)" opacity="0.14" />
-      <circle cx="198" cy="30" r="14" fill="var(--wheat)" opacity="0.2" />
-      <circle cx="198" cy="30" r="8" fill="var(--wheat)" opacity="0.55" />
-      {/* spores */}
-      <g fill="var(--wheat)" opacity="0.4">
-        <circle cx="42" cy="30" r="1.6" />
-        <circle cx="80" cy="44" r="1.3" />
-        <circle cx="120" cy="26" r="1.5" />
-        <circle cx="56" cy="58" r="1.2" />
-      </g>
-      {/* cluster */}
-      {[
-        [86, 100, 1.2, "--clay"],
-        [120, 100, 0.85, "--wheat"],
-        [150, 100, 1.05, "--clay-deep"],
-      ].map(([x, y, s, cap]) => (
-        <g key={`m-${x}`} transform={`translate(${x},${y}) scale(${s})`}>
-          <rect x="-4" y="-18" width="8" height="18" rx="3.5" fill="var(--wheat)" opacity="0.55" />
-          <path
-            d="M-17,-15 C-17,-32 17,-32 17,-15 C10,-12 -10,-12 -17,-15 Z"
-            fill={`var(${cap})`}
-            opacity="0.8"
-          />
-          <circle cx="-6" cy="-22" r="1.8" fill="var(--card)" opacity="0.7" />
-          <circle cx="5" cy="-25" r="1.5" fill="var(--card)" opacity="0.7" />
-        </g>
-      ))}
-      <path
-        d="M0,98 C60,94 150,100 240,96 L240,120 L0,120 Z"
+      <circle cx="200" cy="30" r="13" fill="var(--wheat)" opacity="0.65" />
+      {/* trunk */}
+      <rect
+        x="116"
+        y="60"
+        width="8"
+        height="34"
+        rx="3"
         fill="var(--soil)"
-        opacity="0.4"
+        opacity="0.5"
+      />
+      {/* canopy — layered circles for an orchard tree */}
+      <circle cx="120" cy="50" r="30" fill="var(--leaf)" opacity="0.45" />
+      <circle cx="100" cy="58" r="20" fill="var(--leaf)" opacity="0.4" />
+      <circle cx="142" cy="56" r="20" fill="var(--leaf)" opacity="0.4" />
+      <circle cx="120" cy="36" r="18" fill="var(--leaf)" opacity="0.35" />
+      {/* fruit hints */}
+      <g fill="var(--clay)" opacity="0.7">
+        <circle cx="106" cy="48" r="3" />
+        <circle cx="128" cy="40" r="3" />
+        <circle cx="138" cy="60" r="3" />
+        <circle cx="114" cy="64" r="3" />
+      </g>
+      <path
+        d="M0,94 C70,90 160,98 240,94 L240,120 L0,120 Z"
+        fill="var(--sage)"
+        opacity="0.3"
       />
     </>
   ),
@@ -252,7 +270,7 @@ const CropTypeArt = ({ variant, className }) => (
     preserveAspectRatio="xMidYMid slice"
     aria-hidden="true"
   >
-    {art[variant] || art.leafy}
+    {art[variant] || art.other}
   </svg>
 );
 

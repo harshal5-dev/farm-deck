@@ -1,23 +1,22 @@
 import { getZoneRow, farmRows } from "@/features/fields/mock/zoneDb";
 
 /**
- * Mock crop database — in-memory stand-in for the crops module (crop
- * cycles / plantings). Each row is ONE cycle: a crop growing in a
- * zone, from plan to harvest.
+ * Mock crop database — two tables that mirror the backend schema:
  *
- * Rules mirrored from the domain design:
- *   - The lifecycle lives here (planned → sown → growing → ready →
- *     harvested, plus failed/cancelled) — NOT on the zone.
- *   - Terminal rows are kept as history; advancing to "harvested"
- *     stamps harvestDateActual automatically.
- *   - A new crop needs an ACTIVE, non-maintenance zone (you don't sow
- *     into a broken pump); editing keeps its own zone even if the zone
- *     was since deactivated — history stays editable.
- *   - Zone joins resolve live from the zone mock, so deactivating a
- *     zone keeps its crop history readable.
+ *   • `crops`    — catalog of crop varieties (target pH / EC / PPM /
+ *                  light / days-to-harvest). Reusable lookup rows
+ *                  referenced from cycles via FK.
+ *   • `cycles`   — ONE planting cycle: a crop growing in a zone on a
+ *                  farm, from plan to close. Carries status,
+ *                  growth_stage, plant count, dates and notes.
+ *
+ * Lifecycle is on cycles, not on the zone — terminal rows are kept
+ * as history. Editing a cycle keeps its own zone even if the zone
+ * was since deactivated; new cycles require an ACTIVE, non-maintenance
+ * zone.
  *
  * Errors are thrown as `{ status, data: { error: { message } } }` to
- * match the API envelope the app's toasts read from.
+ * match the API envelope the app's toasts already read from.
  */
 
 const uuid = () =>
@@ -38,218 +37,363 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const latency = () => sleep(220 + Math.random() * 380);
 const nowIso = () => new Date().toISOString();
 
-/* ------------------------------------------------------------------ */
-/*  Crop-type lookup rows                                              */
-/* ------------------------------------------------------------------ */
-
-export const cropTypeRows = [
-  { id: "ct-tomato", name: "tomato", displayName: "Tomato", description: "Staked or trellised fruiting crop — high-value greenhouse staple." },
-  { id: "ct-lettuce", name: "lettuce", displayName: "Lettuce", description: "Fast leafy greens — heads or cuts, ideal for hydro rafts." },
-  { id: "ct-basil", name: "basil", displayName: "Basil", description: "Aromatic herbs — pinch harvests, restaurant-ready premiums." },
-  { id: "ct-pepper", name: "bell_pepper", displayName: "Bell pepper", description: "Coloured block peppers on the high-wire — long season crop." },
-  { id: "ct-carrot", name: "carrot", displayName: "Carrot", description: "Direct-sown roots — loose soil, steady water, sweet harvest." },
-  { id: "ct-apple", name: "apple", displayName: "Apple", description: "Permanent orchard blocks — blossoms, thinning, then bins." },
-  { id: "ct-berries", name: "berries", displayName: "Berries", description: "Trailing canes on trellises — u-pick and fresh market." },
-  { id: "ct-mushroom", name: "mushroom", displayName: "Mushroom", description: "Oyster, lion's mane, shiitake — humidity and CO₂ managed." },
-  { id: "ct-micro", name: "microgreens", displayName: "Microgreens", description: "Tray-grown shoots — the fastest cash crop in the book." },
-];
-
-const findCropType = (id) => cropTypeRows.find((t) => t.id === id);
 const farmNameOf = (farmId) =>
   farmRows.find((f) => f.id === farmId)?.name ?? null;
 
 /* ------------------------------------------------------------------ */
-/*  Crop cycles                                                        */
+/*  Crop catalog (rows for the `crops` table)                         */
 /* ------------------------------------------------------------------ */
 
 let cropRows = [
   {
-    id: "crop-beefsteak",
+    id: "crop-tomato-beefsteak",
+    name: "Beefsteak Tomato",
+    category: "fruiting",
+    targetPhMin: 6.0,
+    targetPhMax: 6.8,
+    targetEcMin: 2.0,
+    targetEcMax: 3.5,
+    targetPpmMin: 1400,
+    targetPpmMax: 2400,
+    daysToHarvest: 80,
+    lightHoursPerDay: 14,
+    notes:
+      "Heavy feeder — keep EC at the higher end once the first trusses set.",
+    isActive: true,
+    createdAt: daysAgo(420),
+    updatedAt: daysAgo(60),
+  },
+  {
+    id: "crop-tomato-cherry",
+    name: "Cherry Tomato",
+    category: "fruiting",
+    targetPhMin: 5.8,
+    targetPhMax: 6.5,
+    targetEcMin: 2.2,
+    targetEcMax: 3.8,
+    targetPpmMin: 1500,
+    targetPpmMax: 2500,
+    daysToHarvest: 65,
+    lightHoursPerDay: 14,
+    notes: "Indeterminate — keep lowering and de-leafing each Friday.",
+    isActive: true,
+    createdAt: daysAgo(400),
+    updatedAt: daysAgo(40),
+  },
+  {
+    id: "crop-bell-pepper",
+    name: "Bell Pepper",
+    category: "fruiting",
+    targetPhMin: 6.0,
+    targetPhMax: 6.8,
+    targetEcMin: 2.5,
+    targetEcMax: 3.5,
+    targetPpmMin: 1700,
+    targetPpmMax: 2400,
+    daysToHarvest: 75,
+    lightHoursPerDay: 14,
+    notes: "Coloured block peppers on the high-wire — long season crop.",
+    isActive: true,
+    createdAt: daysAgo(380),
+    updatedAt: daysAgo(80),
+  },
+  {
+    id: "crop-lettuce-butterhead",
+    name: "Butterhead Lettuce",
+    category: "leafy_green",
+    targetPhMin: 5.8,
+    targetPhMax: 6.4,
+    targetEcMin: 0.8,
+    targetEcMax: 1.2,
+    targetPpmMin: 560,
+    targetPpmMax: 840,
+    daysToHarvest: 35,
+    lightHoursPerDay: 14,
+    notes: "Hydro raft classic — harvest at full head, before bolting.",
+    isActive: true,
+    createdAt: daysAgo(360),
+    updatedAt: daysAgo(30),
+  },
+  {
+    id: "crop-lettuce-mizuna",
+    name: "Mizuna",
+    category: "leafy_green",
+    targetPhMin: 6.0,
+    targetPhMax: 7.0,
+    targetEcMin: 1.0,
+    targetEcMax: 1.4,
+    targetPpmMin: 700,
+    targetPpmMax: 980,
+    daysToHarvest: 30,
+    lightHoursPerDay: 12,
+    notes: "Asian green — cut-and-come-again; multiple harvests per tray.",
+    isActive: true,
+    createdAt: daysAgo(330),
+    updatedAt: daysAgo(15),
+  },
+  {
+    id: "crop-basil-genovese",
+    name: "Genovese Basil",
+    category: "herb",
+    targetPhMin: 5.8,
+    targetPhMax: 6.5,
+    targetEcMin: 1.0,
+    targetEcMax: 1.6,
+    targetPpmMin: 700,
+    targetPpmMax: 1120,
+    daysToHarvest: 55,
+    lightHoursPerDay: 14,
+    notes: "Pinch above the second node to keep the bush tight.",
+    isActive: true,
+    createdAt: daysAgo(300),
+    updatedAt: daysAgo(20),
+  },
+  {
+    id: "crop-microgreen-mix",
+    name: "Microgreen Salad Mix",
+    category: "microgreen",
+    targetPhMin: 5.8,
+    targetPhMax: 6.2,
+    targetEcMin: 0.4,
+    targetEcMax: 0.8,
+    targetPpmMin: 280,
+    targetPpmMax: 560,
+    daysToHarvest: 10,
+    lightHoursPerDay: 14,
+    notes: "Dense seeding on 10×20 trays; cut at cotyledon.",
+    isActive: true,
+    createdAt: daysAgo(240),
+    updatedAt: daysAgo(7),
+  },
+  {
+    id: "crop-microgreen-pea-shoots",
+    name: "Pea Shoots",
+    category: "microgreen",
+    targetPhMin: 6.0,
+    targetPhMax: 6.8,
+    targetEcMin: 0.6,
+    targetEcMax: 1.0,
+    targetPpmMin: 420,
+    targetPpmMax: 700,
+    daysToHarvest: 12,
+    lightHoursPerDay: 12,
+    notes: "Pre-soak seeds 12h for an even germ.",
+    isActive: true,
+    createdAt: daysAgo(220),
+    updatedAt: daysAgo(11),
+  },
+  {
+    id: "crop-carrot-nantes",
+    name: "Nantes Carrot",
+    category: "root",
+    targetPhMin: 6.0,
+    targetPhMax: 6.8,
+    targetEcMin: 1.0,
+    targetEcMax: 1.6,
+    targetPpmMin: 700,
+    targetPpmMax: 1120,
+    daysToHarvest: 70,
+    lightHoursPerDay: 12,
+    notes: "Loose soil, steady water — sweet harvest when soil is cool.",
+    isActive: true,
+    createdAt: daysAgo(190),
+    updatedAt: daysAgo(8),
+  },
+  {
+    id: "crop-mushroom-oyster",
+    name: "Oyster Mushroom",
+    category: "other",
+    targetPhMin: null,
+    targetPhMax: null,
+    targetEcMin: null,
+    targetEcMax: null,
+    targetPpmMin: null,
+    targetPpmMax: null,
+    daysToHarvest: 35,
+    lightHoursPerDay: 0,
+    notes:
+      "Humidity 85-95%, CO₂ <800 ppm during pinning. Darkness — light is irrelevant.",
+    isActive: true,
+    createdAt: daysAgo(150),
+    updatedAt: daysAgo(25),
+  },
+];
+
+/** Synchronous catalog lookup — exported for cross-feature consumers
+ *  (e.g. daily-logs decorate their rows with the crop). */
+export const findCrop = (id) => cropRows.find((c) => c.id === id);
+
+/* ------------------------------------------------------------------ */
+/*  Cycles (rows for the `cycles` table)                              */
+/* ------------------------------------------------------------------ */
+
+let cycleRows = [
+  {
+    id: "cyc-beefsteak",
+    farmId: "farm-skagit",
     zoneId: "zone-beefsteak-1",
-    cropTypeId: "ct-tomato",
-    variety: "Trust",
+    cropId: "crop-tomato-beefsteak",
+    name: "Spring beefsteak run",
     status: "growing",
-    sowDatePlanned: daysAgo(46),
-    sowDateActual: daysAgo(45),
-    harvestDateExpected: daysAhead(40),
-    harvestDateActual: null,
-    quantity: 220,
-    quantityUnit: "plants",
+    growthStage: "vegetative",
+    plantCount: 220,
+    dateSeeded: daysAgo(45),
+    expectedHarvest: daysAhead(40),
+    actualHarvestDate: null,
     notes: "Lowered the first trusses; de-leafing every Friday.",
     createdAt: daysAgo(50),
     updatedAt: hoursAgo(6),
   },
   {
-    id: "crop-cucumber",
+    id: "cyc-bell-pepper",
+    farmId: "farm-skagit",
     zoneId: "zone-cucumber-east",
-    cropTypeId: "ct-pepper",
-    variety: "Corinto",
-    status: "harvest_ready",
-    sowDatePlanned: daysAgo(64),
-    sowDateActual: daysAgo(62),
-    harvestDateExpected: daysAhead(3),
-    harvestDateActual: null,
-    quantity: 120,
-    quantityUnit: "plants",
-    notes: "First pick scheduled with the restaurant orders.",
+    cropId: "crop-bell-pepper",
+    name: "Block peppers east",
+    status: "flowering",
+    growthStage: "flowering",
+    plantCount: 120,
+    dateSeeded: daysAgo(62),
+    expectedHarvest: daysAhead(28),
+    actualHarvestDate: null,
+    notes: "First flowers opened — bumble hives placed Tuesday.",
     createdAt: daysAgo(66),
     updatedAt: daysAgo(1),
   },
   {
-    id: "crop-butterhead",
+    id: "cyc-butterhead",
+    farmId: "farm-snake",
     zoneId: "zone-tilapia-raceways",
-    cropTypeId: "ct-lettuce",
-    variety: "Rex",
+    cropId: "crop-lettuce-butterhead",
+    name: "Butterhead raft rotation",
     status: "planned",
-    sowDatePlanned: daysAhead(7),
-    sowDateActual: null,
-    harvestDateExpected: daysAhead(42),
-    harvestDateActual: null,
-    quantity: 480,
-    quantityUnit: "plants",
+    growthStage: "seedling",
+    plantCount: 480,
+    dateSeeded: null,
+    expectedHarvest: daysAhead(35),
+    actualHarvestDate: null,
     notes: "Follows the mizuna once the biofilter settles.",
     createdAt: daysAgo(3),
     updatedAt: daysAgo(3),
   },
   {
-    id: "crop-mizuna",
+    id: "cyc-mizuna",
+    farmId: "farm-snake",
     zoneId: "zone-tilapia-raceways",
-    cropTypeId: "ct-lettuce",
-    variety: "Mizuna",
-    status: "sown",
-    sowDatePlanned: daysAgo(13),
-    sowDateActual: daysAgo(12),
-    harvestDateExpected: daysAhead(18),
-    harvestDateActual: null,
-    quantity: 240,
-    quantityUnit: "plants",
+    cropId: "crop-lettuce-mizuna",
+    name: "Mizuna baby-leaf run",
+    status: "seeding",
+    growthStage: "seedling",
+    plantCount: 240,
+    dateSeeded: daysAgo(12),
+    expectedHarvest: daysAhead(18),
+    actualHarvestDate: null,
     notes: "Germinated in 36h — strong run.",
     createdAt: daysAgo(15),
     updatedAt: daysAgo(12),
   },
   {
-    id: "crop-honeycrisp",
-    zoneId: "zone-honeycrisp-a",
-    cropTypeId: "ct-apple",
-    variety: "Honeycrisp",
-    status: "growing",
-    sowDatePlanned: daysAgo(4000),
-    sowDateActual: daysAgo(4000),
-    harvestDateExpected: daysAhead(32),
-    harvestDateActual: null,
-    quantity: 18,
-    quantityUnit: "acres",
-    notes: "Nets on before the July heat; bins ordered.",
-    createdAt: daysAgo(4000),
-    updatedAt: daysAgo(6),
-  },
-  {
-    id: "crop-gala",
-    zoneId: "zone-gala-b",
-    cropTypeId: "ct-apple",
-    variety: "Gala",
-    status: "growing",
-    sowDatePlanned: daysAgo(4000),
-    sowDateActual: daysAgo(4000),
-    harvestDateExpected: daysAhead(47),
-    harvestDateActual: null,
-    quantity: 14,
-    quantityUnit: "acres",
-    notes: "Leaf-tissue sample due with the July flush.",
-    createdAt: daysAgo(4000),
-    updatedAt: daysAgo(10),
-  },
-  {
-    id: "crop-marion",
-    zoneId: "zone-marion-west",
-    cropTypeId: "ct-berries",
-    variety: "Marion",
-    status: "harvest_ready",
-    sowDatePlanned: daysAgo(120),
-    sowDateActual: daysAgo(118),
-    harvestDateExpected: daysAhead(5),
-    harvestDateActual: null,
-    quantity: 7,
-    quantityUnit: "acres",
-    notes: "Brix at 14 — u-pick opens Saturday.",
-    createdAt: daysAgo(120),
-    updatedAt: hoursAgo(30),
-  },
-  {
-    id: "crop-blueberry",
-    zoneId: "zone-blueberry-east",
-    cropTypeId: "ct-berries",
-    variety: "Duke",
-    status: "harvested",
-    sowDatePlanned: daysAgo(130),
-    sowDateActual: daysAgo(128),
-    harvestDateExpected: daysAgo(22),
-    harvestDateActual: daysAgo(20),
-    quantity: 3.5,
-    quantityUnit: "acres",
-    notes: "2,840 lb off the Duke block — best year yet.",
-    createdAt: daysAgo(130),
-    updatedAt: daysAgo(20),
-  },
-  {
-    id: "crop-basil",
+    id: "cyc-basil",
+    farmId: "farm-skagit",
     zoneId: "zone-cucumber-east",
-    cropTypeId: "ct-basil",
-    variety: "Genovese",
+    cropId: "crop-basil-genovese",
+    name: "Genovese succession",
     status: "planned",
-    sowDatePlanned: daysAhead(12),
-    sowDateActual: null,
-    harvestDateExpected: daysAhead(55),
-    harvestDateActual: null,
-    quantity: 96,
-    quantityUnit: "plants",
-    notes: "Succession crop after the Corinto peppers clear.",
+    growthStage: "seedling",
+    plantCount: 96,
+    dateSeeded: null,
+    expectedHarvest: daysAhead(55),
+    actualHarvestDate: null,
+    notes: "Succession crop after the block peppers clear.",
     createdAt: daysAgo(2),
     updatedAt: daysAgo(2),
   },
   {
-    id: "crop-oyster",
+    id: "cyc-microgreens",
+    farmId: "farm-skagit",
     zoneId: "zone-mushroom-1",
-    cropTypeId: "ct-mushroom",
-    variety: "Oyster",
-    status: "failed",
-    sowDatePlanned: daysAgo(210),
-    sowDateActual: daysAgo(208),
-    harvestDateExpected: daysAgo(190),
-    harvestDateActual: null,
-    quantity: 40,
-    quantityUnit: "trays",
-    notes: "Pins aborted in the week-2 heat wave — room retired after.",
-    createdAt: daysAgo(210),
-    updatedAt: daysAgo(195),
+    cropId: "crop-microgreen-mix",
+    name: "Microgreen restaurant mix",
+    status: "harvested",
+    growthStage: "harvest",
+    plantCount: 48,
+    dateSeeded: daysAgo(11),
+    expectedHarvest: daysAgo(1),
+    actualHarvestDate: daysAgo(1),
+    notes: "Cut at cotyledon — 48 trays delivered to the Saturday restaurant run.",
+    createdAt: daysAgo(13),
+    updatedAt: daysAgo(1),
   },
   {
-    id: "crop-carrots",
+    id: "cyc-pea-shoots",
+    farmId: "farm-skagit",
+    zoneId: "zone-mushroom-1",
+    cropId: "crop-microgreen-pea-shoots",
+    name: "Pea shoots — late trays",
+    status: "growing",
+    growthStage: "vegetative",
+    plantCount: 30,
+    dateSeeded: daysAgo(5),
+    expectedHarvest: daysAhead(7),
+    actualHarvestDate: null,
+    notes: "Strong tendrils — second cut looking good.",
+    createdAt: daysAgo(7),
+    updatedAt: daysAgo(1),
+  },
+  {
+    id: "cyc-carrots",
+    farmId: "farm-yakima",
     zoneId: "zone-gala-b",
-    cropTypeId: "ct-carrot",
-    variety: "Nantes",
+    cropId: "crop-carrot-nantes",
+    name: "Alley-crop Nantes",
     status: "planned",
-    sowDatePlanned: daysAhead(5),
-    sowDateActual: null,
-    harvestDateExpected: daysAhead(80),
-    harvestDateActual: null,
-    quantity: 6,
-    quantityUnit: "rows",
+    growthStage: "seedling",
+    plantCount: 6,
+    dateSeeded: null,
+    expectedHarvest: daysAhead(70),
+    actualHarvestDate: null,
     notes: "Alley crop between the Gala rows.",
     createdAt: daysAgo(4),
     updatedAt: daysAgo(4),
   },
+  {
+    id: "cyc-oyster",
+    farmId: "farm-skagit",
+    zoneId: "zone-mushroom-1",
+    cropId: "crop-mushroom-oyster",
+    name: "Oyster pin run",
+    status: "failed",
+    growthStage: "harvest",
+    plantCount: 40,
+    dateSeeded: daysAgo(208),
+    expectedHarvest: daysAgo(190),
+    actualHarvestDate: null,
+    notes: "Pins aborted in the week-2 heat wave — room retired after.",
+    createdAt: daysAgo(210),
+    updatedAt: daysAgo(195),
+  },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
+/*  Decorators + sync helpers exposed for cross-feature consumers     */
 /* ------------------------------------------------------------------ */
 
-/** Join the live zone row so deactivated zones still resolve for history. */
-const withFarmName = (crop) => {
-  const zone = getZoneRow(crop.zoneId);
+/** Synchronous cycle lookup — used by other features (e.g. daily
+ *  logs) that need to read a cycle's joined zone + catalog row
+ *  without going through the API. */
+export function findCycle(id) {
+  return cycleRows.find((c) => c.id === id) ?? null;
+}
+
+/** Join the live zone + crop-catalog row so the list renders in one read. */
+const decorateCycle = (cycle) => {
+  const zone = getZoneRow(cycle.zoneId);
+  const crop = findCrop(cycle.cropId);
   return {
-    ...crop,
+    ...cycle,
+    crop,
+    cropName: crop?.name ?? "Unknown crop",
+    cropCategory: crop?.category ?? null,
     zoneName: zone?.name ?? "Unknown field",
     zoneStatus: zone?.zoneStatus ?? null,
     farmId: zone?.farmId ?? null,
@@ -257,52 +401,266 @@ const withFarmName = (crop) => {
   };
 };
 
-/** Form payload → storable crop shape. */
-const toStoredCrop = (input) => ({
-  zoneId: input.zoneId,
-  cropTypeId: input.cropTypeId,
-  variety: input.variety?.trim() || null,
-  status: input.status || "planned",
-  sowDatePlanned: input.sowDate || null,
-  harvestDateExpected: input.harvestDateExpected || null,
-  quantity:
-    input.quantity === null || input.quantity === undefined ||
-    input.quantity === ""
-      ? null
-      : Number(input.quantity),
-  quantityUnit: input.quantityUnit || "plants",
-  notes: input.notes?.trim() || null,
-});
+/* ------------------------------------------------------------------ */
+/*  Catalog operations (`crops` table)                                */
+/* ------------------------------------------------------------------ */
 
-/** Display name — "Trust Tomatoes", "Mizuna Lettuce", or just "Mushroom". */
-export function cropDisplayName(crop, type) {
-  const typeName = type?.displayName ?? "";
-  if (crop.variety) {
-    return `${crop.variety} ${typeName.toLowerCase()}`;
-  }
-  return typeName || "Crop";
-}
+/** Range validator — {min, max} where at least one may be null. */
+const isValidRange = (min, max) =>
+  min == null || max == null || Number(min) <= Number(max);
 
-const decorateCrop = (crop) => {
-  const type = findCropType(crop.cropTypeId);
-  return { ...withFarmName(crop), name: cropDisplayName(crop, type) };
+/** Number or null — used for nullable target columns. */
+const asNumberOrNull = (v) => {
+  if (v === "" || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
 };
 
-/* ------------------------------------------------------------------ */
-/*  Public operations                                                  */
-/* ------------------------------------------------------------------ */
+const trimOrNull = (v) => {
+  const s = v == null ? null : String(v).trim();
+  return s ? s : null;
+};
+
+const validateCropPayload = (input) => {
+  const phMin = asNumberOrNull(input.targetPhMin);
+  const phMax = asNumberOrNull(input.targetPhMax);
+  const ecMin = asNumberOrNull(input.targetEcMin);
+  const ecMax = asNumberOrNull(input.targetEcMax);
+  const ppmMin = asNumberOrNull(input.targetPpmMin);
+  const ppmMax = asNumberOrNull(input.targetPpmMax);
+  const dth = asNumberOrNull(input.daysToHarvest);
+  const light = asNumberOrNull(input.lightHoursPerDay);
+
+  if (input.targetPhMin != null && (phMin < 0 || phMin > 14)) {
+    throw apiError(400, "pH min must be between 0 and 14.");
+  }
+  if (input.targetPhMax != null && (phMax < 0 || phMax > 14)) {
+    throw apiError(400, "pH max must be between 0 and 14.");
+  }
+  if (!isValidRange(phMin, phMax)) {
+    throw apiError(400, "pH min must be ≤ pH max.");
+  }
+  if (!isValidRange(ecMin, ecMax)) {
+    throw apiError(400, "EC min must be ≤ EC max.");
+  }
+  if (!isValidRange(ppmMin, ppmMax)) {
+    throw apiError(400, "PPM min must be ≤ PPM max.");
+  }
+  if (dth != null && dth <= 0) {
+    throw apiError(400, "Days to harvest must be greater than 0.");
+  }
+  if (light != null && (light < 0 || light > 24)) {
+    throw apiError(400, "Light hours per day must be between 0 and 24.");
+  }
+};
+
+const toStoredCrop = (input) => ({
+  name: trimOrNull(input.name),
+  category: input.category || "other",
+  targetPhMin: asNumberOrNull(input.targetPhMin),
+  targetPhMax: asNumberOrNull(input.targetPhMax),
+  targetEcMin: asNumberOrNull(input.targetEcMin),
+  targetEcMax: asNumberOrNull(input.targetEcMax),
+  targetPpmMin: asNumberOrNull(input.targetPpmMin),
+  targetPpmMax: asNumberOrNull(input.targetPpmMax),
+  daysToHarvest: asNumberOrNull(input.daysToHarvest),
+  lightHoursPerDay: asNumberOrNull(input.lightHoursPerDay),
+  notes: trimOrNull(input.notes),
+});
 
 export async function listCrops() {
   await latency();
-  return { crops: cropRows.map(decorateCrop) };
+  return { crops: [...cropRows] };
 }
 
 export async function createCrop(input) {
   await latency();
   const stored = toStoredCrop(input);
+  if (!stored.name || stored.name.length < 2) {
+    throw apiError(400, "Crop name must be at least 2 characters.");
+  }
+  if (
+    cropRows.some(
+      (c) =>
+        c.isActive &&
+        c.name.toLowerCase() === stored.name.toLowerCase(),
+    )
+  ) {
+    throw apiError(
+      409,
+      `A crop named "${stored.name}" already exists in the catalog.`,
+    );
+  }
+  validateCropPayload(input);
 
-  if (!stored.zoneId) throw apiError(400, "Pick the field this crop grows in.");
-  if (!stored.cropTypeId) throw apiError(400, "Pick a crop type.");
+  const crop = {
+    id: uuid(),
+    ...stored,
+    isActive: true,
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+  };
+  cropRows = [crop, ...cropRows];
+  return crop;
+}
+
+export async function updateCrop({ id, ...patch }) {
+  await latency();
+  const index = cropRows.findIndex((c) => c.id === id);
+  if (index === -1) throw apiError(404, "That crop no longer exists.");
+
+  const stored = toStoredCrop(patch);
+  if (!stored.name || stored.name.length < 2) {
+    throw apiError(400, "Crop name must be at least 2 characters.");
+  }
+  if (
+    cropRows.some(
+      (c) =>
+        c.id !== id &&
+        c.isActive &&
+        c.name.toLowerCase() === stored.name.toLowerCase(),
+    )
+  ) {
+    throw apiError(
+      409,
+      `A crop named "${stored.name}" already exists in the catalog.`,
+    );
+  }
+  validateCropPayload(patch);
+
+  cropRows[index] = {
+    ...cropRows[index],
+    ...stored,
+    updatedAt: nowIso(),
+  };
+  return cropRows[index];
+}
+
+export async function inactivateCrop(id) {
+  await latency();
+  const index = cropRows.findIndex((c) => c.id === id);
+  if (index === -1) throw apiError(404, "That crop no longer exists.");
+  // Don't allow inactivating a crop that's still being grown.
+  const activeRefs = cycleRows.filter(
+    (c) =>
+      c.cropId === id &&
+      !["completed", "failed", "cancelled"].includes(c.status),
+  );
+  if (activeRefs.length > 0) {
+    throw apiError(
+      400,
+      `Close ${activeRefs.length} active cycle${activeRefs.length === 1 ? "" : "s"} first — this crop is still in production.`,
+    );
+  }
+  cropRows[index] = {
+    ...cropRows[index],
+    isActive: false,
+    updatedAt: nowIso(),
+  };
+  return cropRows[index];
+}
+
+export async function activateCrop(id) {
+  await latency();
+  const index = cropRows.findIndex((c) => c.id === id);
+  if (index === -1) throw apiError(404, "That crop no longer exists.");
+  cropRows[index] = {
+    ...cropRows[index],
+    isActive: true,
+    updatedAt: nowIso(),
+  };
+  return cropRows[index];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Cycle operations (`cycles` table)                                 */
+/* ------------------------------------------------------------------ */
+
+const VALID_CYCLE_STATUSES = [
+  "planned",
+  "seeding",
+  "growing",
+  "flowering",
+  "harvested",
+  "completed",
+  "cancelled",
+  "failed",
+];
+const VALID_GROWTH_STAGES = [
+  "seedling",
+  "vegetative",
+  "flowering",
+  "fruiting",
+  "harvest",
+];
+
+const toStoredCycle = (input) => {
+  const status = VALID_CYCLE_STATUSES.includes(input.status)
+    ? input.status
+    : "planned";
+  const growthStage = VALID_GROWTH_STAGES.includes(input.growthStage)
+    ? input.growthStage
+    : "seedling";
+  return {
+    name: trimOrNull(input.name),
+    farmId: input.farmId || null,
+    zoneId: input.zoneId || null,
+    cropId: input.cropId || null,
+    status,
+    growthStage,
+    plantCount:
+      input.plantCount === "" ||
+      input.plantCount == null ||
+      Number.isNaN(Number(input.plantCount))
+        ? null
+        : Number(input.plantCount),
+    dateSeeded: input.dateSeeded || null,
+    expectedHarvest: input.expectedHarvest || null,
+    actualHarvestDate: input.actualHarvestDate || null,
+    notes: trimOrNull(input.notes),
+  };
+};
+
+const validateCyclePayload = (stored) => {
+  if (!stored.zoneId) throw apiError(400, "Pick the field this cycle grows in.");
+  if (!stored.cropId) throw apiError(400, "Pick a crop from the catalog.");
+  if (!stored.name || stored.name.length < 2) {
+    throw apiError(400, "Give this cycle a name.");
+  }
+  if (stored.plantCount != null && stored.plantCount <= 0) {
+    throw apiError(400, "Plant count must be greater than 0.");
+  }
+  if (
+    stored.dateSeeded &&
+    stored.expectedHarvest &&
+    new Date(stored.dateSeeded) > new Date(stored.expectedHarvest)
+  ) {
+    throw apiError(
+      400,
+      "Expected harvest must be on or after the seed date.",
+    );
+  }
+  if (
+    stored.actualHarvestDate &&
+    stored.dateSeeded &&
+    new Date(stored.actualHarvestDate) < new Date(stored.dateSeeded)
+  ) {
+    throw apiError(
+      400,
+      "Actual harvest date cannot be before the seed date.",
+    );
+  }
+};
+
+export async function listCycles() {
+  await latency();
+  return { cycles: cycleRows.map(decorateCycle) };
+}
+
+export async function createCycle(input) {
+  await latency();
+  const stored = toStoredCycle(input);
+  validateCyclePayload(stored);
 
   const zone = getZoneRow(stored.zoneId);
   if (!zone) throw apiError(404, "That field no longer exists.");
@@ -312,36 +670,41 @@ export async function createCrop(input) {
   if (zone.zoneStatus === "maintenance") {
     throw apiError(
       400,
-      `${zone.name} is under maintenance — fix it before sowing into it.`
+      `${zone.name} is under maintenance — fix it before sowing into it.`,
     );
   }
 
-  const crop = {
+  const crop = findCrop(stored.cropId);
+  if (!crop) throw apiError(404, "That crop is no longer in the catalog.");
+  if (!crop.isActive) {
+    throw apiError(400, "That crop is deactivated — pick an active crop.");
+  }
+
+  // Stamp zone's farm on the cycle (DB FK keeps them in lockstep).
+  stored.farmId = zone.farmId;
+
+  const cycle = {
     id: uuid(),
     ...stored,
-    sowDateActual:
-      stored.status !== "planned" ? stored.sowDatePlanned : null,
-    harvestDateActual:
-      stored.status === "harvested" ? nowIso() : null,
     createdAt: nowIso(),
     updatedAt: nowIso(),
   };
-  cropRows = [crop, ...cropRows];
-  return decorateCrop(crop);
+  cycleRows = [cycle, ...cycleRows];
+  return decorateCycle(cycle);
 }
 
-export async function updateCrop({ id, ...patch }) {
+export async function updateCycle({ id, ...patch }) {
   await latency();
-  const index = cropRows.findIndex((c) => c.id === id);
-  if (index === -1) throw apiError(404, "That crop no longer exists.");
+  const index = cycleRows.findIndex((c) => c.id === id);
+  if (index === -1) throw apiError(404, "That cycle no longer exists.");
 
-  const previous = cropRows[index];
-  const stored = toStoredCrop(patch);
-  if (!stored.zoneId) throw apiError(400, "Pick the field this crop grows in.");
+  const previous = cycleRows[index];
+  const stored = toStoredCycle(patch);
+  validateCyclePayload(stored);
 
-  // Moving to a NEW field re-runs the sowing rules; staying on your own
-  // field is always allowed (history stays editable even if the field
-  // was since deactivated or broke).
+  // Moving to a NEW field re-runs the sowing rules; staying on the
+  // current field is always allowed so history stays editable even
+  // if the field was since deactivated or broke.
   if (stored.zoneId !== previous.zoneId) {
     const zone = getZoneRow(stored.zoneId);
     if (!zone) throw apiError(404, "That field no longer exists.");
@@ -351,55 +714,70 @@ export async function updateCrop({ id, ...patch }) {
     if (zone.zoneStatus === "maintenance") {
       throw apiError(
         400,
-        `${zone.name} is under maintenance — fix it before sowing into it.`
+        `${zone.name} is under maintenance — fix it before sowing into it.`,
       );
     }
+    stored.farmId = zone.farmId;
+  } else {
+    stored.farmId = previous.farmId;
   }
 
-  // Keep the actual dates honest with the lifecycle: passing a
-  // milestone stamps its date once, moving back clears it.
-  const crop = {
+  const crop = findCrop(stored.cropId);
+  if (!crop) throw apiError(404, "That crop is no longer in the catalog.");
+
+  cycleRows[index] = {
     ...previous,
     ...stored,
-    sowDateActual:
-      stored.status !== "planned"
-        ? previous.sowDateActual ?? stored.sowDatePlanned
-        : null,
-    harvestDateActual:
-      stored.status === "harvested"
-        ? previous.harvestDateActual ?? nowIso()
-        : null,
     updatedAt: nowIso(),
   };
-  cropRows[index] = crop;
-  return decorateCrop(crop);
+  return decorateCycle(cycleRows[index]);
 }
 
-/** One-step happy-path advance ("Mark sown", "Complete harvest"…). */
-export async function advanceCropStatus(id) {
+/** One-step happy-path advance ("Mark flowering", "Close cycle"…). */
+export async function advanceCycleStatus(id) {
   await latency();
-  const crop = cropRows.find((c) => c.id === id);
-  if (!crop) throw apiError(404, "That crop no longer exists.");
+  const index = cycleRows.findIndex((c) => c.id === id);
+  if (index === -1) throw apiError(404, "That cycle no longer exists.");
 
   const steps = {
-    planned: "sown",
-    sown: "growing",
-    growing: "harvest_ready",
-    harvest_ready: "harvested",
+    planned: "seeding",
+    seeding: "growing",
+    growing: "flowering",
+    flowering: "harvested",
+    harvested: "completed",
   };
-  const next = steps[crop.status];
+  const next = steps[cycleRows[index].status];
   if (!next) {
-    throw apiError(400, "This crop cycle is already finished.");
+    throw apiError(400, "This cycle is already closed.");
   }
 
-  crop.status = next;
-  if (next === "sown") crop.sowDateActual = crop.sowDateActual ?? nowIso();
-  if (next === "harvested") crop.harvestDateActual = nowIso();
-  crop.updatedAt = nowIso();
-  return decorateCrop(crop);
+  // Stamp the relevant date when crossing a milestone; also advance
+  // the growth stage to keep the two columns roughly in sync.
+  const stageFor = {
+    seeding: "seedling",
+    growing: "vegetative",
+    flowering: "flowering",
+    harvested: "harvest",
+    completed: "harvest",
+  };
+  const updates = { status: next, updatedAt: nowIso() };
+  if (stageFor[next]) updates.growthStage = stageFor[next];
+  if (next === "seeding" && !cycleRows[index].dateSeeded) {
+    updates.dateSeeded = nowIso();
+  }
+  if (next === "harvested" && !cycleRows[index].actualHarvestDate) {
+    updates.actualHarvestDate = nowIso();
+  }
+
+  cycleRows[index] = { ...cycleRows[index], ...updates };
+  return decorateCycle(cycleRows[index]);
 }
 
-export async function listCropTypes() {
-  await latency();
-  return cropTypeRows;
+/**
+ * Convenience helper for the catalog — synchronous, used by the
+ * cycle form so it can show a chip with target conditions without a
+ * round-trip through the API.
+ */
+export function getCatalogCrop(id) {
+  return findCrop(id) ?? null;
 }

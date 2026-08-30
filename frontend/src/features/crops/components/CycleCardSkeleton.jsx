@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-const CropCardSkeleton = () => {
+const CycleCardSkeleton = () => {
   return (
     <div className="glass-card texture-paper relative flex h-full flex-col overflow-hidden rounded-3xl">
       {/* Hero band */}
@@ -19,17 +19,30 @@ const CropCardSkeleton = () => {
           </div>
         </div>
 
-        {/* Pills row — type + quantity */}
+        {/* Pills row — category + plant count */}
         <div className="mt-2 flex items-center gap-1.5">
-          <Skeleton className="h-4 w-14 rounded-full" />
+          <Skeleton className="h-4 w-16 rounded-full" />
           <Skeleton className="h-4 w-20 rounded-full" />
+        </div>
+
+        {/* Targets strip */}
+        <div className="mt-2 grid grid-cols-3 gap-1.5 rounded-xl border border-border/30 bg-muted/25 px-2 py-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <Skeleton className="size-5 rounded-md" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <Skeleton className="h-2 w-6" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Timeline strip */}
         <div className="mt-2 rounded-xl border border-border/30 bg-muted/25 px-3 py-2">
           <div className="flex items-center justify-between">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-20" />
           </div>
           <Skeleton className="mt-2 h-1.5 w-full rounded-full" />
         </div>
@@ -39,7 +52,7 @@ const CropCardSkeleton = () => {
       <div className="relative flex items-center justify-between border-t border-border/40 bg-muted/25 px-3.5 py-1.5">
         <Skeleton className="h-3 w-24" />
         <div className="flex gap-2">
-          <Skeleton className="h-8 w-24 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
           <Skeleton className="size-8 rounded-lg" />
         </div>
       </div>
@@ -47,4 +60,4 @@ const CropCardSkeleton = () => {
   );
 };
 
-export default CropCardSkeleton;
+export default CycleCardSkeleton;

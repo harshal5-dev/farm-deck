@@ -1,7 +1,7 @@
 import { IconPlant2, IconCirclePlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-const EmptyCrops = ({ onAdd, canAdd = true }) => {
+const EmptyCycles = ({ onAdd, canAdd = true }) => {
   return (
     <div className="glass-card texture-paper highlight-edge relative w-full max-w-xl overflow-hidden rounded-3xl py-16 text-center">
       <div className="pointer-events-none absolute -top-10 left-1/2 size-48 -translate-x-1/2 rounded-full bg-leaf/10 blur-3xl" />
@@ -14,18 +14,18 @@ const EmptyCrops = ({ onAdd, canAdd = true }) => {
         </div>
         <div className="space-y-1.5">
           <h3 className="font-heading text-lg font-semibold tracking-tight">
-            No crops match your filters
+            No cycles match your filters
           </h3>
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">
             {canAdd
-              ? "Try adjusting your search or plan a new crop cycle on one of your fields."
-              : "Try adjusting your filters — only managers and growers can add crops."}
+              ? "Try adjusting your search or plan a new planting on one of your fields."
+              : "Try adjusting your filters — only managers and growers can add cycles."}
           </p>
         </div>
         {canAdd && onAdd && (
           <Button onClick={onAdd} className="mt-2 gap-2">
             <IconCirclePlus className="size-4" strokeWidth={1.85} />
-            Plan a crop
+            Plan a cycle
           </Button>
         )}
       </div>
@@ -33,4 +33,4 @@ const EmptyCrops = ({ onAdd, canAdd = true }) => {
   );
 };
 
-export default EmptyCrops;
+export default EmptyCycles;

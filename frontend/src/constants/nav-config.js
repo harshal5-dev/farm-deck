@@ -68,7 +68,6 @@ export const NAV_GROUPS = [
         href: "/app/harvests",
         icon: IconBasket,
         permission: PERMISSIONS.VIEW_HARVESTS,
-        comingSoon: true,
       },
     ],
   },

@@ -2,59 +2,62 @@ import { useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { IconArrowLeft, IconPlant2 } from "@tabler/icons-react";
+import { IconArrowLeft, IconBook } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { getCropType } from "../constants";
-import CropForm from "../components/crop-form/CropForm";
+import CropCatalogForm from "../components/crop-catalog-form/CropCatalogForm";
 import { useUpdateCropMutation } from "../cropApi";
-import { clearSelectedCrop, selectSelectedCrop } from "../selectedCropSlice";
+import {
+  clearSelectedCatalogCrop,
+  selectSelectedCatalogCrop,
+} from "../selectedCatalogCropSlice";
 
-/**
- * Map a stored crop onto the form's field shape. Crop records arrive
- * decorated from the list (cropType lookup row included).
- */
+const asString = (v) => (v === 0 || v ? String(v) : "");
+
 const toFormDefaults = (crop) => ({
-  zoneId: crop.zoneId || "",
-  cropTypeId: crop.cropTypeId || "",
-  variety: crop.variety || "",
-  status: crop.status || "planned",
-  sowDate: crop.sowDatePlanned || crop.sowDateActual || "",
-  harvestDateExpected: crop.harvestDateExpected || "",
-  quantity: crop.quantity != null ? String(crop.quantity) : "",
-  quantityUnit: crop.quantityUnit || "plants",
+  name: crop.name || "",
+  category: crop.category || "leafy_green",
+  targetPhMin: asString(crop.targetPhMin),
+  targetPhMax: asString(crop.targetPhMax),
+  targetEcMin: asString(crop.targetEcMin),
+  targetEcMax: asString(crop.targetEcMax),
+  targetPpmMin: asString(crop.targetPpmMin),
+  targetPpmMax: asString(crop.targetPpmMax),
+  daysToHarvest: asString(crop.daysToHarvest),
+  lightHoursPerDay: asString(crop.lightHoursPerDay),
   notes: crop.notes || "",
 });
 
 const EditCrop = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const crop = useSelector(selectSelectedCrop);
+  const crop = useSelector(selectSelectedCatalogCrop);
   const [updateCrop, { isLoading: submitting }] = useUpdateCropMutation();
   const { canManageCrops } = usePermissions();
 
   useEffect(() => {
     if (!crop) {
-      navigate("/app/crops", { replace: true });
+      navigate("/app/crops?tab=catalog", { replace: true });
     }
   }, [crop, navigate]);
 
-  if (!canManageCrops) return <Navigate to="/app/crops" replace />;
+  if (!canManageCrops) return <Navigate to="/app/crops?tab=catalog" replace />;
 
   if (!crop) {
     return (
       <div className="space-y-4">
         <Link
-          to="/app/crops"
+          to="/app/crops?tab=catalog"
           className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <IconArrowLeft
             className="size-4 transition-transform group-hover:-translate-x-0.5"
             strokeWidth={1.75}
           />
-          Back to Crops
+          Back to Catalog
         </Link>
         <div className="glass-card texture-paper highlight-edge rounded-3xl p-10 text-center">
           <h2 className="font-heading text-lg font-semibold tracking-tight">
@@ -65,27 +68,28 @@ const EditCrop = () => {
           </p>
           <Button
             className="mt-4"
-            onClick={() => navigate("/app/crops", { replace: true })}
+            onClick={() =>
+              navigate("/app/crops?tab=catalog", { replace: true })
+            }
           >
-            Back to crops
+            Back to catalog
           </Button>
         </div>
       </div>
     );
   }
 
-  const typeName = crop.cropType?.name;
-  const t = getCropType(typeName);
+  const t = getCropType(crop.category);
   const TypeIcon = t.icon;
 
   const handleSubmit = async (values) => {
     try {
       const updated = await updateCrop({ id: crop.id, ...values }).unwrap();
-      dispatch(clearSelectedCrop());
+      dispatch(clearSelectedCatalogCrop());
       toast.success("Crop updated", {
         description: `${updated.name}'s details have been saved.`,
       });
-      navigate("/app/crops", { replace: true });
+      navigate("/app/crops?tab=catalog", { replace: true });
     } catch (err) {
       toast.error("Could not update crop", {
         description: err?.data?.error?.message || "Please try again.",
@@ -94,28 +98,26 @@ const EditCrop = () => {
   };
 
   const handleCancel = () => {
-    dispatch(clearSelectedCrop());
-    navigate("/app/crops");
+    dispatch(clearSelectedCatalogCrop());
+    navigate("/app/crops?tab=catalog");
   };
 
   return (
     <div className="flex flex-col lg:h-full lg:min-h-0">
-      {/* ===== Compact back link ===== */}
       <Reveal duration={350}>
         <Link
-          to="/app/crops"
-          onClick={() => dispatch(clearSelectedCrop())}
+          to="/app/crops?tab=catalog"
+          onClick={() => dispatch(clearSelectedCatalogCrop())}
           className="group mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <IconArrowLeft
             className="size-3.5 transition-transform group-hover:-translate-x-0.5"
             strokeWidth={1.85}
           />
-          Back to Crops
+          Back to Catalog
         </Link>
       </Reveal>
 
-      {/* ===== Hero — compact, no scroll ===== */}
       <Reveal delay={60} duration={450}>
         <div className="glass-card texture-paper highlight-edge relative mb-4 overflow-hidden rounded-2xl">
           <div
@@ -157,7 +159,7 @@ const EditCrop = () => {
                       t.text
                     )}
                   >
-                    <IconPlant2 className="size-2.5" strokeWidth={2.2} />
+                    <IconBook className="size-2.5" strokeWidth={2.2} />
                     {t.label}
                   </span>
                 </div>
@@ -165,7 +167,7 @@ const EditCrop = () => {
                   Edit crop
                 </h1>
                 <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-                  Update {crop.name} on {crop.zoneName}.
+                  Update {crop.name} in the catalog.
                 </p>
               </div>
             </div>
@@ -173,10 +175,9 @@ const EditCrop = () => {
         </div>
       </Reveal>
 
-      {/* ===== Form body ===== */}
       <Reveal delay={140} duration={500}>
         <div className="glass-card texture-paper highlight-edge flex flex-col rounded-2xl p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
-          <CropForm
+          <CropCatalogForm
             mode="edit"
             defaultValues={toFormDefaults(crop)}
             onSubmit={handleSubmit}

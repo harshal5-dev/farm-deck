@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { RequiredLegend } from "@/components/ui/field-indicators";
 import FarmForm from "@/features/farms/components/farm-form/FarmForm";
 import ZoneForm from "@/features/fields/components/zone-form/ZoneForm";
-import CropForm from "@/features/crops/components/crop-form/CropForm";
+import CycleForm from "@/features/crops/components/cycle-form/CycleForm";
 import { zoneApi } from "@/features/fields/zoneApi";
 import { useCreateSetupFarmMutation, useListSetupFarmTypesQuery } from "../setupApi";
 
@@ -214,7 +214,7 @@ export const FieldsStep = ({
 );
 
 /* ------------------------------------------------------------------ */
-/*  Step 3 — crops (existing CropForm, first field preselected)        */
+/*  Step 3 — cycles (existing CycleForm, first field preselected)      */
 /* ------------------------------------------------------------------ */
 export const CropsStep = ({
   farm,
@@ -228,13 +228,13 @@ export const CropsStep = ({
 }) => (
   <div className="flex flex-col gap-3">
     <StepHint icon={IconCirclePlus}>
-      Plan what's growing on {farm.name}. Pick a field, choose the crop,
-      set a sow date — the cycle advances as it grows.
+      Plan what's growing on {farm.name}. Pick a crop from the catalog,
+      set a seed date — the cycle advances as it grows.
     </StepHint>
-    <CropForm
+    <CycleForm
       key={createdKey}
       mode="create"
-      defaultValues={zones[0] ? { zoneId: zones[0].id } : undefined}
+      initialZoneId={zones[0]?.id}
       onSubmit={onSubmit}
       submitting={submitting}
       onCancel={onExit}

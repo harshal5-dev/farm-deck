@@ -2,25 +2,36 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import * as cropDb from "./mock/cropDb";
 
 /**
- * Crop API — currently MOCK-BACKED (same pattern as zoneApi).
+ * Crop API — currently MOCK-BACKED.
  *
- * Swapping to the real module later is mechanical: replace each
- * `queryFn` with a `query` against the shared baseQuery. Response
- * shapes already match the app envelope.
+ * Two surfaces that mirror the backend schema:
+ *
+ *   • Catalog (`/crops/`)     — CRUD on the `crops` table (varieties
+ *                                with target pH / EC / PPM / light /
+ *                                days-to-harvest).
+ *   • Cycles  (`/cycles/`)    — CRUD on the `cycles` table (one
+ *                                planting per row, with status and
+ *                                growth_stage lifecycle).
  *
  * Planned routes:
- *   GET    /crops/            → list  { data: { crops } }
- *   POST   /crops/            → create
- *   PUT    /crops/:id         → update (full replace)
- *   PATCH  /crops/:id/advance → happy-path status advance
- *   GET    /lookups/crop-types
+ *   GET    /crops/                      → list  { data: { crops } }
+ *   POST   /crops/                      → create
+ *   PUT    /crops/:id                   → update
+ *   PATCH  /crops/:id/inactivate   → soft delete
+ *   PATCH  /crops/:id/activate     → reactivate
+ *
+ *   GET    /cycles/                     → list  { data: { cycles } }
+ *   POST   /cycles/                     → create
+ *   PUT    /cycles/:id                  → update
+ *   PATCH  /cycles/:id/advance          → happy-path status advance
  */
 
 export const cropApi = createApi({
   reducerPath: "cropApi",
   baseQuery: () => ({ data: null }),
-  tagTypes: ["Crop"],
+  tagTypes: ["Crop", "Cycle"],
   endpoints: (builder) => ({
+    /* ---------- Catalog (crops table) ----------------------------- */
     listCrops: builder.query({
       queryFn: async () => {
         try {
@@ -54,10 +65,10 @@ export const cropApi = createApi({
       invalidatesTags: ["Crop"],
     }),
 
-    advanceCropStatus: builder.mutation({
+    inactivateCrop: builder.mutation({
       queryFn: async (id) => {
         try {
-          return { data: await cropDb.advanceCropStatus(id) };
+          return { data: await cropDb.inactivateCrop(id) };
         } catch (error) {
           return { error };
         }
@@ -65,22 +76,74 @@ export const cropApi = createApi({
       invalidatesTags: ["Crop"],
     }),
 
-    listCropTypes: builder.query({
-      queryFn: async () => {
+    activateCrop: builder.mutation({
+      queryFn: async (id) => {
         try {
-          return { data: await cropDb.listCropTypes() };
+          return { data: await cropDb.activateCrop(id) };
         } catch (error) {
           return { error };
         }
       },
+      invalidatesTags: ["Crop"],
+    }),
+
+    /* ---------- Cycles (cycles table) ----------------------------- */
+    listCycles: builder.query({
+      queryFn: async () => {
+        try {
+          return { data: await cropDb.listCycles() };
+        } catch (error) {
+          return { error };
+        }
+      },
+      providesTags: ["Cycle"],
+    }),
+
+    createCycle: builder.mutation({
+      queryFn: async (cycle) => {
+        try {
+          return { data: await cropDb.createCycle(cycle) };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["Cycle"],
+    }),
+
+    updateCycle: builder.mutation({
+      queryFn: async (patch) => {
+        try {
+          return { data: await cropDb.updateCycle(patch) };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["Cycle"],
+    }),
+
+    advanceCycleStatus: builder.mutation({
+      queryFn: async (id) => {
+        try {
+          return { data: await cropDb.advanceCycleStatus(id) };
+        } catch (error) {
+          return { error };
+        }
+      },
+      invalidatesTags: ["Cycle"],
     }),
   }),
 });
 
 export const {
+  /* Catalog */
   useListCropsQuery,
   useCreateCropMutation,
   useUpdateCropMutation,
-  useAdvanceCropStatusMutation,
-  useListCropTypesQuery,
+  useInactivateCropMutation,
+  useActivateCropMutation,
+  /* Cycles */
+  useListCyclesQuery,
+  useCreateCycleMutation,
+  useUpdateCycleMutation,
+  useAdvanceCycleStatusMutation,
 } = cropApi;

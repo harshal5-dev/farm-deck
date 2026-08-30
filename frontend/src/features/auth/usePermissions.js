@@ -18,6 +18,7 @@ export function usePermissions() {
       canManageFields:  hasPermission(role, PERMISSIONS.MANAGE_FIELDS),
       canViewCrops:     hasPermission(role, PERMISSIONS.VIEW_CROPS),
       canManageCrops:   hasPermission(role, PERMISSIONS.MANAGE_CROPS),
+      canViewHarvests: hasPermission(role, PERMISSIONS.VIEW_HARVESTS),
       canLogHarvests:   hasPermission(role, PERMISSIONS.LOG_HARVESTS),
       canManageBilling: hasPermission(role, PERMISSIONS.MANAGE_BILLING),
     }),

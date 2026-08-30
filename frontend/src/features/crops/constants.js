@@ -9,45 +9,30 @@ import {
   IconCircleCheck,
   IconFlame,
   IconGrain,
-  IconGrape,
+  IconLeaf,
   IconMushroom,
   IconPlant,
   IconPlant2,
   IconSalad,
   IconSeedling,
+  IconSun,
 } from "@tabler/icons-react";
 
 /**
- * Crop-type config — visual metadata keyed by the lookup `name`
- * (mirrors a future `crop_types` table). Same structure as
- * FARM_TYPES / ZONE_TYPES so cards, chips, pickers and pills all read
- * from one place.
- *
- * `category` picks the CropTypeArt scene (one illustration per plant
- * family rather than per crop — 6 scenes cover the catalog).
+ * Crop-catalog visual metadata — keyed by `category` from the `crops`
+ * table (DB schema enum: 'leafy_green' | 'herb' | 'fruiting' |
+ * 'microgreen' | 'root' | 'other'). The `name` field is the crop
+ * cultivar itself (e.g. "Genovese Basil"), so a single CROP_TYPES
+ * entry covers a whole family of crops; pickers and cards all read
+ * from here.
  */
 export const CROP_TYPES = {
-  tomato: {
-    id: "tomato",
-    label: "Tomato",
-    category: "fruiting",
-    tagline: "Fruiting vine",
-    description: "Staked or trellised fruiting crop — high-value greenhouse staple.",
-    icon: IconCherry,
-    text: "text-clay-deep dark:text-clay",
-    bg: "bg-clay/12 dark:bg-clay/15",
-    bgSoft: "bg-clay/8",
-    ring: "ring-clay/40",
-    border: "border-clay/30",
-    gradient: "from-clay to-clay-deep",
-    chip: "from-clay/20 to-clay/5 text-clay-deep dark:text-clay ring-clay/25",
-  },
-  lettuce: {
-    id: "lettuce",
-    label: "Lettuce",
-    category: "leafy",
-    tagline: "Leafy greens",
-    description: "Fast leafy greens — heads or cuts, ideal for hydro rafts.",
+  leafy_green: {
+    id: "leafy_green",
+    label: "Leafy green",
+    tagline: "Heads, cuts & baby greens",
+    description:
+      "Fast-turnover leafy crops — hydroponic rafts or field rows, harvested by the head or by the leaf.",
     icon: IconSalad,
     text: "text-leaf",
     bg: "bg-leaf/12 dark:bg-leaf/15",
@@ -57,12 +42,12 @@ export const CROP_TYPES = {
     gradient: "from-leaf to-sage-deep",
     chip: "from-leaf/20 to-leaf/5 text-leaf ring-leaf/25",
   },
-  basil: {
-    id: "basil",
-    label: "Basil",
-    category: "herb",
-    tagline: "Culinary herb",
-    description: "Aromatic herbs — pinch harvests, restaurant-ready premiums.",
+  herb: {
+    id: "herb",
+    label: "Herb",
+    tagline: "Aromatic culinary herbs",
+    description:
+      "Pinched and bunched — basil, mint, chives. Restaurant premiums on a steady cut cadence.",
     icon: IconPlant,
     text: "text-lagoon-deep dark:text-lagoon",
     bg: "bg-lagoon/12 dark:bg-lagoon/15",
@@ -72,27 +57,42 @@ export const CROP_TYPES = {
     gradient: "from-lagoon to-lagoon-deep",
     chip: "from-lagoon/20 to-lagoon/5 text-lagoon-deep dark:text-lagoon ring-lagoon/25",
   },
-  bell_pepper: {
-    id: "bell_pepper",
-    label: "Bell pepper",
-    category: "fruiting",
-    tagline: "Fruiting block",
-    description: "Coloured block peppers on the high-wire — long season crop.",
-    icon: IconFlame,
-    text: "text-wheat-deep dark:text-wheat",
-    bg: "bg-wheat/15 dark:bg-wheat/15",
-    bgSoft: "bg-wheat/10",
-    ring: "ring-wheat/40",
-    border: "border-wheat/30",
-    gradient: "from-wheat to-clay-deep",
-    chip: "from-wheat/25 to-wheat/5 text-wheat-deep dark:text-wheat ring-wheat/25",
+  fruiting: {
+    id: "fruiting",
+    label: "Fruiting",
+    tagline: "Trellised vines & bushes",
+    description:
+      "Staked or trellised fruiting crops — tomatoes, peppers, cucumbers, berries. Long season, high value.",
+    icon: IconCherry,
+    text: "text-clay-deep dark:text-clay",
+    bg: "bg-clay/12 dark:bg-clay/15",
+    bgSoft: "bg-clay/8",
+    ring: "ring-clay/40",
+    border: "border-clay/30",
+    gradient: "from-clay to-clay-deep",
+    chip: "from-clay/20 to-clay/5 text-clay-deep dark:text-clay ring-clay/25",
   },
-  carrot: {
-    id: "carrot",
-    label: "Carrot",
-    category: "root",
-    tagline: "Root vegetable",
-    description: "Direct-sown roots — loose soil, steady water, sweet harvest.",
+  microgreen: {
+    id: "microgreen",
+    label: "Microgreen",
+    tagline: "10-day trays",
+    description:
+      "Tray-grown shoots — the fastest cash crop. Dense seeding, cut at cotyledon.",
+    icon: IconSeedling,
+    text: "text-leaf",
+    bg: "bg-leaf/10 dark:bg-leaf/12",
+    bgSoft: "bg-leaf/6",
+    ring: "ring-leaf/30",
+    border: "border-leaf/25",
+    gradient: "from-sage to-leaf",
+    chip: "from-sage/20 to-leaf/5 text-leaf ring-leaf/20",
+  },
+  root: {
+    id: "root",
+    label: "Root",
+    tagline: "Direct-sown roots",
+    description:
+      "Below-ground harvests — carrots, beets, radishes, turnips. Loose soil, steady water.",
     icon: IconCarrot,
     text: "text-wheat-deep dark:text-wheat",
     bg: "bg-wheat/15 dark:bg-wheat/15",
@@ -102,90 +102,49 @@ export const CROP_TYPES = {
     gradient: "from-wheat-deep to-clay",
     chip: "from-wheat/25 to-clay/5 text-wheat-deep dark:text-wheat ring-wheat/25",
   },
-  apple: {
-    id: "apple",
-    label: "Apple",
-    category: "fruiting",
-    tagline: "Orchard tree",
-    description: "Permanent orchard blocks — blossoms, thinning, then bins.",
-    icon: IconApple,
-    text: "text-leaf",
-    bg: "bg-leaf/12 dark:bg-leaf/15",
-    bgSoft: "bg-leaf/8",
-    ring: "ring-leaf/40",
-    border: "border-leaf/30",
-    gradient: "from-leaf to-wheat-deep",
-    chip: "from-leaf/20 to-wheat/5 text-leaf ring-leaf/25",
-  },
-  berries: {
-    id: "berries",
-    label: "Berries",
-    category: "vine",
-    tagline: "Trellised canes",
-    description: "Trailing canes on trellises — u-pick and fresh market.",
-    icon: IconGrape,
-    text: "text-lagoon-deep dark:text-lagoon",
-    bg: "bg-lagoon/12 dark:bg-lagoon/15",
-    bgSoft: "bg-lagoon/8",
-    ring: "ring-lagoon/40",
-    border: "border-lagoon/30",
-    gradient: "from-sky-warm to-lagoon-deep",
-    chip: "from-sky-warm/20 to-lagoon/5 text-lagoon-deep dark:text-lagoon ring-lagoon/25",
-  },
-  mushroom: {
-    id: "mushroom",
-    label: "Mushroom",
-    category: "fungi",
-    tagline: "Gourmet fungi",
-    description: "Oyster, lion's mane, shiitake — humidity and CO₂ managed.",
+  other: {
+    id: "other",
+    label: "Specialty",
+    tagline: "Orchards, fungi & niche",
+    description:
+      "Permanent blocks, mushrooms and other long-cycle crops — managed by season, not by tray.",
     icon: IconMushroom,
-    text: "text-clay-deep dark:text-clay",
-    bg: "bg-clay/12 dark:bg-clay/15",
-    bgSoft: "bg-clay/8",
-    ring: "ring-clay/40",
-    border: "border-clay/30",
-    gradient: "from-clay to-wheat-deep",
-    chip: "from-clay/25 to-clay/5 text-clay-deep dark:text-clay ring-clay/30",
-  },
-  microgreens: {
-    id: "microgreens",
-    label: "Microgreens",
-    category: "leafy",
-    tagline: "10-day turn",
-    description: "Tray-grown shoots — the fastest cash crop in the book.",
-    icon: IconSeedling,
-    text: "text-leaf",
-    bg: "bg-leaf/12 dark:bg-leaf/15",
-    bgSoft: "bg-leaf/8",
-    ring: "ring-leaf/40",
-    border: "border-leaf/30",
-    gradient: "from-sage to-leaf",
-    chip: "from-sage/20 to-leaf/5 text-leaf ring-leaf/25",
+    text: "text-sage-deep dark:text-sage",
+    bg: "bg-sage/12 dark:bg-sage/15",
+    bgSoft: "bg-sage/8",
+    ring: "ring-sage/40",
+    border: "border-sage/30",
+    gradient: "from-sage-deep to-leaf",
+    chip: "from-sage/20 to-sage-deep/5 text-sage-deep dark:text-sage ring-sage/25",
   },
 };
 
+/** Catalog category ordering used by chips, pickers and counts. */
 export const CROP_TYPE_ORDER = [
-  "tomato",
-  "lettuce",
-  "basil",
-  "bell_pepper",
-  "carrot",
-  "apple",
-  "berries",
-  "mushroom",
-  "microgreens",
+  "leafy_green",
+  "herb",
+  "fruiting",
+  "microgreen",
+  "root",
+  "other",
 ];
 
 export function getCropType(id) {
-  return CROP_TYPES[id] || CROP_TYPES.tomato;
+  return CROP_TYPES[id] || CROP_TYPES.other;
 }
 
 /**
- * Crop lifecycle — the rich status lives HERE (on the planting/crop
- * cycle), not on the zone. Terminal rows are kept as history.
+ * Cycle lifecycle — the rich status lives on the planting cycle, not
+ * on the zone. Mirrors the `cycles.status` CHECK constraint:
  *
- *   planned → sown → growing → harvest_ready → harvested
- *      ↘ cancelled              ↘ failed
+ *   planned → seeding → growing → flowering → harvested → completed
+ *      ↘ cancelled                ↘ failed
+ *
+ * `harvested` is the operator-confirmed pick date; `completed` is
+ * when the cycle is closed out (yield logs, residue cleared). For
+ * short-cycle crops they're effectively the same day; long crops
+ * (orchards) may sit in `harvested` across multiple picks before
+ * closing.
  */
 export const CROP_STATUS_META = {
   planned: {
@@ -197,12 +156,12 @@ export const CROP_STATUS_META = {
     dot: "bg-sky-500",
     chip: "border-sky-500/30 bg-sky-500/12 text-sky-700 dark:text-sky-400",
   },
-  sown: {
-    id: "sown",
-    label: "Sown",
+  seeding: {
+    id: "seeding",
+    label: "Seeding",
     group: "active",
     description: "Seeds in, transplants placed.",
-    icon: IconGrain,
+    icon: IconSeedling,
     dot: "bg-lagoon",
     chip:
       "border-lagoon/30 bg-lagoon/12 text-lagoon-deep dark:text-lagoon",
@@ -216,21 +175,30 @@ export const CROP_STATUS_META = {
     dot: "bg-leaf",
     chip: "border-leaf/30 bg-leaf/12 text-leaf",
   },
-  harvest_ready: {
-    id: "harvest_ready",
-    label: "Ready",
+  flowering: {
+    id: "flowering",
+    label: "Flowering",
     group: "active",
-    description: "Mature — waiting on the picking crew.",
+    description: "Blooms open — pollination window.",
+    icon: IconSun,
+    dot: "bg-wheat",
+    chip: "border-wheat/30 bg-wheat/15 text-wheat-deep dark:text-wheat",
+  },
+  harvested: {
+    id: "harvested",
+    label: "Harvested",
+    group: "active",
+    description: "Crop picked — yield log pending.",
     icon: IconBasket,
     dot: "bg-amber-500",
     chip:
       "border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-400",
   },
-  harvested: {
-    id: "harvested",
-    label: "Harvested",
+  completed: {
+    id: "completed",
+    label: "Completed",
     group: "done",
-    description: "Cycle complete — yields recorded.",
+    description: "Cycle closed out — yields recorded, residue cleared.",
     icon: IconCircleCheck,
     dot: "bg-emerald-500",
     chip:
@@ -258,10 +226,11 @@ export const CROP_STATUS_META = {
 
 export const CROP_STATUS_ORDER = [
   "planned",
-  "sown",
+  "seeding",
   "growing",
-  "harvest_ready",
+  "flowering",
   "harvested",
+  "completed",
   "failed",
   "cancelled",
 ];
@@ -275,11 +244,20 @@ export const CROP_STATUS_FILTERS = [
   { id: "all", label: "All", statuses: CROP_STATUS_ORDER },
   {
     id: "active",
-    label: "Growing",
-    statuses: ["planned", "sown", "growing", "harvest_ready"],
+    label: "Active",
+    statuses: ["planned", "seeding", "growing", "flowering", "harvested"],
   },
-  { id: "ready", label: "Ready", statuses: ["harvest_ready"] },
-  { id: "done", label: "Done", statuses: ["harvested", "failed", "cancelled"] },
+  {
+    id: "flowering",
+    label: "Flowering",
+    statuses: ["flowering"],
+  },
+  { id: "ready", label: "Ready", statuses: ["harvested"] },
+  {
+    id: "done",
+    label: "Closed",
+    statuses: ["completed", "failed", "cancelled"],
+  },
 ];
 
 /**
@@ -287,33 +265,104 @@ export const CROP_STATUS_FILTERS = [
  * on the card read from here; the edit form allows any status.
  */
 export const CROP_NEXT_ACTION = {
-  planned: { to: "sown", label: "Mark sown", icon: IconGrain },
-  sown: { to: "growing", label: "Mark growing", icon: IconPlant2 },
-  growing: {
-    to: "harvest_ready",
-    label: "Mark ready",
+  planned: { to: "seeding", label: "Start seeding", icon: IconSeedling },
+  seeding: { to: "growing", label: "Mark growing", icon: IconPlant2 },
+  growing: { to: "flowering", label: "Mark flowering", icon: IconSun },
+  flowering: {
+    to: "harvested",
+    label: "Mark harvested",
     icon: IconBasket,
   },
-  harvest_ready: {
-    to: "harvested",
-    label: "Complete harvest",
+  harvested: {
+    to: "completed",
+    label: "Close cycle",
     icon: IconCircleCheck,
   },
 };
 
 /**
- * Quantity units for what was planted — free-form column on the
- * backend, suggested here.
+ * Growth-stage metadata — the fine-grained stage tracked per cycle
+ * alongside `status`. Mirrors the `cycles.growth_stage` CHECK
+ * constraint:
+ *
+ *   seedling → vegetative → flowering → fruiting → harvest
+ *
+ * A cycle's growth_stage can move faster or slower than the coarse
+ * status (e.g. status=growing while stage=flowering during a heat
+ * wave) — the form lets you set both.
  */
-export const QUANTITY_UNITS = [
-  { id: "plants", label: "plants" },
-  { id: "trays", label: "trays" },
-  { id: "seeds", label: "seeds" },
-  { id: "sq_m", label: "m²" },
-  { id: "rows", label: "rows" },
-  { id: "acres", label: "acres" },
+export const GROWTH_STAGE_META = {
+  seedling: {
+    id: "seedling",
+    label: "Seedling",
+    description: "Cotyledons out, true leaves forming.",
+    icon: IconSeedling,
+    dot: "bg-lagoon",
+    chip:
+      "border-lagoon/30 bg-lagoon/12 text-lagoon-deep dark:text-lagoon",
+  },
+  vegetative: {
+    id: "vegetative",
+    label: "Vegetative",
+    description: "Leaf and root mass building.",
+    icon: IconLeaf,
+    dot: "bg-leaf",
+    chip: "border-leaf/30 bg-leaf/12 text-leaf",
+  },
+  flowering: {
+    id: "flowering",
+    label: "Flowering",
+    description: "Blooms setting.",
+    icon: IconSun,
+    dot: "bg-wheat",
+    chip: "border-wheat/30 bg-wheat/15 text-wheat-deep dark:text-wheat",
+  },
+  fruiting: {
+    id: "fruiting",
+    label: "Fruiting",
+    description: "Fruit set and fill.",
+    icon: IconCherry,
+    dot: "bg-clay-deep",
+    chip: "border-clay/30 bg-clay/12 text-clay-deep dark:text-clay",
+  },
+  harvest: {
+    id: "harvest",
+    label: "Harvest",
+    description: "Ready to pick.",
+    icon: IconBasket,
+    dot: "bg-amber-500",
+    chip:
+      "border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-400",
+  },
+};
+
+export const GROWTH_STAGE_ORDER = [
+  "seedling",
+  "vegetative",
+  "flowering",
+  "fruiting",
+  "harvest",
 ];
 
-export function getQuantityUnit(id) {
-  return QUANTITY_UNITS.find((u) => u.id === id) || QUANTITY_UNITS[0];
+export function getGrowthStage(id) {
+  return GROWTH_STAGE_META[id] || GROWTH_STAGE_META.seedling;
 }
+
+/**
+ * Display icon set for catalog thumbnails — reuses Tabler icons the
+ * rest of the app already pulls. Picking the icon here keeps the
+ * catalog cards visually distinct from CROP_TYPES (which key off
+ * the family of the crop, not the cultivar).
+ */
+export const CROP_VARIETY_ICONS = [
+  IconCherry,
+  IconApple,
+  IconLeaf,
+  IconPlant,
+  IconCarrot,
+  IconSalad,
+  IconSeedling,
+  IconMushroom,
+  IconFlame,
+  IconGrain,
+];

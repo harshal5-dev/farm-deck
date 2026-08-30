@@ -7,7 +7,19 @@ import {
 } from "@/features/members";
 import { farmApi, selectedFarmReducer } from "@/features/farms";
 import { zoneApi, selectedZoneReducer } from "@/features/fields";
-import { cropApi, selectedCropReducer } from "@/features/crops";
+import {
+  cropApi,
+  selectedCycleReducer,
+  selectedCatalogCropReducer,
+} from "@/features/crops";
+import {
+  dailyLogApi,
+  selectedDailyLogReducer,
+} from "@/features/daily-logs";
+import {
+  harvestApi,
+  selectedHarvestReducer,
+} from "@/features/harvests";
 import { setupApi } from "@/features/setup";
 import { lookupsApi } from "@/features/lookups";
 
@@ -17,13 +29,18 @@ export const store = configureStore({
     selectedMember: selectedMemberReducer,
     selectedFarm: selectedFarmReducer,
     selectedZone: selectedZoneReducer,
-    selectedCrop: selectedCropReducer,
+    selectedCycle: selectedCycleReducer,
+    selectedCatalogCrop: selectedCatalogCropReducer,
+    selectedDailyLog: selectedDailyLogReducer,
+    selectedHarvest: selectedHarvestReducer,
     [authApi.reducerPath]: authApi.reducer,
     [ProfileApi.reducerPath]: ProfileApi.reducer,
     [memberApi.reducerPath]: memberApi.reducer,
     [farmApi.reducerPath]: farmApi.reducer,
     [zoneApi.reducerPath]: zoneApi.reducer,
     [cropApi.reducerPath]: cropApi.reducer,
+    [dailyLogApi.reducerPath]: dailyLogApi.reducer,
+    [harvestApi.reducerPath]: harvestApi.reducer,
     [setupApi.reducerPath]: setupApi.reducer,
     [lookupsApi.reducerPath]: lookupsApi.reducer,
   },
@@ -35,6 +52,8 @@ export const store = configureStore({
       farmApi.middleware,
       zoneApi.middleware,
       cropApi.middleware,
+      dailyLogApi.middleware,
+      harvestApi.middleware,
       setupApi.middleware,
       lookupsApi.middleware,
     ),
