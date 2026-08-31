@@ -16,7 +16,7 @@ import (
 
 type Services struct {
 	Auth   auth.AuthService
-	Email  email.EmailService
+	Email  email.MailService
 	User   user.UserService
 	Tenant tenant.TenantService
 	Lookup lookup.LookupService

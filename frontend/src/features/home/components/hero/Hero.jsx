@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import HeroArtCard from "./HeroArtCard";
+import { REPO_URL } from "../../constants";
 
 const Hero = ({ appLink, isAuthenticated = false }) => {
   const primaryCta = isAuthenticated
@@ -104,7 +105,7 @@ const Hero = ({ appLink, isAuthenticated = false }) => {
                 </Button>
               </Link>
               <a
-                href="https://github.com/harshal5-dev/farm-deck"
+                href={REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >

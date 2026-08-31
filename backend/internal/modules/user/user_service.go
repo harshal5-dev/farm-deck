@@ -24,11 +24,11 @@ type UserService interface {
 
 type UserServiceImpl struct {
 	userRepo     repository.UserRepo
-	emailService email.EmailService
+	emailService email.MailService
 	cfg          config.Config
 }
 
-func NewUserService(userRepo repository.UserRepo, emailService email.EmailService, cfg config.Config) UserService {
+func NewUserService(userRepo repository.UserRepo, emailService email.MailService, cfg config.Config) UserService {
 	return &UserServiceImpl{
 		userRepo:     userRepo,
 		emailService: emailService,

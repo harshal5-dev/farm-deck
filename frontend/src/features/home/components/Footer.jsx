@@ -1,5 +1,14 @@
 import { Link } from "react-router-dom";
+import {
+  IconBrandGithub,
+  IconBrandLinkedin,
+} from "@tabler/icons-react";
 import Logo from "@/components/layout/Logo";
+import {
+  GITHUB_PROFILE_URL,
+  LINKEDIN_URL,
+  REPO_URL,
+} from "../constants";
 
 const Footer = ({ appLink, isAuthenticated = false }) => {
   const authLink = isAuthenticated
@@ -74,7 +83,7 @@ const Footer = ({ appLink, isAuthenticated = false }) => {
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <a
-                  href="https://github.com/harshal5-dev/farm-deck"
+                  href={REPO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
@@ -91,12 +100,32 @@ const Footer = ({ appLink, isAuthenticated = false }) => {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>
             © {new Date().getFullYear()} Farmdeck · Built with Go, Gin,
             PostgreSQL & React
           </p>
-          <p className="font-mono">portfolio.project</p>
+          <div className="flex items-center gap-1">
+            <a
+              href={GITHUB_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub profile"
+              className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-foreground/5 hover:text-foreground"
+            >
+              <IconBrandGithub className="size-4" strokeWidth={1.85} />
+            </a>
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn profile"
+              className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-foreground/5 hover:text-foreground"
+            >
+              <IconBrandLinkedin className="size-4" strokeWidth={1.85} />
+            </a>
+            <p className="ml-3 font-mono">portfolio.project</p>
+          </div>
         </div>
       </div>
     </footer>

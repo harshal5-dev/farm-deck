@@ -3,13 +3,20 @@ import { Button } from "@/components/ui/button";
 import {
   IconArrowRight,
   IconBrandGithub,
+  IconBrandLinkedin,
   IconHeartHandshake,
   IconLayoutDashboard,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import StatTile from "./StatTile";
-import { highlights, stats } from "../../constants";
+import {
+  GITHUB_PROFILE_URL,
+  LINKEDIN_URL,
+  REPO_URL,
+  highlights,
+  stats,
+} from "../../constants";
 
 
 const About = ({ appLink, isAuthenticated = false }) => {
@@ -50,21 +57,41 @@ const About = ({ appLink, isAuthenticated = false }) => {
               to learn and demonstrate real-world full-stack engineering.
             </p>
 
-            <a
-              href="https://github.com/harshal5-dev/farm-deck"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-leaf transition-colors hover:text-leaf/80"
-            >
-              <span className="flex size-9 items-center justify-center rounded-lg bg-leaf/10 ring-1 ring-leaf/20 transition-transform group-hover:scale-105">
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 text-sm font-semibold text-leaf transition-colors hover:text-leaf/80"
+              >
+                <span className="flex size-9 items-center justify-center rounded-lg bg-leaf/10 ring-1 ring-leaf/20 transition-transform group-hover:scale-105">
+                  <IconBrandGithub className="size-4" strokeWidth={1.85} />
+                </span>
+                Explore the repository
+                <IconArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-0.5"
+                  strokeWidth={2.2}
+                />
+              </a>
+              <a
+                href={GITHUB_PROFILE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
                 <IconBrandGithub className="size-4" strokeWidth={1.85} />
-              </span>
-              Explore the repository
-              <IconArrowRight
-                className="size-4 transition-transform group-hover:translate-x-0.5"
-                strokeWidth={2.2}
-              />
-            </a>
+                GitHub profile
+              </a>
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <IconBrandLinkedin className="size-4" strokeWidth={1.85} />
+                LinkedIn
+              </a>
+            </div>
           </Reveal>
 
           <Reveal trigger="scroll" delay={120} duration={500}>

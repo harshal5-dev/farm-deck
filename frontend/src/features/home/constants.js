@@ -8,6 +8,8 @@ export const navLinks = [
 
 
 export const REPO_URL = "https://github.com/harshal5-dev/farm-deck";
+export const GITHUB_PROFILE_URL = "https://github.com/harshal5-dev";
+export const LINKEDIN_URL = "https://linkedin.com/in/harshal-ganbote";
 
 
 export const heroMetrics = [

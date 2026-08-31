@@ -29,10 +29,10 @@ type AuthServiceImpl struct {
 	refreshRepo    repository.RefreshTokenRepo
 	invitationRepo repository.InvitationRepo
 	cfg            config.Config
-	emailService   email.EmailService
+	emailService   email.MailService
 }
 
-func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, invitationRepo repository.InvitationRepo, cfg config.Config, emailService email.EmailService) AuthService {
+func NewAuthService(credentialRepo repository.CredentialRepo, refreshRepo repository.RefreshTokenRepo, invitationRepo repository.InvitationRepo, cfg config.Config, emailService email.MailService) AuthService {
 	return &AuthServiceImpl{
 		credentialRepo: credentialRepo,
 		refreshRepo:    refreshRepo,
