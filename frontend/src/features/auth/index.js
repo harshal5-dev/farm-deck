@@ -14,16 +14,15 @@ export {
   setCredentials,
   selectUser,
   selectIsAuthenticated,
-  selectIntentionalLogout
+  selectIntentionalLogout,
 } from "./authSlice";
 
 export { useSessionBootstrap } from "./useSessionBootstrap";
 
 export { default as Login } from "./pages/Login";
+export { default as Register } from "./pages/Register";
 export { default as AcceptInvitation } from "./pages/AcceptInvitation";
 export { default as AuthLayout } from "./components/AuthLayout";
-export {
-  default as ProtectedRoute
-} from "./components/ProtectedRoute";
+export { default as ProtectedRoute } from "./components/ProtectedRoute";
 export { default as PublicOnlyRoute } from "./components/PublicOnlyRoute";
 export { default as AppAuthGate } from "./components/AppAuthGate";

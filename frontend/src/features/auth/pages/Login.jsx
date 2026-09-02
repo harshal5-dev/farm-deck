@@ -1,15 +1,8 @@
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  IconShieldCheck,
-  IconSparkles,
-} from "@tabler/icons-react";
-import {
-  setCredentials,
-  useLoginMutation,
-} from "@/features/auth";
+import { IconShieldCheck, IconSparkles } from "@tabler/icons-react";
+import { setCredentials, useLoginMutation } from "@/features/auth";
 import { normalizeError } from "@/lib/api-errors";
 import {
   Card,
@@ -41,7 +34,7 @@ const Login = () => {
     try {
       await login({ emailId: data.emailId, password: data.password }).unwrap();
       const profile = await fetchProfile().unwrap();
-      dispatch(setCredentials(profile))
+      dispatch(setCredentials(profile));
       toast.success("Welcome back!", {
         description: `Signed in as ${data.emailId}`,
       });
@@ -76,7 +69,7 @@ const Login = () => {
           {/* ---------- Decorative top band ---------- */}
           <div className="relative h-1.5 overflow-hidden">
             <div className="absolute inset-0 bg-linear-to-r from-leaf via-sage-deep to-sky-warm" />
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent shimmer-overlay animate-shimmer" />
+            <div className="shimmer-overlay absolute inset-0 animate-shimmer bg-linear-to-r from-transparent via-white/40 to-transparent" />
           </div>
 
           {/* ---------- Header ---------- */}
@@ -101,7 +94,11 @@ const Login = () => {
 
           {/* ---------- Form ---------- */}
           <CardContent className="pt-4 pb-7">
-            <LoginForm onSubmit={onSubmit} serverError={serverError} isLoading={isLoading} />
+            <LoginForm
+              onSubmit={onSubmit}
+              serverError={serverError}
+              isLoading={isLoading}
+            />
 
             {/* Trust note */}
             <Reveal delay={320} duration={500}>
@@ -110,7 +107,9 @@ const Login = () => {
                   className="size-3.5 text-leaf"
                   strokeWidth={1.85}
                 />
-                <span>Secured with HttpOnly cookies — nothing stored locally.</span>
+                <span>
+                  Secured with HttpOnly cookies — nothing stored locally.
+                </span>
               </div>
             </Reveal>
           </CardContent>
@@ -121,10 +120,10 @@ const Login = () => {
               <p className="text-center text-sm text-muted-foreground">
                 New to Farmdeck?{" "}
                 <Link
-                  to="/"
+                  to="/register"
                   className="font-semibold text-leaf underline-offset-4 transition-colors hover:text-leaf/80 hover:underline"
                 >
-                  Learn more
+                  Create an account
                 </Link>
               </p>
             </Reveal>
@@ -133,6 +132,6 @@ const Login = () => {
       </Reveal>
     </AuthLayout>
   );
-}
+};
 
 export default Login;

@@ -22,7 +22,7 @@ type FieldError struct {
 func init() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+			name, _, _ := strings.Cut(fld.Tag.Get("json"), ",")
 			if name == "-" || name == "" {
 				return fld.Name
 			}
@@ -33,8 +33,7 @@ func init() {
 
 func Bind(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBindJSON(req); err != nil {
-		var validationErrs validator.ValidationErrors
-		if errors.As(err, &validationErrs) {
+		if validationErrs, ok := errors.AsType[validator.ValidationErrors](err); ok {
 			response.ValidationError(ctx, toFieldErrors(validationErrs))
 			return false
 		}

@@ -1,11 +1,9 @@
 package middlewares
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
-	"github.com/harshal5-dev/farm-deck/backend/internal/response"
+	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/ctxutil"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 )
@@ -14,14 +12,14 @@ func AuthMiddleware(cookieTokenName, jwtSecret string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString, err := ctx.Cookie(cookieTokenName)
 		if err != nil {
-			response.Unauthorized(ctx, "authentication required")
+			httperr.HandleError(ctx, domain.ErrUnauthorized)
 			ctx.Abort()
 			return
 		}
 
 		claims, err := jwt.VerifyToken(tokenString, jwtSecret)
 		if err != nil {
-			response.Unauthorized(ctx, "invalid or expired token")
+			httperr.HandleError(ctx, domain.ErrUnauthorized)
 			ctx.Abort()
 			return
 		}
@@ -38,14 +36,12 @@ func RequirePermission(perm domain.Permission) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		role, err := ctxutil.GetRole(ctx)
 		if err != nil {
-			response.Unauthorized(ctx, "authentication required")
+			httperr.HandleError(ctx, domain.ErrUnauthorized)
 			ctx.Abort()
 			return
 		}
 		if !domain.HasPermission(role, perm) {
-			response.ErrorWithDetails(ctx, http.StatusForbidden, "FORBIDDEN",
-				"insufficient permissions",
-				gin.H{"required": string(perm), "role": role})
+			httperr.HandleError(ctx, domain.ErrForbidden)
 			ctx.Abort()
 			return
 		}

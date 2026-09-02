@@ -23,8 +23,9 @@ func HandleError(ctx *gin.Context, err error) {
 		response.NotFound(ctx, messageOf(err))
 
 	case errors.Is(err, domain.ErrInvalidCredentials),
-		errors.Is(err, domain.ErrCredentialNotFound):
-		response.Unauthorized(ctx, domain.ErrInvalidCredentials.Error())
+		errors.Is(err, domain.ErrCredentialNotFound),
+		errors.Is(err, domain.ErrUnauthorized):
+		response.Unauthorized(ctx, messageOf(err))
 
 	case errors.Is(err, domain.ErrRefreshTokenInvalid),
 		errors.Is(err, domain.ErrRefreshTokenExpired):
@@ -62,6 +63,8 @@ func messageOf(err error) string {
 		domain.ErrInvitationRevoked,
 		domain.ErrInvitationAccepted,
 		domain.ErrFarmNotFound,
+		domain.ErrForbidden,
+		domain.ErrUnauthorized,
 	} {
 		if errors.Is(err, sentinel) {
 			return sentinel.Error()

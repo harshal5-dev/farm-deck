@@ -202,8 +202,7 @@ func TestRequirePermission_OwnerAlwaysPasses(t *testing.T) {
 	// Owner is a wildcard in HasPermission — no matter which permission
 	// we ask for, an owner passes through.
 	for _, p := range []domain.Permission{
-		domain.PermViewMembers, domain.PermManageMembers,
-		domain.PermManageBilling, domain.PermManageWorkspace,
+		domain.PermViewMembers, domain.PermManageMembers, domain.PermManageWorkspace,
 	} {
 		w := runPerm(p, domain.RoleOwner, true)
 		if w.Code != http.StatusOK {
@@ -218,14 +217,13 @@ func TestRequirePermission_OwnerAlwaysPasses(t *testing.T) {
 func TestRequirePermission_ManagerPassesMemberPerms(t *testing.T) {
 	// Manager has PermManageMembers + PermViewMembers per the role map.
 	cases := []struct {
-		perm      domain.Permission
-		wantCode  int
-		pass      bool
+		perm     domain.Permission
+		wantCode int
+		pass     bool
 	}{
 		{domain.PermManageMembers, http.StatusOK, true},
 		{domain.PermViewMembers, http.StatusOK, true},
 		// Manager does NOT have billing/workspace perms.
-		{domain.PermManageBilling, http.StatusForbidden, false},
 		{domain.PermManageWorkspace, http.StatusForbidden, false},
 	}
 	for _, c := range cases {
@@ -246,7 +244,6 @@ func TestRequirePermission_GrowerForbiddenFromMembersAndAdmin(t *testing.T) {
 	// Grower has no member-management or admin perms. Should 403 on each.
 	for _, p := range []domain.Permission{
 		domain.PermViewMembers, domain.PermManageMembers,
-		domain.PermManageBilling, domain.PermManageWorkspace,
 	} {
 		w := runPerm(p, domain.RoleGrower, true)
 		if w.Code != http.StatusForbidden {
@@ -270,7 +267,6 @@ func TestRequirePermission_ViewerAllowedReadOnly(t *testing.T) {
 		{domain.PermViewHarvests, true},
 		{domain.PermManageFarms, false},
 		{domain.PermViewMembers, false},
-		{domain.PermManageBilling, false},
 	}
 	for _, c := range cases {
 		w := runPerm(c.perm, domain.RoleViewer, true)
@@ -286,7 +282,7 @@ func TestRequirePermission_ViewerAllowedReadOnly(t *testing.T) {
 func TestRequirePermission_ForbiddenBodyIncludesRequiredAndRole(t *testing.T) {
 	// The 403 response should expose {required, role} in error.details so
 	// the frontend (and tests) can introspect what was missing.
-	w := runPerm(domain.PermManageBilling, domain.RoleGrower, true)
+	w := runPerm(domain.PermManageWorkspace, domain.RoleGrower, true)
 
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("status: got %d want 403", w.Code)

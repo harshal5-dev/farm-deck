@@ -32,9 +32,6 @@ func TestHasPermission(t *testing.T) {
 		{domain.RoleOwner, domain.PermManageCrops, true},
 		{domain.RoleOwner, domain.PermViewHarvests, true},
 		{domain.RoleOwner, domain.PermLogHarvests, true},
-		{domain.RoleOwner, domain.PermViewReports, true},
-		{domain.RoleOwner, domain.PermManageWorkspace, true},
-		{domain.RoleOwner, domain.PermManageBilling, true},
 
 		// ----- Manager -----
 		{domain.RoleManager, domain.PermViewMembers, true},
@@ -47,9 +44,6 @@ func TestHasPermission(t *testing.T) {
 		{domain.RoleManager, domain.PermManageCrops, true},
 		{domain.RoleManager, domain.PermViewHarvests, true},
 		{domain.RoleManager, domain.PermLogHarvests, true},
-		{domain.RoleManager, domain.PermViewReports, true},
-		{domain.RoleManager, domain.PermManageWorkspace, false},
-		{domain.RoleManager, domain.PermManageBilling, false},
 
 		// ----- Grower -----
 		{domain.RoleGrower, domain.PermViewMembers, false},
@@ -62,9 +56,6 @@ func TestHasPermission(t *testing.T) {
 		{domain.RoleGrower, domain.PermManageCrops, true},
 		{domain.RoleGrower, domain.PermViewHarvests, true},
 		{domain.RoleGrower, domain.PermLogHarvests, true},
-		{domain.RoleGrower, domain.PermViewReports, true},
-		{domain.RoleGrower, domain.PermManageWorkspace, false},
-		{domain.RoleGrower, domain.PermManageBilling, false},
 
 		// ----- Viewer (read-only across the board) -----
 		{domain.RoleViewer, domain.PermViewMembers, false},
@@ -77,9 +68,6 @@ func TestHasPermission(t *testing.T) {
 		{domain.RoleViewer, domain.PermManageCrops, false},
 		{domain.RoleViewer, domain.PermViewHarvests, true},
 		{domain.RoleViewer, domain.PermLogHarvests, false},
-		{domain.RoleViewer, domain.PermViewReports, true},
-		{domain.RoleViewer, domain.PermManageWorkspace, false},
-		{domain.RoleViewer, domain.PermManageBilling, false},
 
 		// ----- Defensive: unknown roles + empty strings always denied -----
 		{"", domain.PermViewMembers, false},
@@ -108,16 +96,11 @@ func TestRolePermissionsAreMonotonic(t *testing.T) {
 		domain.PermViewFields, domain.PermManageFields,
 		domain.PermViewCrops, domain.PermManageCrops,
 		domain.PermViewHarvests, domain.PermLogHarvests,
-		domain.PermViewReports,
-		domain.PermManageWorkspace, domain.PermManageBilling,
 	}
 
 	// These perms are deliberately owner-only — the invariant doesn't
 	// apply to them.
-	ownerOnly := map[domain.Permission]bool{
-		domain.PermManageWorkspace: true,
-		domain.PermManageBilling:   true,
-	}
+	ownerOnly := map[domain.Permission]bool{}
 
 	check := func(lower, higher string, perm domain.Permission) {
 		if ownerOnly[perm] {
@@ -148,8 +131,6 @@ func TestAllPermissionsListed(t *testing.T) {
 		domain.PermViewFields, domain.PermManageFields,
 		domain.PermViewCrops, domain.PermManageCrops,
 		domain.PermViewHarvests, domain.PermLogHarvests,
-		domain.PermViewReports,
-		domain.PermManageWorkspace, domain.PermManageBilling,
 	}
 
 	// Every non-owner role should allow at least one permission; if a

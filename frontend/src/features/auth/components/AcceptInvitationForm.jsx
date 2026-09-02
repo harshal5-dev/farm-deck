@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
-  IconCheck,
   IconEye,
   IconEyeOff,
   IconKey,
@@ -9,7 +8,6 @@ import {
   IconLock,
   IconLockCheck,
   IconShield,
-  IconX,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import ErrorState from "@/components/ui/error-state";
@@ -25,6 +23,11 @@ import {
 import FieldWrapper from "@/components/ui/field-wrapper";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { buildPasswordChecks, calcPasswordStrength } from "./password-strength";
+import {
+  PasswordRequirementsList,
+  PasswordStrengthMeter,
+} from "./PasswordStrength";
 
 const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -39,8 +42,8 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
   const confirmPassword =
     useWatch({ control: form.control, name: "confirmPassword" }) || "";
 
-  const checks = useMemo(() => buildChecks(password), [password]);
-  const strength = useMemo(() => calcStrength(checks), [checks]);
+  const checks = useMemo(() => buildPasswordChecks(password), [password]);
+  const strength = useMemo(() => calcPasswordStrength(checks), [checks]);
 
   const handleSubmit = async (values) => {
     await onSubmit({
@@ -74,7 +77,7 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
             minLength: { value: 8, message: "At least 8 characters" },
             maxLength: { value: 72, message: "At most 72 characters" },
             validate: (v) =>
-              calcStrength(buildChecks(v)).score >= 2 ||
+              calcPasswordStrength(buildPasswordChecks(v)).score >= 2 ||
               "Pick a stronger password (mix of letters, numbers & symbols)",
           }}
           render={({ field, fieldState }) => (
@@ -101,7 +104,9 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
                       type="button"
                       onClick={() => setShowPassword((s) => !s)}
                       className="text-muted-foreground/70 transition-colors hover:text-foreground"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <IconEyeOff className="size-4" strokeWidth={1.75} />
@@ -121,7 +126,7 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
                 </FieldWrapper>
               </FormControl>
               {/* Strength meter */}
-              <StrengthMeter
+              <PasswordStrengthMeter
                 score={strength.score}
                 segments={strength.segments}
                 tone={strength.tone}
@@ -184,7 +189,7 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
         />
 
         {/* Requirements checklist */}
-        <RequirementsList checks={checks} />
+        <PasswordRequirementsList checks={checks} />
 
         <Reveal delay={80} duration={400}>
           <Button
@@ -220,144 +225,6 @@ const AcceptInvitationForm = ({ onSubmit, serverError, isLoading }) => {
 };
 
 export default AcceptInvitationForm;
-
-/* -------------------------------------------------------------------------- */
-/*  Strength meter + checklist (file-local — no exports).                     */
-/* -------------------------------------------------------------------------- */
-
-function buildChecks(pw) {
-  return {
-    length: pw.length >= 8 && pw.length <= 72,
-    upper: /[A-Z]/.test(pw),
-    lower: /[a-z]/.test(pw),
-    number: /\d/.test(pw),
-    symbol: /[^A-Za-z0-9]/.test(pw),
-  };
-}
-
-function calcStrength(checks) {
-  const passed = Object.values(checks).filter(Boolean).length;
-  // Score 0–4 (the 5th "segment" is for 5/5 = excellent)
-  const score = Math.max(0, passed - 1);
-  const segments = passed;
-  const label =
-    passed === 0
-      ? "Empty"
-      : passed <= 2
-        ? "Weak"
-        : passed === 3
-          ? "Fair"
-          : passed === 4
-            ? "Strong"
-            : "Excellent";
-
-  const tone = STRENGTH_TONES[score] || STRENGTH_TONES[0];
-  return { score, segments, label, tone };
-}
-
-const STRENGTH_TONES = [
-  // index = score 0..4
-  {
-    bar: "bg-destructive/60",
-    fill: "bg-destructive",
-    text: "text-destructive",
-    ring: "ring-destructive/25",
-  },
-  {
-    bar: "bg-clay/30",
-    fill: "bg-clay",
-    text: "text-clay-deep dark:text-clay",
-    ring: "ring-clay/30",
-  },
-  {
-    bar: "bg-wheat/35",
-    fill: "bg-wheat-deep",
-    text: "text-wheat-deep dark:text-wheat",
-    ring: "ring-wheat/35",
-  },
-  {
-    bar: "bg-leaf/25",
-    fill: "bg-leaf",
-    text: "text-leaf",
-    ring: "ring-leaf/30",
-  },
-  {
-    bar: "bg-sage/30",
-    fill: "bg-sage-deep",
-    text: "text-sage-deep dark:text-sage",
-    ring: "ring-sage/40",
-  },
-];
-
-function StrengthMeter({ score, segments, tone }) {
-  return (
-    <div
-      className="mt-1.5 flex gap-1.5"
-      role="meter"
-      aria-valuenow={score}
-      aria-valuemin={0}
-      aria-valuemax={4}
-    >
-      {[0, 1, 2, 3, 4].map((i) => {
-        const filled = i < segments;
-        return (
-          <span
-            key={i}
-            className={cn(
-              "h-1.5 flex-1 rounded-full transition-all duration-300",
-              filled ? tone.fill : tone.bar
-            )}
-            aria-hidden="true"
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-const REQUIREMENTS = [
-  { key: "length", label: "8–72 characters" },
-  { key: "upper", label: "One uppercase letter" },
-  { key: "lower", label: "One lowercase letter" },
-  { key: "number", label: "One number" },
-  { key: "symbol", label: "One special character" },
-];
-
-function RequirementsList({ checks }) {
-  return (
-    <ul className="grid grid-cols-1 gap-1 rounded-xl border border-border/40 bg-card/40 p-3 text-[11px] sm:grid-cols-2">
-      {REQUIREMENTS.map((req) => {
-        const passed = checks[req.key];
-        return (
-          <li
-            key={req.key}
-            className={cn(
-              "flex items-center gap-1.5 transition-colors",
-              passed ? "text-leaf" : "text-muted-foreground/80"
-            )}
-          >
-            <span
-              className={cn(
-                "flex size-4 shrink-0 items-center justify-center rounded-full ring-1 ring-inset transition-colors",
-                passed
-                  ? "bg-leaf/15 ring-leaf/40"
-                  : "bg-muted/40 ring-border"
-              )}
-              aria-hidden="true"
-            >
-              {passed ? (
-                <IconCheck className="size-2.5" strokeWidth={3} />
-              ) : (
-                <IconX className="size-2.5 text-muted-foreground/60" strokeWidth={2.5} />
-              )}
-            </span>
-            <span className="leading-none">{req.label}</span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
 
 // Re-export the icon in case the parent wants to render an icon next to the title.
 export { IconKey as AcceptInvitationKeyIcon };

@@ -1,6 +1,6 @@
 module github.com/harshal5-dev/farm-deck/backend
 
-go 1.26.3
+go 1.27
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
