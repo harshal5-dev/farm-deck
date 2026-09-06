@@ -221,7 +221,7 @@ const LocationPicker = ({ value, onChange, onPlaceSelected, disabled = false }) 
       </MapContainer>
 
       {/* ===== Place search (overlaid top-left) ===== */}
-      <div className="pointer-events-none absolute top-3 left-3 z-[500] w-72 max-w-[calc(100%-1.5rem)]">
+      <div className="pointer-events-none absolute top-3 left-3 z-500 w-72 max-w-[calc(100%-1.5rem)]">
         <div className="pointer-events-auto relative">
           <IconSearch
             className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground"
@@ -296,7 +296,7 @@ const LocationPicker = ({ value, onChange, onPlaceSelected, disabled = false }) 
       </div>
 
       {/* ===== Map controls (overlaid top-right) ===== */}
-      <div className="absolute top-3 right-3 z-[500] flex flex-col items-end gap-1.5">
+      <div className="absolute top-3 right-3 z-500 flex flex-col items-end gap-1.5">
         <div className="flex overflow-hidden rounded-xl border border-border/50 bg-background/90 p-0.5 shadow-lg backdrop-blur">
           {[
             { id: true, label: "Satellite" },
@@ -353,7 +353,7 @@ const LocationPicker = ({ value, onChange, onPlaceSelected, disabled = false }) 
 
       {/* ===== GPS failure hint ===== */}
       {gpsError && (
-        <p className="absolute bottom-3 left-1/2 z-[500] w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-xl border border-amber-500/30 bg-background/95 px-3 py-1.5 text-[11px] font-medium text-amber-700 shadow-lg backdrop-blur dark:text-amber-400">
+        <p className="absolute bottom-3 left-1/2 z-500 w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-xl border border-amber-500/30 bg-background/95 px-3 py-1.5 text-[11px] font-medium text-amber-700 shadow-lg backdrop-blur dark:text-amber-400">
           {gpsError}
         </p>
       )}

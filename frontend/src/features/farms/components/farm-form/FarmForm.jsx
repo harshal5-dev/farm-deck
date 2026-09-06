@@ -85,14 +85,10 @@ const FarmForm = ({
   onSubmit,
   onCancel,
   submitting = false,
-  // Injectable farm-types query — lets the setup wizard feed mock
-  // lookups while every other caller keeps the real API.
   typesQuery = useListFarmTypesQuery,
 }) => {
   const isEdit = mode === "edit";
 
-  // Farm types come from the lookups API — the picker stores the row's
-  // UUID, matching the farms.farm_type_id FK.
   const {
     data: farmTypes = [],
     isLoading: typesLoading,
@@ -119,8 +115,6 @@ const FarmForm = ({
   const selectedType = farmTypes.find((t) => t.id === watched.farmTypeId);
 
   const submit = async (values) => {
-    // Latitude/longitude are both-or-neither — a half pair is rejected by
-    // the planned farms_latlng_pair_chk constraint (GEOLOCATION_DESIGN §2).
     const latSet = values.latitude !== "" && values.latitude != null;
     const lngSet = values.longitude !== "" && values.longitude != null;
     if (latSet !== lngSet) {

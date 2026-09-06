@@ -14,7 +14,7 @@ type ManageFarmRequest struct {
 	Location   *string   `json:"location" example:"Pune, MH"`
 	AreaUnit   string    `json:"areaUnit" binding:"required,min=2,max=50" example:"acres"`
 	Notes      *string   `json:"notes" example:"North-facing slope, drip irrigation installed"`
-	FarmTypeID uuid.UUID `json:"farmTypeID" binding:"required" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
+	FarmTypeID uuid.UUID `json:"farmTypeId" binding:"required" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
 }
 
 type FarmInfo struct {
@@ -31,7 +31,7 @@ type FarmInfo struct {
 	CreatedAt           time.Time `json:"createdAt" example:"2026-08-22T09:00:00Z"`
 	UpdatedAt           time.Time `json:"updatedAt" example:"2026-08-22T09:00:00Z"`
 	ID                  uuid.UUID `json:"id" example:"11111111-1111-1111-1111-111111111111"`
-	FarmTypeID          uuid.UUID `json:"farmTypeID" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
+	FarmTypeID          uuid.UUID `json:"farmTypeId" example:"3fa85f64-5717-4562-b3fc-2c963f66afa6"`
 }
 
 type ListFarmResponse struct {
