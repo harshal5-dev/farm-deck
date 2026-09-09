@@ -2,7 +2,7 @@ import { IconMapPin } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { FarmTypeArt } from "@/components/effects";
 import { getAreaUnit, getFarmType } from "@/constants/farms";
-import { FarmTypePill } from "../pills";
+import FarmTypePill from "../FarmTypePill";
 
 const FarmIdentityPreview = ({
   name,

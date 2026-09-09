@@ -27,8 +27,9 @@ import {
   formatDate,
   formatRelative,
 } from "../lib/format";
-import { FarmTypePill, FarmStatusPill } from "./pills";
 import { getFarmType } from "../../../constants/farms";
+import FarmTypePill from "./FarmTypePill";
+import FarmStatusPill from "./FarmStatusPill";
 
 const iconAction =
   "inline-flex size-8 items-center justify-center rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
