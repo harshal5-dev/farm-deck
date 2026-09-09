@@ -65,7 +65,7 @@ const listFarms = `-- name: ListFarms :many
 SELECT f.id, f.tenant_id, f.farm_type_id, f.name, f.location, f.latitude, f.longitude, f.total_area, f.area_unit, f.notes, f.is_active, f.created_at, f.updated_at, ft.name AS farm_type_name, ft.display_name AS farm_type_display_name FROM farms f
 JOIN farm_types ft ON f.farm_type_id = ft.id
 WHERE tenant_id = $1
-ORDER BY created_at DESC
+ORDER BY f.is_active DESC, f.name ASC, f.id ASC
 `
 
 type ListFarmsRow struct {

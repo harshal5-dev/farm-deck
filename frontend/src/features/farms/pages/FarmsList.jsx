@@ -67,7 +67,7 @@ const Farms = () => {
   } = useListFarmTypesQuery();
 
   const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -406,7 +406,7 @@ const Farms = () => {
                     aria-disabled={activePage === totalPages}
                     className={cn(
                       activePage === totalPages &&
-                        "pointer-events-none opacity-40"
+                      "pointer-events-none opacity-40"
                     )}
                   />
                 </PaginationItem>

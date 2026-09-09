@@ -7,7 +7,7 @@ RETURNING *;
 SELECT f.*, ft.name AS farm_type_name, ft.display_name AS farm_type_display_name FROM farms f
 JOIN farm_types ft ON f.farm_type_id = ft.id
 WHERE tenant_id = $1
-ORDER BY created_at DESC;
+ORDER BY f.is_active DESC, f.name ASC, f.id ASC;
 
 -- name: UpdateFarm :one
 UPDATE farms

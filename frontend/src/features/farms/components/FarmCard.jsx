@@ -58,6 +58,11 @@ const FarmCard = ({
   const t = getFarmType(farm.farmTypeName);
   const TypeIcon = t.icon;
   const coords = formatCoords(farm.latitude, farm.longitude, 2);
+  // Dormant cards read at a glance: dashed border, flat surface,
+  // grayscale art and a gray identity tile — colour returns only on
+  // the Reactivate action.
+  const dormant = !farm.isActive;
+  const mutedTone = "text-muted-foreground/60";
 
   return (
     <Reveal
@@ -65,12 +70,21 @@ const FarmCard = ({
       duration={400}
       changeKey={farm.id}
     >
-      <div className="group/farm glass-card texture-paper highlight-edge relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-leaf/20">
-        {/* Subtle type-tinted wash */}
+      <div
+        className={cn(
+          "group/farm relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-300",
+          dormant
+            ? "border border-dashed border-border/70 bg-muted/25 backdrop-blur-sm hover:border-border hover:shadow-md"
+            : "glass-card texture-paper highlight-edge hover:-translate-y-1 hover:shadow-xl hover:shadow-leaf/20"
+        )}
+      >
+        {/* Subtle type-tinted wash — dormant cards keep a trace of it */}
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 bg-linear-to-br opacity-[0.04] transition-opacity duration-300 group-hover/farm:opacity-[0.08]",
-            t.gradient
+            "pointer-events-none absolute inset-0 bg-linear-to-br transition-opacity duration-300",
+            dormant
+              ? "opacity-[0.015] grayscale"
+              : cn("opacity-[0.04] group-hover/farm:opacity-[0.08]", t.gradient)
           )}
         />
 
@@ -79,13 +93,19 @@ const FarmCard = ({
           <FarmTypeArt
             variant={t.art}
             className={cn(
-              "size-full transition-transform duration-700 group-hover/farm:scale-105",
-              !farm.isActive && "opacity-60 saturate-50"
+              "size-full transition-transform duration-700",
+              !dormant && "group-hover/farm:scale-105",
+              dormant ? "opacity-40 grayscale" : ""
             )}
           />
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
           <div className="absolute inset-x-0 top-0 h-1 overflow-hidden">
-            <div className={cn("absolute inset-0 bg-linear-to-r", t.gradient)} />
+            <div
+              className={cn(
+                "absolute inset-0 bg-linear-to-r",
+                dormant ? "from-muted-foreground/40 to-muted-foreground/20" : t.gradient
+              )}
+            />
           </div>
           {/* Status pill in the top-right */}
           <div className="absolute top-3 right-3">
@@ -102,14 +122,21 @@ const FarmCard = ({
           <div className="flex items-end gap-2.5">
             <div
               className={cn(
-                "relative -mt-6 flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white shadow-lg ring-[3px] ring-card",
-                t.gradient
+                "relative -mt-6 flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg ring-[3px] ring-card",
+                dormant
+                  ? "bg-linear-to-br from-muted-foreground/55 to-muted-foreground/35 shadow-none"
+                  : cn("bg-linear-to-br", t.gradient)
               )}
             >
               <TypeIcon className="size-5.5" strokeWidth={1.85} />
             </div>
             <div className="min-w-0 flex-1 pb-0.5">
-              <h3 className="min-w-0 truncate font-heading text-base font-bold tracking-tight">
+              <h3
+                className={cn(
+                  "min-w-0 truncate font-heading text-base font-bold tracking-tight",
+                  dormant && "text-muted-foreground"
+                )}
+              >
                 {farm.name}
               </h3>
               <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
@@ -122,24 +149,29 @@ const FarmCard = ({
           </div>
 
           {/* KPI strip — area · coordinates · added */}
-          <div className="mt-3 grid grid-cols-3 divide-x divide-border/40 rounded-xl border border-border/30 bg-muted/25">
+          <div
+            className={cn(
+              "mt-3 grid grid-cols-3 divide-x divide-border/40 rounded-xl border border-border/30",
+              dormant ? "bg-muted/15" : "bg-muted/25"
+            )}
+          >
             <StatCell
               icon={IconRuler2}
               value={formatArea(farm.totalArea, farm.areaUnit)}
               label="Area"
-              tone="text-leaf"
+              tone={dormant ? mutedTone : "text-leaf"}
             />
             <StatCell
               icon={IconChartDots}
               value={coords || "Not pinned"}
               label="Coords"
-              tone="text-sky-warm"
+              tone={dormant ? mutedTone : "text-sky-warm"}
             />
             <StatCell
               icon={IconCalendarPlus}
               value={formatDate(farm.createdAt)}
               label="Added"
-              tone="text-wheat-deep dark:text-wheat"
+              tone={dormant ? mutedTone : "text-wheat-deep dark:text-wheat"}
             />
           </div>
 
@@ -147,7 +179,10 @@ const FarmCard = ({
           {farm.notes && (
             <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/80">
               <IconNote
-                className={cn("size-3.5 shrink-0", t.text)}
+                className={cn(
+                  "size-3.5 shrink-0",
+                  dormant ? mutedTone : t.text
+                )}
                 strokeWidth={1.85}
               />
               <span className="truncate">{farm.notes}</span>
@@ -156,7 +191,14 @@ const FarmCard = ({
         </div>
 
         {/* Footer — updated + icon-only colored actions */}
-        <div className="relative flex items-center justify-between gap-2 border-t border-border/40 bg-muted/25 px-3.5 py-2">
+        <div
+          className={cn(
+            "relative flex items-center justify-between gap-2 border-t px-3.5 py-2",
+            dormant
+              ? "border-border/50 bg-muted/15"
+              : "border-border/40 bg-muted/25"
+          )}
+        >
           <span className="inline-flex min-w-0 items-center gap-1 text-[11px] font-medium text-muted-foreground">
             <IconHistory className="size-3.5 shrink-0" strokeWidth={1.85} />
             <span className="truncate">

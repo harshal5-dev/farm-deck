@@ -128,9 +128,9 @@ const ZoneForm = ({
     useListZoneTypesQuery();
   const { data: { farms = [] } = {}, isLoading: farmsLoading } =
     useListFarmsQuery();
-  console.log(farms, "farms");
   const { data: soilTypes = [] } = useListSoilTypesQuery();
   const { data: hydroSystemTypes = [] } = useListHydroSystemTypesQuery();
+  const filteredFarms = farms.filter((farm) => farm.isActive);
 
   const form = useForm({
     defaultValues: {
@@ -153,19 +153,13 @@ const ZoneForm = ({
 
   const selectedType = zoneTypes.find((t) => t.id === watched.zoneTypeId);
   const cultivationMode = selectedType?.cultivationMode ?? null;
-  const selectedFarm = farms.find((f) => f.id === watched.farmId);
+  const selectedFarm = filteredFarms.find((f) => f.id === watched.farmId);
   const selectedSoil = soilTypes.find((s) => s.id === watched.soilTypeId);
 
   const submit = async (values) => {
     const zoneType = zoneTypes.find((t) => t.id === values.zoneTypeId);
     const m = zoneType?.cultivationMode;
 
-    // Wire shape matches the API contract — capitalised IDs, the
-    // zone-type slug in `zoneTypeName`, and mode-specific detail
-    // blocks named after their domain (`soilTypeDetails`,
-    // `hydroSystemTypeDetails`). The DB trigger
-    // (assert_zone_cultivation_mode) rejects a mismatch and the mock
-    // honours the same rule.
     await onSubmit({
       area: toNumberOrNull(values.area),
       areaUnit: values.areaUnit || DEFAULT_AREA_UNIT,
@@ -173,16 +167,16 @@ const ZoneForm = ({
       hydroSystemTypeDetails:
         m === "hydro" && values.hydroSystemTypeId
           ? {
-              growMedium: values.growMedium.trim() || null,
-              hydroSystemTypeID: values.hydroSystemTypeId,
-              numberOfSlots:
-                values.numberOfSlots === "" || values.numberOfSlots == null
-                  ? null
-                  : Number(values.numberOfSlots),
-              reservoirVolumeLiters: toNumberOrNull(
-                values.reservoirVolumeLiters
-              ),
-            }
+            growMedium: values.growMedium.trim() || null,
+            hydroSystemTypeID: values.hydroSystemTypeId,
+            numberOfSlots:
+              values.numberOfSlots === "" || values.numberOfSlots == null
+                ? null
+                : Number(values.numberOfSlots),
+            reservoirVolumeLiters: toNumberOrNull(
+              values.reservoirVolumeLiters
+            ),
+          }
           : null,
       name: values.name.trim(),
       notes: values.notes.trim() || null,
@@ -283,10 +277,10 @@ const ZoneForm = ({
                           value={field.value}
                           onValueChange={field.onChange}
                           disabled={submitting || farmsLoading || !!lockFarmId}
-                          items={farms.map((f) => ({
+                          items={filteredFarms.map((f) => ({
                             value: f.id,
                             label: f.name,
-                            description: f.farmTypeName,
+                            description: f.farmTypeDisplayName,
                           }))}
                         />
                       )}
@@ -765,56 +759,56 @@ const ZoneForm = ({
         {/* ===== Footer ===== (hidden in the setup wizard, which
             renders its own pinned footer with the submit action) */}
         {!hideFooter && (
-        <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-          <div className="text-[11px] text-muted-foreground sm:order-1">
-            <p>
-              {isDirty ? (
-                <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                  <span className="size-1.5 rounded-full bg-amber-500" />
-                  Unsaved changes
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
-                  <IconCircleCheckFilled className="size-3 text-leaf" />
-                  {isEdit ? "All changes saved" : "Ready to add"}
-                </span>
-              )}
-            </p>
-            <RequiredLegend />
+          <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+            <div className="text-[11px] text-muted-foreground sm:order-1">
+              <p>
+                {isDirty ? (
+                  <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                    <span className="size-1.5 rounded-full bg-amber-500" />
+                    Unsaved changes
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/70">
+                    <IconCircleCheckFilled className="size-3 text-leaf" />
+                    {isEdit ? "All changes saved" : "Ready to add"}
+                  </span>
+                )}
+              </p>
+              <RequiredLegend />
+            </div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  form.reset();
+                  onCancel?.();
+                }}
+                disabled={submitting}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting || (isEdit && !isDirty)}
+                className="w-full gap-2 shadow-md shadow-leaf/20 sm:w-auto"
+              >
+                {submitting ? (
+                  <IconLoader2 className="size-4 animate-spin" strokeWidth={2} />
+                ) : (
+                  <IconCheck className="size-4" strokeWidth={2} />
+                )}
+                {submitting
+                  ? isEdit
+                    ? "Saving…"
+                    : "Adding…"
+                  : isEdit
+                    ? "Save changes"
+                    : "Add field"}
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-2 sm:order-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                form.reset();
-                onCancel?.();
-              }}
-              disabled={submitting}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitting || (isEdit && !isDirty)}
-              className="w-full gap-2 shadow-md shadow-leaf/20 sm:w-auto"
-            >
-              {submitting ? (
-                <IconLoader2 className="size-4 animate-spin" strokeWidth={2} />
-              ) : (
-                <IconCheck className="size-4" strokeWidth={2} />
-              )}
-              {submitting
-                ? isEdit
-                  ? "Saving…"
-                  : "Adding…"
-                : isEdit
-                  ? "Save changes"
-                  : "Add field"}
-            </Button>
-          </div>
-        </div>
         )}
       </form>
     </Form>

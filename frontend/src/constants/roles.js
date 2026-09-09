@@ -5,16 +5,6 @@ import {
   IconEye,
 } from "@tabler/icons-react";
 
-/**
- * Role config — single source of truth for the four workspace roles.
- * Used by the sidebar, members grid, invite dialog, role pills, etc.
- *
- * Each role gets:
- *  - a Tailwind palette (text/bg/ring/border + light/dark variants)
- *  - a tabler icon
- *  - a one-line description for tooltips / dialogs
- *  - a permissions summary (used in dialogs + tooltips)
- */
 export const ROLES = {
   owner: {
     id: "owner",
@@ -108,8 +98,7 @@ export const STATUS_META = {
     label: "Active",
     dot: "bg-emerald-500",
     text: "text-emerald-700 dark:text-emerald-400",
-    chip:
-      "border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
+    chip: "border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
   },
   invited: {
     label: "Invited",
@@ -126,10 +115,10 @@ export const USER_ROLES = {
   viewer: "viewer",
 };
 
-export function getRole(roleId) {
+export const getRole = (roleId) => {
   return ROLES[roleId] || ROLES.viewer;
-}
+};
 
-export function getStatus(statusId) {
+export const getStatus = (statusId) => {
   return STATUS_META[statusId] || STATUS_META.active;
-}
+};

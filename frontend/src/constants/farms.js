@@ -41,15 +41,15 @@ export const FARM_TYPES = {
     id: "mixed",
     icon: IconPlant2,
     art: "mixed",
-    accent: "lagoon",
-    text: "text-lagoon-deep dark:text-lagoon",
-    textBright: "text-lagoon-deep",
-    bg: "bg-lagoon/12 dark:bg-lagoon/15",
-    bgSoft: "bg-lagoon/8",
-    ring: "ring-lagoon/40",
-    border: "border-lagoon/30",
-    gradient: "from-lagoon to-lagoon-deep",
-    chip: "from-lagoon/20 to-lagoon/5 text-lagoon-deep dark:text-lagoon ring-lagoon/25",
+    accent: "clay",
+    text: "text-clay-deep dark:text-clay",
+    textBright: "text-clay-deep",
+    bg: "bg-clay/12 dark:bg-clay/15",
+    bgSoft: "bg-clay/8",
+    ring: "ring-clay/40",
+    border: "border-clay/30",
+    gradient: "from-clay to-clay-deep",
+    chip: "from-clay/20 to-clay/5 text-clay-deep dark:text-clay ring-clay/25",
   },
   indoor: {
     id: "indoor",
@@ -66,7 +66,6 @@ export const FARM_TYPES = {
     chip: "from-wheat/25 to-wheat/5 text-wheat-deep dark:text-wheat ring-wheat/25",
   },
 };
-
 
 export function getFarmType(id) {
   return FARM_TYPES[id] || FARM_TYPES.outdoor;
@@ -157,9 +156,9 @@ export const SOIL_TYPE_ORDER = [
   "peaty",
 ];
 
-export function getSoilType(id) {
+export const getSoilType = (id) => {
   return SOIL_TYPES[id] || SOIL_TYPES.loam;
-}
+};
 
 /**
  * Area units — matches `farms.area_unit VARCHAR(20) NOT NULL DEFAULT 'sq_m'`.
@@ -201,9 +200,9 @@ export const AREA_UNIT_ORDER = [
 
 export const DEFAULT_AREA_UNIT = "sq_m";
 
-export function getAreaUnit(id) {
+export const getAreaUnit = (id) => {
   return AREA_UNITS[id] || AREA_UNITS[DEFAULT_AREA_UNIT];
-}
+};
 
 /**
  * Resolve an `areaUnit` string to its short label ("12.5 ac"). The column
@@ -211,14 +210,15 @@ export function getAreaUnit(id) {
  * one of the AREA_UNITS ids — normalise case and trailing plurals before
  * giving up and echoing the raw string.
  */
-export function getAreaUnitLabel(unit) {
+export const getAreaUnitLabel = (unit) => {
   if (!unit) return "";
   const key = String(unit).trim().toLowerCase();
   const direct =
-    AREA_UNITS[key] || AREA_UNITS[key.replace(/\s+/g, "_")] ||
+    AREA_UNITS[key] ||
+    AREA_UNITS[key.replace(/\s+/g, "_")] ||
     AREA_UNITS[key.replace(/s$/, "")];
   return direct?.label ?? String(unit);
-}
+};
 
 /**
  * Farm status — derived from the API's `isActive` boolean. Used for
@@ -230,8 +230,7 @@ export const FARM_STATUS_META = {
     label: "Active",
     dot: "bg-emerald-500",
     text: "text-emerald-700 dark:text-emerald-400",
-    chip:
-      "border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
+    chip: "border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-400",
   },
   inactive: {
     id: "inactive",
@@ -244,6 +243,6 @@ export const FARM_STATUS_META = {
 
 export const FARM_STATUS_ORDER = ["active", "inactive"];
 
-export function getFarmStatus(id) {
+export const getFarmStatus = (id) => {
   return FARM_STATUS_META[id] || FARM_STATUS_META.active;
-}
+};

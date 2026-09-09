@@ -9,7 +9,7 @@
  *                                          unavailable — drop a pin")
  * Location capture must never block farm creation.
  */
-export async function searchPlaces(query, { count = 5 } = {}) {
+export const searchPlaces = async (query, { count = 5 } = {}) => {
   const q = String(query || "").trim();
   if (q.length < 3) return [];
 
@@ -25,11 +25,11 @@ export async function searchPlaces(query, { count = 5 } = {}) {
   } catch {
     return null; // offline / aborted / CORS — degrade, never throw
   }
-}
+};
 
 /** One-line label for a geocode result, e.g. "Talegaon, Maharashtra, India". */
-export function formatPlace(place) {
+export const formatPlace = (place) => {
   return [place?.name, place?.admin1, place?.country]
     .filter(Boolean)
     .join(", ");
-}
+};

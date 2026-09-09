@@ -45,7 +45,7 @@ const describeError = (code) => {
  * message. Options default to a fresh high-accuracy fix, which is what a
  * phone in the field gives in ~5–20 m (see the design doc).
  */
-export function locateMe(options = HIGH_ACCURACY_OPTIONS) {
+export const locateMe = (options = HIGH_ACCURACY_OPTIONS) => {
   return new Promise((resolve, reject) => {
     if (!isGeolocationAvailable()) {
       reject(new Error(describeError()));
@@ -59,17 +59,17 @@ export function locateMe(options = HIGH_ACCURACY_OPTIONS) {
           accuracy: position.coords.accuracy,
         }),
       (error) => reject(new Error(describeError(error?.code))),
-      options,
+      options
     );
   });
-}
+};
 
 /**
  * Validate one coordinate input (form value is a string; empty = unset).
  * `limit` is 90 for latitude, 180 for longitude. Mirrors the DB CHECKs
  * `farms_lat_chk` / `farms_lng_chk` plus the NUMERIC(9,6) precision.
  */
-export function validateCoordinate(value, limit) {
+export const validateCoordinate = (value, limit) => {
   if (value === "" || value == null) return true;
   const n = Number(value);
   if (Number.isNaN(n)) return "Enter a number";
@@ -81,4 +81,4 @@ export function validateCoordinate(value, limit) {
     return `Must be between -${limit} and ${limit}`;
   }
   return true;
-}
+};
