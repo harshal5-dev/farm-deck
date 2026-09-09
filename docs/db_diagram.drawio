@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="TMEHgiSpCqJ93KLEFLZ2">
-    <mxGraphModel dx="999" dy="1461" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="999" dy="872" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -20,6 +20,18 @@
           <mxGeometry height="100" relative="1" width="100" as="geometry">
             <mxPoint x="100" y="100" as="sourcePoint" />
             <mxPoint x="160" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tt1X6Gbi9_KuSzGWQHJ9-2" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=50;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 20px;&quot;&gt;credinteal&lt;/span&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="170" width="320" x="150" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="tt1X6Gbi9_KuSzGWQHJ9-3" parent="tt1X6Gbi9_KuSzGWQHJ9-2" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;user_id: UUID idx&lt;/span&gt;&lt;/font&gt;&lt;div&gt;&lt;div&gt;&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 15px;&quot;&gt;email_id: varchar&lt;br class=&quot;Apple-interchange-newline&quot;&gt;created_at: TIMESTAMPTZ NN DF now()&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-family: &amp;quot;Comic Sans MS&amp;quot;; font-size: 15px;&quot;&gt;updated_at: TIMESTAMPTZ NN DF now()&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="320" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tt1X6Gbi9_KuSzGWQHJ9-5" edge="1" parent="1" source="tt1X6Gbi9_KuSzGWQHJ9-3" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;rounded=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;curved=0;" target="Sn_Df4vLUvqPcnLA_u8H-4" value="">
+          <mxGeometry height="100" relative="1" width="100" as="geometry">
+            <mxPoint x="430" y="480" as="sourcePoint" />
+            <mxPoint x="530" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
