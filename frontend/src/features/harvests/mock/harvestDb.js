@@ -1,4 +1,4 @@
-import { getZoneRow, farmRows } from "@/features/fields/mock/zoneDb";
+import { getZoneRow, farmRows } from "@/features/zones/mock/zoneDb";
 import { findCrop, findCycle } from "@/features/crops/mock/cropDb";
 
 /**

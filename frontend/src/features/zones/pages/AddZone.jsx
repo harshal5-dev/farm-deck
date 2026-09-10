@@ -11,7 +11,7 @@ import { usePermissions } from "@/features/auth/usePermissions";
 import ZoneForm from "../components/zone-form/ZoneForm";
 import { useCreateZoneMutation } from "../zoneApi";
 
-const AddField = () => {
+const AddZone = () => {
   const navigate = useNavigate();
   const { canManageFields } = usePermissions();
   const [createZone, { isLoading }] = useCreateZoneMutation();
@@ -120,4 +120,4 @@ const AddField = () => {
   );
 };
 
-export default AddField;
+export default AddZone;

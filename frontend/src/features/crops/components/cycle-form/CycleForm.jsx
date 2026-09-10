@@ -39,7 +39,7 @@ import {
   RequiredStar,
 } from "@/components/ui/field-indicators";
 import { Reveal } from "@/components/effects";
-import { useListZonesQuery } from "@/features/fields/zoneApi";
+import { useListZonesQuery } from "@/features/zones/zoneApi";
 import {
   CROP_STATUS_ORDER,
   GROWTH_STAGE_ORDER,

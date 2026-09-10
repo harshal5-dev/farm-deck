@@ -38,7 +38,7 @@ const toFormDefaults = (zone) => ({
   notes: zone.notes || "",
 });
 
-const EditField = () => {
+const EditZone = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const zone = useSelector(selectSelectedZone);
@@ -203,4 +203,4 @@ const EditField = () => {
   );
 };
 
-export default EditField;
+export default EditZone;

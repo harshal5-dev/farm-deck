@@ -1,4 +1,4 @@
-import { getHydroSystemType } from "@/features/fields/constants";
+import { getHydroSystemType } from "@/features/zones/constants";
 import { useListHydroSystemTypesQuery } from "../lookupsApi";
 import HydroSystemCard from "../components/hydro-system/HydroSystemCard";
 import HydroSystemTypesViewSkeleton from "../components/hydro-system/HydroSystemTypesViewSkeleton";

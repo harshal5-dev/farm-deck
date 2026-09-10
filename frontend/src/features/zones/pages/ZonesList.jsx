@@ -46,7 +46,7 @@ import { setSelectedZone } from "../selectedZoneSlice";
 import { buildPageList } from "../lib/format";
 import ZoneCard from "../components/ZoneCard";
 import ZoneCardSkeleton from "../components/ZoneCardSkeleton";
-import EmptyFields from "../components/EmptyFields";
+import EmptyZones from "../components/EmptyZones";
 import ZoneTypeFilterChip from "../components/ZoneTypeFilterChip";
 
 const PAGE_SIZE = 6;
@@ -65,7 +65,7 @@ const SORT_OPTIONS = [
   { id: "newest", label: "Newest added" },
 ];
 
-const FieldsList = () => {
+const ZonesList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
@@ -436,7 +436,7 @@ const FieldsList = () => {
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex min-h-64 items-center justify-center py-6">
-              <EmptyFields onAdd={handleAdd} canAdd={canManageFields} />
+              <EmptyZones onAdd={handleAdd} canAdd={canManageFields} />
             </div>
           ) : (
             <div
@@ -520,4 +520,4 @@ const FieldsList = () => {
   );
 };
 
-export default FieldsList;
+export default ZonesList;

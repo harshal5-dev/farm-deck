@@ -6,7 +6,7 @@ import {
   selectedMemberReducer,
 } from "@/features/members";
 import { farmApi, selectedFarmReducer } from "@/features/farms";
-import { zoneApi, selectedZoneReducer } from "@/features/fields";
+import { zoneApi, selectedZoneReducer } from "@/features/zones";
 import {
   cropApi,
   selectedCycleReducer,

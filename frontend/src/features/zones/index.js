@@ -1,6 +1,6 @@
-import FieldsList from "./pages/FieldsList";
-import AddField from "./pages/AddField";
-import EditField from "./pages/EditField";
+import ZonesList from "./pages/ZonesList";
+import AddZone from "./pages/AddZone";
+import EditZone from "./pages/EditZone";
 import { zoneApi } from "./zoneApi";
 import selectedZoneReducer, {
   setSelectedZone,
@@ -9,9 +9,9 @@ import selectedZoneReducer, {
 } from "./selectedZoneSlice";
 
 export {
-  FieldsList,
-  AddField,
-  EditField,
+  ZonesList,
+  AddZone,
+  EditZone,
   zoneApi,
   selectedZoneReducer,
   setSelectedZone,

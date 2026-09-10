@@ -29,7 +29,7 @@ import {
   useListLogsQuery,
 } from "../dailyLogApi";
 import { useListCyclesQuery } from "@/features/crops/cropApi";
-import { getZoneRow } from "@/features/fields/mock/zoneDb";
+import { getZoneRow } from "@/features/zones/mock/zoneDb";
 import { getCropType } from "@/features/crops/constants";
 import { setSelectedDailyLog } from "../selectedDailyLogSlice";
 import { buildPageList, formatDate } from "@/features/farms/lib/format";

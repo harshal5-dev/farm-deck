@@ -1,4 +1,4 @@
-import { getZoneType } from "@/features/fields/constants";
+import { getZoneType } from "@/features/zones/constants";
 import { useListZoneTypesQuery } from "../lookupsApi";
 import ZoneTypeCard from "../components/zone-type/ZoneTypeCard";
 import ZoneTypesViewSkeleton from "../components/zone-type/ZoneTypesViewSkeleton";

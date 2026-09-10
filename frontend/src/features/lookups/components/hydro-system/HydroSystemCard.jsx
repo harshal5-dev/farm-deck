@@ -1,4 +1,4 @@
-import HydroSystemArt from "@/features/fields/components/HydroSystemArt";
+import HydroSystemArt from "@/features/zones/components/HydroSystemArt";
 import { Reveal } from "@/components/effects";
 import { cn } from "@/lib/utils";
 

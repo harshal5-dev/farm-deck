@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RequiredLegend } from "@/components/ui/field-indicators";
 import FarmForm from "@/features/farms/components/farm-form/FarmForm";
-import ZoneForm from "@/features/fields/components/zone-form/ZoneForm";
+import ZoneForm from "@/features/zones/components/zone-form/ZoneForm";
 import CycleForm from "@/features/crops/components/cycle-form/CycleForm";
-import { zoneApi } from "@/features/fields/zoneApi";
+import { zoneApi } from "@/features/zones/zoneApi";
 import { useCreateSetupFarmMutation, useListSetupFarmTypesQuery } from "../setupApi";
 
 /** Small muted line above each step's form. */

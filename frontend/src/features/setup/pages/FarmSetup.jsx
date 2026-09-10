@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
-import { useCreateZoneMutation } from "@/features/fields/zoneApi";
+import { useCreateZoneMutation } from "@/features/zones/zoneApi";
 import { useCreateCycleMutation } from "@/features/crops/cropApi";
 import SetupStepper from "../components/SetupStepper";
 import SetupSuccess from "../components/SetupSuccess";

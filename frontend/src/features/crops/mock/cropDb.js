@@ -1,4 +1,4 @@
-import { getZoneRow, farmRows } from "@/features/fields/mock/zoneDb";
+import { getZoneRow, farmRows } from "@/features/zones/mock/zoneDb";
 
 /**
  * Mock crop database — two tables that mirror the backend schema:

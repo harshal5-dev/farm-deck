@@ -2,7 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createFarmRow,
   listFarmTypesMock,
-} from "@/features/fields/mock/zoneDb";
+} from "@/features/zones/mock/zoneDb";
 
 /**
  * Setup API — mock-backed endpoints for the guided setup wizard.

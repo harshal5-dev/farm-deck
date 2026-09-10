@@ -1,4 +1,4 @@
-import ZoneTypeArt from "@/features/fields/components/ZoneTypeArt";
+import ZoneTypeArt from "@/features/zones/components/ZoneTypeArt";
 import { Reveal } from "@/components/effects";
 import { cn } from "@/lib/utils";
 

@@ -54,7 +54,7 @@ import {
   useAdvanceCycleStatusMutation,
   useListCyclesQuery,
 } from "../cropApi";
-import { useListFarmsForPickerQuery } from "@/features/fields/zoneApi";
+import { useListFarmsForPickerQuery } from "@/features/zones/zoneApi";
 import { setSelectedCycle } from "../selectedCycleSlice";
 import { buildPageList } from "../lib/format-crops";
 import CycleCard from "../components/CycleCard";

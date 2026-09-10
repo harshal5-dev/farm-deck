@@ -1,7 +1,7 @@
 import { IconLayoutGrid, IconCirclePlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-const EmptyFields = ({ onAdd, canAdd = true }) => {
+const EmptyZones = ({ onAdd, canAdd = true }) => {
   return (
     <div className="glass-card texture-paper highlight-edge relative w-full max-w-xl overflow-hidden rounded-3xl py-16 text-center">
       <div className="pointer-events-none absolute -top-10 left-1/2 size-48 -translate-x-1/2 rounded-full bg-lagoon/10 blur-3xl" />
@@ -33,4 +33,4 @@ const EmptyFields = ({ onAdd, canAdd = true }) => {
   );
 };
 
-export default EmptyFields;
+export default EmptyZones;

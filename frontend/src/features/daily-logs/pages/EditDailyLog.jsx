@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useListCyclesQuery } from "@/features/crops/cropApi";
 import { useUpdateLogMutation } from "../dailyLogApi";
-import { getZoneRow } from "@/features/fields/mock/zoneDb";
+import { getZoneRow } from "@/features/zones/mock/zoneDb";
 import DailyLogForm from "../components/daily-log-form/DailyLogForm";
 import {
   clearSelectedDailyLog,

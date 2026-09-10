@@ -11,7 +11,7 @@ import { Reveal } from "@/components/effects";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { useListCyclesQuery } from "@/features/crops/cropApi";
 import { useCreateLogMutation, useListLogsQuery } from "../dailyLogApi";
-import { getZoneRow } from "@/features/fields/mock/zoneDb";
+import { getZoneRow } from "@/features/zones/mock/zoneDb";
 import DailyLogForm from "../components/daily-log-form/DailyLogForm";
 import { getLogType } from "../constants";
 
