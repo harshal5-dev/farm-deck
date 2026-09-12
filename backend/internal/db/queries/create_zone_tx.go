@@ -2,8 +2,10 @@ package queries
 
 import (
 	"context"
+	"errors"
 
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
+	"github.com/jackc/pgx/v5"
 )
 
 type CreateZoneTxResult struct {
@@ -27,6 +29,9 @@ func (store *SQLStore) CreateZoneTx(ctx context.Context, arg domain.CreateZoneTx
 			Notes:      arg.Notes,
 		})
 		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return domain.ErrDuplicateZoneName
+			}
 			return err
 		}
 

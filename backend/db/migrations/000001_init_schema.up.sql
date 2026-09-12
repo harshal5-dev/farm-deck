@@ -73,6 +73,7 @@ CREATE TABLE farm_types (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name         VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
+    display_order INTEGER NOT NULL DEFAULT 0,
     description  VARCHAR(1000)
 );
 
@@ -103,6 +104,7 @@ CREATE TABLE zone_types (
     display_name      VARCHAR(100) NOT NULL,
     cultivation_mode  VARCHAR(20) NOT NULL,     -- drives daily-log shape & detail-table choice
     description       VARCHAR(1000),
+    display_order     INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT zone_types_mode_chk CHECK (cultivation_mode IN ('soil','hydro','other'))
 );
 
@@ -112,14 +114,16 @@ CREATE TABLE soil_types (
     display_name    VARCHAR(100) NOT NULL,
     water_retention VARCHAR(20) NOT NULL,       -- low | medium | high
     drainage        VARCHAR(20) NOT NULL,
-    description     VARCHAR(1000)
+    description     VARCHAR(1000),
+    display_order   INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE hydro_system_types (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name         VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
-    description  VARCHAR(1000)
+    description  VARCHAR(1000),
+    display_order   INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE zones (

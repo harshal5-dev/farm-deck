@@ -22,9 +22,10 @@ const AddZone = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const created = await createZone(values).unwrap();
+      console.log("Submitting new field values:", values);
+      await createZone(values).unwrap();
       toast.success("Field added", {
-        description: `${created.name} is now part of ${created.farmName}.`,
+        description: `${values.name} has been added to your fields list.`,
       });
       navigate("/app/fields", { replace: true });
     } catch (err) {

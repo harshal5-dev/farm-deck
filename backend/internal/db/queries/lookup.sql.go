@@ -10,7 +10,7 @@ import (
 )
 
 const listFarmTypes = `-- name: ListFarmTypes :many
-SELECT id, name, display_name, description FROM farm_types ORDER BY name DESC
+SELECT id, name, display_name, display_order, description FROM farm_types ORDER BY display_order
 `
 
 func (q *Queries) ListFarmTypes(ctx context.Context) ([]FarmType, error) {
@@ -26,6 +26,7 @@ func (q *Queries) ListFarmTypes(ctx context.Context) ([]FarmType, error) {
 			&i.ID,
 			&i.Name,
 			&i.DisplayName,
+			&i.DisplayOrder,
 			&i.Description,
 		); err != nil {
 			return nil, err
@@ -39,7 +40,7 @@ func (q *Queries) ListFarmTypes(ctx context.Context) ([]FarmType, error) {
 }
 
 const listHydroSystemTypes = `-- name: ListHydroSystemTypes :many
-SELECT id, name, display_name, description FROM hydro_system_types  ORDER BY name
+SELECT id, name, display_name, description, display_order FROM hydro_system_types  ORDER BY display_order
 `
 
 func (q *Queries) ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, error) {
@@ -56,6 +57,7 @@ func (q *Queries) ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, 
 			&i.Name,
 			&i.DisplayName,
 			&i.Description,
+			&i.DisplayOrder,
 		); err != nil {
 			return nil, err
 		}
@@ -68,7 +70,7 @@ func (q *Queries) ListHydroSystemTypes(ctx context.Context) ([]HydroSystemType, 
 }
 
 const listSoilTypes = `-- name: ListSoilTypes :many
-SELECT id, name, display_name, water_retention, drainage, description FROM soil_types ORDER BY name
+SELECT id, name, display_name, water_retention, drainage, description, display_order FROM soil_types ORDER BY display_order
 `
 
 func (q *Queries) ListSoilTypes(ctx context.Context) ([]SoilType, error) {
@@ -87,6 +89,7 @@ func (q *Queries) ListSoilTypes(ctx context.Context) ([]SoilType, error) {
 			&i.WaterRetention,
 			&i.Drainage,
 			&i.Description,
+			&i.DisplayOrder,
 		); err != nil {
 			return nil, err
 		}
@@ -99,7 +102,7 @@ func (q *Queries) ListSoilTypes(ctx context.Context) ([]SoilType, error) {
 }
 
 const listZoneTypes = `-- name: ListZoneTypes :many
-SELECT id, name, display_name, cultivation_mode, description FROM zone_types ORDER BY name
+SELECT id, name, display_name, cultivation_mode, description, display_order FROM zone_types ORDER BY display_order
 `
 
 func (q *Queries) ListZoneTypes(ctx context.Context) ([]ZoneType, error) {
@@ -117,6 +120,7 @@ func (q *Queries) ListZoneTypes(ctx context.Context) ([]ZoneType, error) {
 			&i.DisplayName,
 			&i.CultivationMode,
 			&i.Description,
+			&i.DisplayOrder,
 		); err != nil {
 			return nil, err
 		}

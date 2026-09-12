@@ -53,14 +53,10 @@ import {
   GROW_MEDIUM_SUGGESTIONS,
   getHydroSystemType,
 } from "../../constants";
-import {
-  useListZoneTypesQuery,
-  useListSoilTypesQuery,
-  useListHydroSystemTypesQuery,
-} from "../../zoneApi";
 import ZoneIdentityPreview from "./ZoneIdentityPreview";
 import ZoneTypeCard from "./ZoneTypeCard";
 import { useListFarmsQuery } from "@/features/farms";
+import { useListHydroSystemTypesQuery, useListSoilTypesQuery, useListZoneTypesQuery } from "@/features/lookups";
 
 const fieldLabel =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
@@ -235,12 +231,6 @@ const ZoneForm = ({
                 rules={{ required: "Pick the farm this field belongs to" }}
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
-                    {/* The farm picker renders a custom trigger (no native
-                        input for FormControl to bind an id to), so a
-                        FormLabel's htmlFor would reference nothing and
-                        trip an a11y warning. Use a plain span label there;
-                        the locked-input branch keeps a real FormLabel so
-                        clicking it focuses the input. */}
                     {lockFarmId && lockFarmName ? (
                       <FormLabel className={fieldLabel}>
                         Farm
@@ -254,9 +244,6 @@ const ZoneForm = ({
                     )}
                     <FormControl>
                       {lockFarmId && lockFarmName ? (
-                        /* Locked context (setup wizard) — a static display
-                           beats a disabled select that can't resolve its
-                           label before the options load. */
                         <FieldWrapper icon={IconTractor}>
                           <Input
                             value={lockFarmName}
@@ -361,10 +348,6 @@ const ZoneForm = ({
               )}
             />
 
-            {/* ===== Cultivation details — conditional on the mode =====
-                Mirrors the schema's detail tables: soil zones carry
-                zone_soil_details, hydro zones zone_hydro_details, and
-                'other' types take neither until their sections ship. */}
             {cultivationMode && (
               <Reveal key={cultivationMode} duration={300}>
                 <div className="rounded-2xl border border-border/40 bg-muted/15 p-3.5">

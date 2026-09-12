@@ -35,17 +35,19 @@ type Farm struct {
 }
 
 type FarmType struct {
-	ID          uuid.UUID
-	Name        string
-	DisplayName string
-	Description *string
+	ID           uuid.UUID
+	Name         string
+	DisplayName  string
+	DisplayOrder int32
+	Description  *string
 }
 
 type HydroSystemType struct {
-	ID          uuid.UUID
-	Name        string
-	DisplayName string
-	Description *string
+	ID           uuid.UUID
+	Name         string
+	DisplayName  string
+	Description  *string
+	DisplayOrder int32
 }
 
 type RefreshToken struct {
@@ -66,6 +68,7 @@ type SoilType struct {
 	WaterRetention string
 	Drainage       string
 	Description    *string
+	DisplayOrder   int32
 }
 
 type Tenant struct {
@@ -136,4 +139,5 @@ type ZoneType struct {
 	DisplayName     string
 	CultivationMode string
 	Description     *string
+	DisplayOrder    int32
 }

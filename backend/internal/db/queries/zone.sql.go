@@ -15,6 +15,7 @@ import (
 const createZone = `-- name: CreateZone :one
 INSERT INTO zones (farm_id, tenant_id, zone_type_id, name, area, area_unit, notes)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
+ON CONFLICT (farm_id, name) WHERE is_active DO NOTHING
 RETURNING id, farm_id, tenant_id, zone_type_id, name, area, area_unit, notes, is_active, created_at, updated_at
 `
 

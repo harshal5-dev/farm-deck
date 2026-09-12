@@ -58,9 +58,7 @@ const FarmCard = ({
   const t = getFarmType(farm.farmTypeName);
   const TypeIcon = t.icon;
   const coords = formatCoords(farm.latitude, farm.longitude, 2);
-  // Dormant cards read at a glance: dashed border, flat surface,
-  // grayscale art and a gray identity tile — colour returns only on
-  // the Reactivate action.
+
   const dormant = !farm.isActive;
   const mutedTone = "text-muted-foreground/60";
 
@@ -176,18 +174,26 @@ const FarmCard = ({
           </div>
 
           {/* Notes teaser */}
-          {farm.notes && (
-            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/80">
-              <IconNote
-                className={cn(
-                  "size-3.5 shrink-0",
-                  dormant ? mutedTone : t.text
-                )}
-                strokeWidth={1.85}
-              />
-              <span className="truncate">{farm.notes}</span>
-            </p>
-          )}
+
+          <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/80">
+            <IconNote
+              className={cn(
+                "size-3.5 shrink-0",
+                dormant ? mutedTone : t.text
+              )}
+              strokeWidth={1.85}
+            />
+            <span
+              className={cn(
+                "truncate",
+                !farm.notes && "italic text-muted-foreground/55"
+              )}
+            >
+              {farm.notes ||
+                "No notes yet — crops, water source, anything worth remembering…"}
+            </span>
+          </p>
+
         </div>
 
         {/* Footer — updated + icon-only colored actions */}

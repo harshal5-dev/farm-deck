@@ -39,6 +39,9 @@ func HandleError(ctx *gin.Context, err error) {
 	case errors.Is(err, domain.ErrInvitationAccepted):
 		response.Conflict(ctx, messageOf(err))
 
+	case errors.Is(err, domain.ErrDuplicateZoneName):
+		response.Conflict(ctx, messageOf(err))
+
 	case errors.Is(err, domain.ErrForbidden):
 		response.Forbidden(ctx, messageOf(err))
 
@@ -65,6 +68,7 @@ func messageOf(err error) string {
 		domain.ErrFarmNotFound,
 		domain.ErrForbidden,
 		domain.ErrUnauthorized,
+		domain.ErrInvalidCredentials,
 	} {
 		if errors.Is(err, sentinel) {
 			return sentinel.Error()

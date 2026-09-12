@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQuery } from "@/lib/api";
 import * as zoneDb from "./mock/zoneDb";
 
 /**
@@ -25,7 +26,7 @@ import * as zoneDb from "./mock/zoneDb";
 
 export const zoneApi = createApi({
   reducerPath: "zoneApi",
-  baseQuery: () => ({ data: null }),
+  baseQuery,
   tagTypes: ["Zone", "FarmPicker"],
   endpoints: (builder) => ({
     listZones: builder.query({
@@ -40,13 +41,11 @@ export const zoneApi = createApi({
     }),
 
     createZone: builder.mutation({
-      queryFn: async (zone) => {
-        try {
-          return { data: await zoneDb.createZone(zone) };
-        } catch (error) {
-          return { error };
-        }
-      },
+      query: (zone) => ({
+        url: "/zones",
+        method: "POST",
+        body: zone,
+      }),
       invalidatesTags: ["Zone"],
     }),
 

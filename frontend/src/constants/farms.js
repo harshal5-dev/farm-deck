@@ -80,7 +80,7 @@ export function getFarmType(id) {
  */
 export const SOIL_TYPES = {
   loam: {
-    id: "loam",
+    name: "loam",
     label: "Loam",
     art: "loam",
     description: "Balanced mix — the gold standard for most crops.",
@@ -88,7 +88,7 @@ export const SOIL_TYPES = {
     gradient: "from-leaf to-sage-deep",
   },
   sandy_loam: {
-    id: "sandy_loam",
+    name: "sandy_loam",
     label: "Sandy loam",
     art: "sandy_loam",
     description: "Drains well, easy to work — great for root vegetables.",
@@ -96,7 +96,7 @@ export const SOIL_TYPES = {
     gradient: "from-wheat to-leaf",
   },
   sandy: {
-    id: "sandy",
+    name: "sandy",
     label: "Sandy",
     art: "sandy",
     description: "Fast-draining, gritty, warms early in spring.",
@@ -104,7 +104,7 @@ export const SOIL_TYPES = {
     gradient: "from-wheat to-wheat-deep",
   },
   clay_loam: {
-    id: "clay_loam",
+    name: "clay_loam",
     label: "Clay loam",
     art: "clay_loam",
     description: "Rich in nutrients, holds moisture longer.",
@@ -112,7 +112,7 @@ export const SOIL_TYPES = {
     gradient: "from-clay to-leaf",
   },
   clay: {
-    id: "clay",
+    name: "clay",
     label: "Clay",
     art: "clay",
     description: "Heavy, slow-draining, nutrient-dense.",
@@ -120,7 +120,7 @@ export const SOIL_TYPES = {
     gradient: "from-clay to-clay-deep",
   },
   silt: {
-    id: "silt",
+    name: "silt",
     label: "Silt",
     art: "silt",
     description: "Smooth and fertile, holds moisture well.",
@@ -128,7 +128,7 @@ export const SOIL_TYPES = {
     gradient: "from-sky-warm to-lagoon",
   },
   chalky: {
-    id: "chalky",
+    name: "chalky",
     label: "Chalky",
     art: "chalky",
     description: "Alkaline and free-draining — lime-rich.",
@@ -136,7 +136,7 @@ export const SOIL_TYPES = {
     gradient: "from-wheat to-clay",
   },
   peaty: {
-    id: "peaty",
+    name: "peaty",
     label: "Peaty",
     art: "peaty",
     description: "Acidic, dark, and rich in organic matter.",
@@ -156,8 +156,8 @@ export const SOIL_TYPE_ORDER = [
   "peaty",
 ];
 
-export const getSoilType = (id) => {
-  return SOIL_TYPES[id] || SOIL_TYPES.loam;
+export const getSoilType = (name) => {
+  return SOIL_TYPES[name] || SOIL_TYPES.loam;
 };
 
 /**
