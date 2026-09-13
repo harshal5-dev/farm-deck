@@ -1,28 +1,22 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "@/lib/api";
+import { baseQuery, transformResult } from "@/lib/api";
 import * as zoneDb from "./mock/zoneDb";
 
 /**
- * Zone API — currently MOCK-BACKED.
+ * Zone API — list, lookups and farm picker hit the real backend;
+ * update / deactivate / reactivate are still mock-backed until the
+ * backend ships those routes.
  *
- * Every endpoint is served by the in-memory database in `./mock/zoneDb`
- * through `queryFn`, so the full CRUD flow (list, create, update,
- * deactivate, reactivate — including the name-conflict errors the real
- * unique indexes will raise) works with zero backend.
- *
- * Swapping to the real module later is mechanical: replace each
- * `queryFn` with `query: () => ({ url, method, body })` against the
- * shared `baseQuery` from `@/lib/api` (see features/farms/farmApi.js)
- * and delete the mock import. Response shapes are already identical.
- *
- * Planned routes (mirroring the farms module):
- *   GET    /zones/               → list  { data: { zones, active, inactive, total } }
- *   POST   /zones/               → create
- *   PUT    /zones/:id            → update (full replace)
- *   PATCH  /zones/:id            → inactivate (soft delete)
- *   PATCH  /zones/:id/activate   → reactivate
- *   GET    /lookups/zone-types | soil-types | hydro-system-types
+ * listZones keeps the client-side filtering UX of the list page, so it
+ * stitches every server page (pageSize 100, capped at MAX_PAGES) into
+ * the single { zones, active, inactive, total } shape the page filters
+ * locally. If zones-per-tenant ever outgrows that ceiling, move the
+ * filters into the /zones query params — the endpoint already supports
+ * page/pageSize/farmID/zoneTypeID/status/q/sort.
  */
+
+const ZONES_FETCH_PAGE_SIZE = 100; // must stay <= the backend's pageSize cap
+const ZONES_MAX_PAGES = 10; // safety ceiling: 1000 zones client-side
 
 export const zoneApi = createApi({
   reducerPath: "zoneApi",
@@ -30,12 +24,30 @@ export const zoneApi = createApi({
   tagTypes: ["Zone", "FarmPicker"],
   endpoints: (builder) => ({
     listZones: builder.query({
-      queryFn: async () => {
-        try {
-          return { data: await zoneDb.listZones() };
-        } catch (error) {
-          return { error };
+      // Fetch pages until the server-reported total is covered, then hand
+      // back the same envelope the page has always consumed.
+      queryFn: async (_arg, api) => {
+        const zones = [];
+        let last = null;
+        for (let page = 1; page <= ZONES_MAX_PAGES; page += 1) {
+          const res = await baseQuery(
+            { url: "/zones", params: { page, pageSize: ZONES_FETCH_PAGE_SIZE } },
+            api,
+            {}
+          );
+          if (res.error) return { error: res.error };
+          last = res.data?.data ?? {};
+          zones.push(...(last.zones ?? []));
+          if (zones.length >= (last.total ?? 0)) break;
         }
+        return {
+          data: {
+            zones,
+            active: last?.active ?? 0,
+            inactive: last?.inactive ?? 0,
+            total: last?.total ?? zones.length,
+          },
+        };
       },
       providesTags: ["Zone"],
     }),
@@ -82,46 +94,29 @@ export const zoneApi = createApi({
       invalidatesTags: ["Zone"],
     }),
 
-    /* --- lookups (move to lookupsApi when the backend lands) -------- */
+    /* --- lookups (backend: GET /lookups/*) --------------------------- */
 
     listZoneTypes: builder.query({
-      queryFn: async () => {
-        try {
-          return { data: await zoneDb.listZoneTypes() };
-        } catch (error) {
-          return { error };
-        }
-      },
+      query: () => ({ url: "/lookups/zone-types", method: "GET" }),
+      transformResponse: transformResult,
     }),
 
     listSoilTypes: builder.query({
-      queryFn: async () => {
-        try {
-          return { data: await zoneDb.listSoilTypes() };
-        } catch (error) {
-          return { error };
-        }
-      },
+      query: () => ({ url: "/lookups/soil-types", method: "GET" }),
+      transformResponse: transformResult,
     }),
 
     listHydroSystemTypes: builder.query({
-      queryFn: async () => {
-        try {
-          return { data: await zoneDb.listHydroSystemTypes() };
-        } catch (error) {
-          return { error };
-        }
-      },
+      query: () => ({ url: "/lookups/hydro-system-types", method: "GET" }),
+      transformResponse: transformResult,
     }),
 
+    /* Active farms for pickers — same backend list as the farms module,
+       narrowed to what a picker needs. */
     listFarmsForPicker: builder.query({
-      queryFn: async () => {
-        try {
-          return { data: await zoneDb.listFarmsForPicker() };
-        } catch (error) {
-          return { error };
-        }
-      },
+      query: () => ({ url: "/farms", method: "GET" }),
+      transformResponse: (result) =>
+        transformResult(result).farms?.filter((f) => f.isActive) ?? [],
       providesTags: ["FarmPicker"],
     }),
   }),

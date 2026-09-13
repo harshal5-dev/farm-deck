@@ -43,6 +43,18 @@ func Bind(ctx *gin.Context, req any) bool {
 	return true
 }
 
+func BindQuery(ctx *gin.Context, req any) bool {
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		if validationErrs, ok := errors.AsType[validator.ValidationErrors](err); ok {
+			response.ValidationError(ctx, toFieldErrors(validationErrs))
+			return false
+		}
+		response.BadRequest(ctx, err.Error())
+		return false
+	}
+	return true
+}
+
 func toFieldErrors(errs validator.ValidationErrors) []FieldError {
 	fieldErrors := make([]FieldError, 0, len(errs))
 	for _, err := range errs {

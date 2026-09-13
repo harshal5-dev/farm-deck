@@ -10,11 +10,10 @@ import (
 func Register(public, protected *gin.RouterGroup, h farm.FarmHandler) {
 
 	protectedRoutes := protected.Group("/farms")
-	protectedRoutes.GET("", h.ListFarms)
+	protectedRoutes.GET("", middlewares.RequirePermission(domain.PermViewFarms), h.ListFarms)
 
-	manage := middlewares.RequirePermission(domain.PermManageFarms)
-	protectedRoutes.POST("", manage, h.CreateFarm)
-	protectedRoutes.PUT("/:id", manage, h.UpdateFarm)
-	protectedRoutes.PATCH("/:id", manage, h.DeactivateFarm)
-	protectedRoutes.PATCH("/:id/activate", manage, h.ActivateFarm)
+	protectedRoutes.POST("", middlewares.RequirePermission(domain.PermManageFarms), h.CreateFarm)
+	protectedRoutes.PUT("/:id", middlewares.RequirePermission(domain.PermManageFarms), h.UpdateFarm)
+	protectedRoutes.PATCH("/:id", middlewares.RequirePermission(domain.PermManageFarms), h.DeactivateFarm)
+	protectedRoutes.PATCH("/:id/activate", middlewares.RequirePermission(domain.PermManageFarms), h.ActivateFarm)
 }

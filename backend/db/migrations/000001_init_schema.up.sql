@@ -97,6 +97,7 @@ CREATE TABLE farms (
 );
 CREATE INDEX idx_farms_tenant_active ON farms(tenant_id) WHERE is_active = true;
 CREATE INDEX idx_farms_tenant_all    ON farms(tenant_id);
+CREATE UNIQUE INDEX uq_farms_tenant_name_live ON farms(tenant_id, name) WHERE is_active = true;
 
 CREATE TABLE zone_types (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),

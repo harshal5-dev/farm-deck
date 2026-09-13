@@ -26,7 +26,14 @@ func NewFarmRepo(store db.Store) FarmRepo {
 }
 
 func (r *FarmRepoImpl) CreateFarm(ctx context.Context, params db.CreateFarmParams) (db.Farm, error) {
-	return r.store.CreateFarm(ctx, params)
+	farm, err := r.store.CreateFarm(ctx, params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.Farm{}, domain.ErrDuplicateFarmName
+		}
+		return db.Farm{}, err
+	}
+	return farm, nil
 }
 
 func (r *FarmRepoImpl) ListFarms(ctx context.Context, tenantID uuid.UUID) ([]db.ListFarmsRow, error) {

@@ -15,6 +15,7 @@ import (
 const createFarm = `-- name: CreateFarm :one
 INSERT INTO farms (name, location, latitude, longitude, total_area, area_unit, notes, tenant_id, farm_type_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (tenant_id, name) WHERE is_active DO NOTHING
 RETURNING id, tenant_id, farm_type_id, name, location, latitude, longitude, total_area, area_unit, notes, is_active, created_at, updated_at
 `
 

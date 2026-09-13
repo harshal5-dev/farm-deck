@@ -1,6 +1,7 @@
 -- name: CreateFarm :one
 INSERT INTO farms (name, location, latitude, longitude, total_area, area_unit, notes, tenant_id, farm_type_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (tenant_id, name) WHERE is_active DO NOTHING
 RETURNING *;
 
 -- name: ListFarms :many

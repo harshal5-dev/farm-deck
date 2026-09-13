@@ -101,7 +101,7 @@ const ZonesList = () => {
     const hydroById = new Map(hydroSystemTypes.map((h) => [h.id, h]));
     return zones.map((z) => ({
       ...z,
-      zoneType: typeById.get(z.zoneTypeID),
+      zoneType: typeById.get(z.zoneTypeId),
       soilType: z.soilTypeDetails
         ? soilById.get(z.soilTypeDetails.soilTypeID)
         : null,
@@ -127,7 +127,7 @@ const ZonesList = () => {
   const typeCounts = useMemo(() => {
     const counts = { all: decorated.length };
     decorated.forEach((z) => {
-      counts[z.zoneTypeID] = (counts[z.zoneTypeID] || 0) + 1;
+      counts[z.zoneTypeId] = (counts[z.zoneTypeId] || 0) + 1;
     });
     return counts;
   }, [decorated]);
@@ -135,8 +135,8 @@ const ZonesList = () => {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let out = decorated.filter((z) => {
-      if (typeFilter !== "all" && z.zoneTypeID !== typeFilter) return false;
-      if (farmFilter !== "all" && z.farmID !== farmFilter) return false;
+      if (typeFilter !== "all" && z.zoneTypeId !== typeFilter) return false;
+      if (farmFilter !== "all" && z.farmId !== farmFilter) return false;
       if (statusFilter === "active" && !z.isActive) return false;
       if (statusFilter === "inactive" && z.isActive) return false;
       if (q) {

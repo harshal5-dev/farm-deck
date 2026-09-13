@@ -1231,6 +1231,120 @@ const docTemplate = `{
             }
         },
         "/zones": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the caller's fields with pagination, optional filters and\nstatus counts. Omitted params fall back to defaults; filters are\nAND-combined and scoped to the caller's tenant.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "List tenant fields",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "1-based page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Rows per page, 1–100 (default 6)",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by farm UUID",
+                        "name": "farmID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by zone type UUID",
+                        "name": "zoneTypeID",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "all",
+                            "active",
+                            "inactive"
+                        ],
+                        "type": "string",
+                        "description": "all | active | inactive (default all)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by field name, farm name",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "recent",
+                            "name",
+                            "newest",
+                            "size"
+                        ],
+                        "type": "string",
+                        "description": "recent | name | newest | size (default recent)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "paginated fields with counts",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ListZonesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1453,9 +1567,17 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-08-22T09:00:00Z"
                 },
-                "farmTypeID": {
+                "farmTypeDisplayName": {
+                    "type": "string",
+                    "example": "Outdoor Farm"
+                },
+                "farmTypeId": {
                     "type": "string",
                     "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "farmTypeName": {
+                    "type": "string",
+                    "example": "Outdoor"
                 },
                 "id": {
                     "type": "string",
@@ -1606,6 +1728,88 @@ const docTemplate = `{
                 }
             }
         },
+        "ListZonesInfo": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "number"
+                },
+                "areaUnit": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "cultivationMode": {
+                    "type": "string"
+                },
+                "farmId": {
+                    "type": "string"
+                },
+                "farmName": {
+                    "type": "string"
+                },
+                "hydroSystemTypeDetails": {
+                    "$ref": "#/definitions/ZoneHydroSystemDetails"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "soilTypeDetails": {
+                    "$ref": "#/definitions/ZoneSoilTypeDetails"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zoneTypeDisplayName": {
+                    "type": "string"
+                },
+                "zoneTypeId": {
+                    "type": "string"
+                },
+                "zoneTypeName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ListZonesResponse": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "inactive": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                },
+                "zones": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ListZonesInfo"
+                    }
+                }
+            }
+        },
         "LoginRequest": {
             "type": "object",
             "required": [
@@ -1633,7 +1837,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "areaUnit",
-                "farmTypeID",
+                "farmTypeId",
                 "name"
             ],
             "properties": {
@@ -1643,7 +1847,7 @@ const docTemplate = `{
                     "minLength": 2,
                     "example": "acres"
                 },
-                "farmTypeID": {
+                "farmTypeId": {
                     "type": "string",
                     "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 },
@@ -1894,6 +2098,43 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tenantName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ZoneHydroSystemDetails": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "growMedium": {
+                    "type": "string"
+                },
+                "hydroSystemTypeID": {
+                    "type": "string"
+                },
+                "numberOfSlots": {
+                    "type": "integer"
+                },
+                "reservoirVolumeLiters": {
+                    "type": "number"
+                }
+            }
+        },
+        "ZoneSoilTypeDetails": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "drainage": {
+                    "type": "string"
+                },
+                "soilTypeID": {
+                    "type": "string"
+                },
+                "waterRetention": {
                     "type": "string"
                 }
             }

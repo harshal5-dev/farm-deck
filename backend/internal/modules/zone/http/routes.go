@@ -11,4 +11,5 @@ func Register(public, protected *gin.RouterGroup, h zone.ZoneHandler) {
 	protectedRoutes := protected.Group("/zones")
 
 	protectedRoutes.POST("", middlewares.RequirePermission(domain.PermManageFields), h.CreateZone)
+	protectedRoutes.GET("", middlewares.RequirePermission(domain.PermViewFields), h.ListZone)
 }

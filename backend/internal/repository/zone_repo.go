@@ -11,10 +11,11 @@ import (
 type ZoneRepo interface {
 	CreateZone(ctx context.Context, params domain.CreateZoneTxParams) (db.CreateZoneTxResult, error)
 	UpdateZone(ctx context.Context, params db.UpdateZoneParams) (db.Zone, error)
-	ListZones(ctx context.Context, tenantID uuid.UUID, isActive bool) ([]db.ListZonesRow, error)
+	ListZones(ctx context.Context, params db.ListZonesParams) ([]db.ListZonesRow, error)
 	ToggleZoneIsActive(ctx context.Context, zoneID uuid.UUID, isActive bool) (db.Zone, error)
 	UpdateZoneHydroDetails(ctx context.Context, params db.UpdateZoneHydroDetailsParams) (db.ZoneHydroDetail, error)
 	UpdateZoneSoilDetails(ctx context.Context, params db.UpdateZoneSoilDetailsParams) (db.ZoneSoilDetail, error)
+	CountZonesByStatus(ctx context.Context, params db.CountZonesByStatusParams) (db.CountZonesByStatusRow, error)
 }
 
 type ZoneRepoImpl struct {
@@ -33,11 +34,8 @@ func (z *ZoneRepoImpl) UpdateZone(ctx context.Context, params db.UpdateZoneParam
 	return z.store.UpdateZone(ctx, params)
 }
 
-func (z *ZoneRepoImpl) ListZones(ctx context.Context, tenantID uuid.UUID, isActive bool) ([]db.ListZonesRow, error) {
-	return z.store.ListZones(ctx, db.ListZonesParams{
-		TenantID: tenantID,
-		IsActive: isActive,
-	})
+func (z *ZoneRepoImpl) ListZones(ctx context.Context, params db.ListZonesParams) ([]db.ListZonesRow, error) {
+	return z.store.ListZones(ctx, params)
 }
 
 func (z *ZoneRepoImpl) ToggleZoneIsActive(ctx context.Context, zoneID uuid.UUID, isActive bool) (db.Zone, error) {
@@ -53,4 +51,8 @@ func (z *ZoneRepoImpl) UpdateZoneHydroDetails(ctx context.Context, params db.Upd
 
 func (z *ZoneRepoImpl) UpdateZoneSoilDetails(ctx context.Context, params db.UpdateZoneSoilDetailsParams) (db.ZoneSoilDetail, error) {
 	return z.store.UpdateZoneSoilDetails(ctx, params)
+}
+
+func (z *ZoneRepoImpl) CountZonesByStatus(ctx context.Context, params db.CountZonesByStatusParams) (db.CountZonesByStatusRow, error) {
+	return z.store.CountZonesByStatus(ctx, params)
 }

@@ -10,6 +10,7 @@ import (
 
 type ZoneService interface {
 	CreateZone(ctx context.Context, tenantID uuid.UUID, req CreateZoneRequest) error
+	ListZones(ctx context.Context, tenantID uuid.UUID, args ListZonesArgs) (ListZonesResponse, error)
 }
 
 type ZoneServiceImpl struct {
@@ -28,4 +29,26 @@ func (s *ZoneServiceImpl) CreateZone(ctx context.Context, tenantID uuid.UUID, re
 		return fmt.Errorf("create zone: %w", err)
 	}
 	return nil
+}
+
+func (s *ZoneServiceImpl) ListZones(ctx context.Context, tenantID uuid.UUID, args ListZonesArgs) (ListZonesResponse, error) {
+	params, err := args.Normalize(tenantID)
+	if err != nil {
+		return ListZonesResponse{}, err
+	}
+
+	zones, err := s.zoneRepo.ListZones(ctx, params)
+	if err != nil {
+		return ListZonesResponse{}, fmt.Errorf("list zone: %w", err)
+	}
+
+	counts, err := s.zoneRepo.CountZonesByStatus(ctx, toCountZonesByStatusParams(tenantID, params))
+	if err != nil {
+		return ListZonesResponse{}, fmt.Errorf("count zones by status: %w", err)
+	}
+
+	// Echo the effective (defaulted) paging, never the raw args — pageSize 0
+	// would also divide by zero in the totalPages math.
+	page, pageSize := args.effectivePaging()
+	return toListZonesResponse(zones, counts, page, pageSize), nil
 }

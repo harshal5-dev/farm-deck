@@ -230,7 +230,7 @@ const art = {
       </g>
       {/* recirculating loop — down one side, up the other */}
       <g
-        stroke="var(--lagoon-deep)"
+        stroke="var(--iris-deep)"
         strokeWidth="2"
         fill="none"
         opacity="0.5"
@@ -243,15 +243,15 @@ const art = {
         <path d="M214,74 L210,82 L202,78" />
       </g>
       {/* rising bubbles */}
-      <g fill="var(--lagoon)" opacity="0.45">
+      <g fill="var(--iris)" opacity="0.45">
         <circle cx="70" cy="94" r="2.4" />
         <circle cx="78" cy="88" r="1.8" />
         <circle cx="158" cy="92" r="2.6" />
         <circle cx="166" cy="85" r="1.8" />
       </g>
       {/* fish tank water */}
-      {wave(88, 3, "var(--lagoon)", 0.32, "aw1")}
-      {wave(102, 2.5, "var(--lagoon-deep)", 0.26, "aw2")}
+      {wave(88, 3, "var(--iris)", 0.32, "aw1")}
+      {wave(102, 2.5, "var(--iris-deep)", 0.26, "aw2")}
       {/* the fish */}
       {fish(96, 100, 1)}
       {fish(164, 106, 0.7)}

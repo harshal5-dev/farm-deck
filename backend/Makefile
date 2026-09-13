@@ -38,7 +38,7 @@ docker-run: ## Run the container locally on :8083 using configs/.env
 		$(IMAGE_NAME):latest
 
 swagger: ## Regenerate OpenAPI docs from annotations
-	swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal --useStructName
+	swag init -g cmd/api/main.go -o docs --parseInternal --useStructName
 
 sqlc: ## Generate Go from SQL queries
 	sqlc generate -f db/sqlc.yaml

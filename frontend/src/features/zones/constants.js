@@ -3,9 +3,12 @@ import {
   IconDroplet,
   IconDroplets,
   IconFish,
+  IconHammer,
   IconMushroom,
+  IconPlayerPause,
   IconRotate,
   IconSeedling,
+  IconTool,
 } from "@tabler/icons-react";
 
 /**
@@ -36,6 +39,7 @@ export const ZONE_TYPES = {
     border: "border-leaf/30",
     gradient: "from-leaf to-sage-deep",
     chip: "from-leaf/20 to-leaf/5 text-leaf ring-leaf/25",
+    glow: "hover:shadow-leaf/20",
   },
   hydro: {
     id: "hydro",
@@ -53,6 +57,7 @@ export const ZONE_TYPES = {
     border: "border-lagoon/30",
     gradient: "from-lagoon to-lagoon-deep",
     chip: "from-lagoon/20 to-lagoon/5 text-lagoon-deep dark:text-lagoon ring-lagoon/25",
+    glow: "hover:shadow-lagoon/20",
   },
   aquaponic: {
     id: "aquaponic",
@@ -63,13 +68,14 @@ export const ZONE_TYPES = {
       "Hydroponics married to fish — fish waste feeds the plants, plants clean the water back.",
     icon: IconFish,
     art: "aquaponic",
-    text: "text-sky-warm",
-    bg: "bg-sky-warm/12 dark:bg-sky-warm/15",
-    bgSoft: "bg-sky-warm/8",
-    ring: "ring-sky-warm/40",
-    border: "border-sky-warm/30",
-    gradient: "from-sky-warm to-lagoon",
-    chip: "from-sky-warm/20 to-sky-warm/5 text-sky-warm ring-sky-warm/25",
+    text: "text-iris-deep dark:text-iris",
+    bg: "bg-iris/12 dark:bg-iris/15",
+    bgSoft: "bg-iris/8",
+    ring: "ring-iris/40",
+    border: "border-iris/30",
+    gradient: "from-iris to-iris-deep",
+    chip: "from-iris/20 to-iris/5 text-iris-deep dark:text-iris ring-iris/25",
+    glow: "hover:shadow-iris/25",
   },
   mushroom: {
     id: "mushroom",
@@ -87,6 +93,7 @@ export const ZONE_TYPES = {
     border: "border-wheat/30",
     gradient: "from-clay to-wheat-deep",
     chip: "from-clay/25 to-clay/5 text-clay-deep dark:text-clay ring-clay/30",
+    glow: "hover:shadow-clay/25",
   },
 };
 
@@ -106,6 +113,7 @@ export const ZONE_STATUS_META = {
     id: "idle",
     label: "Idle",
     description: "Empty and ready for the next cycle.",
+    icon: IconPlayerPause,
     dot: "bg-muted-foreground/50",
     chip: "border-border/60 bg-muted/40 text-muted-foreground",
   },
@@ -113,6 +121,7 @@ export const ZONE_STATUS_META = {
     id: "preparing",
     label: "Preparing",
     description: "Getting ready — amending soil, cleaning the system.",
+    icon: IconTool,
     dot: "bg-amber-500",
     chip:
       "border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-400",
@@ -121,6 +130,7 @@ export const ZONE_STATUS_META = {
     id: "maintenance",
     label: "Maintenance",
     description: "Out of commission — repairs or treatment.",
+    icon: IconHammer,
     dot: "bg-red-500",
     chip: "border-red-500/30 bg-red-500/12 text-red-600 dark:text-red-400",
   },

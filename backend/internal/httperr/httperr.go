@@ -12,14 +12,15 @@ import (
 func HandleError(ctx *gin.Context, err error) {
 	switch {
 	case errors.Is(err, domain.ErrUserExists),
-		errors.Is(err, domain.ErrTenantExists):
+		errors.Is(err, domain.ErrTenantExists),
+		errors.Is(err, domain.ErrDuplicateFarmName),
+		errors.Is(err, domain.ErrDuplicateZoneName),
+		errors.Is(err, domain.ErrInvitationAccepted):
 		response.Conflict(ctx, messageOf(err))
 
-	case errors.Is(err, domain.ErrInvalidTenantName):
-		response.BadRequest(ctx, messageOf(err))
-
 	case errors.Is(err, domain.ErrUserNotFound),
-		errors.Is(err, domain.ErrTenantNotFound):
+		errors.Is(err, domain.ErrTenantNotFound),
+		errors.Is(err, domain.ErrFarmNotFound):
 		response.NotFound(ctx, messageOf(err))
 
 	case errors.Is(err, domain.ErrInvalidCredentials),
@@ -33,20 +34,12 @@ func HandleError(ctx *gin.Context, err error) {
 
 	case errors.Is(err, domain.ErrInvitationInvalid),
 		errors.Is(err, domain.ErrInvitationExpired),
-		errors.Is(err, domain.ErrInvitationRevoked):
+		errors.Is(err, domain.ErrInvitationRevoked),
+		errors.Is(err, domain.ErrInvalidTenantName):
 		response.BadRequest(ctx, messageOf(err))
-
-	case errors.Is(err, domain.ErrInvitationAccepted):
-		response.Conflict(ctx, messageOf(err))
-
-	case errors.Is(err, domain.ErrDuplicateZoneName):
-		response.Conflict(ctx, messageOf(err))
 
 	case errors.Is(err, domain.ErrForbidden):
 		response.Forbidden(ctx, messageOf(err))
-
-	case errors.Is(err, domain.ErrFarmNotFound):
-		response.NotFound(ctx, messageOf(err))
 
 	default:
 		log.Printf("internal error: %s %s: %v", ctx.Request.Method, ctx.Request.URL.Path, err)
@@ -69,6 +62,8 @@ func messageOf(err error) string {
 		domain.ErrForbidden,
 		domain.ErrUnauthorized,
 		domain.ErrInvalidCredentials,
+		domain.ErrDuplicateFarmName,
+		domain.ErrDuplicateZoneName,
 	} {
 		if errors.Is(err, sentinel) {
 			return sentinel.Error()

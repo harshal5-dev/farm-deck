@@ -35,6 +35,9 @@ var (
 	// Permission errors
 	ErrForbidden = errors.New("forbidden")
 
+	// farm errors
+	ErrDuplicateFarmName = errors.New("farm name already exists")
+
 	// Zone errors
 	ErrDuplicateZoneName = errors.New("zone name already exists")
 

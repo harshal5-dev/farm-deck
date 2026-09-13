@@ -10,6 +10,7 @@ import (
 
 type ZoneHandler interface {
 	CreateZone(ctx *gin.Context)
+	ListZone(ctx *gin.Context)
 }
 
 type ZoneHandlerImpl struct {
@@ -55,4 +56,45 @@ func (h *ZoneHandlerImpl) CreateZone(ctx *gin.Context) {
 	}
 
 	response.OK(ctx, "zone created successfully")
+}
+
+// ListZones godoc
+// @Summary      List tenant fields
+// @Description  Returns the caller's fields with pagination, optional filters and
+// @Description  status counts. Omitted params fall back to defaults; filters are
+// @Description  AND-combined and scoped to the caller's tenant.
+// @Tags         zone
+// @Produce      json
+// @Security     CookieAuth
+// @Param        page       query int    false "1-based page number (default 1)"
+// @Param        pageSize   query int    false "Rows per page, 1–100 (default 6)"
+// @Param        farmID     query string false "Filter by farm UUID"
+// @Param        zoneTypeID query string false "Filter by zone type UUID"
+// @Param        status     query string false "all | active | inactive (default all)" Enums(all,active,inactive)
+// @Param        q          query string false "Search by field name, farm name"
+// @Param        sort       query string false "recent | name | newest | size (default recent)" Enums(recent,name,newest,size)
+// @Success      200 {object} response.APIResponse{data=zone.ListZonesResponse} "paginated fields with counts"
+// @Failure      400 {object} response.APIError "invalid query parameters"
+// @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /zones [get]
+func (h *ZoneHandlerImpl) ListZone(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	var args ListZonesArgs
+	if !validate.BindQuery(ctx, &args) {
+		return
+	}
+
+	result, err := h.zoneService.ListZones(ctx, tenantID, args)
+	if err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+	response.OK(ctx, result)
 }

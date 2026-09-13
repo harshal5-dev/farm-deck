@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CheckTenantExistsBySubdomain(ctx context.Context, subdomain string) (bool, error)
 	CheckUserExistsByEmailID(ctx context.Context, emailID string) (bool, error)
+	CountZonesByStatus(ctx context.Context, arg CountZonesByStatusParams) (CountZonesByStatusRow, error)
 	CreateCredential(ctx context.Context, arg CreateCredentialParams) (Credential, error)
 	CreateFarm(ctx context.Context, arg CreateFarmParams) (Farm, error)
 	CreateMember(ctx context.Context, arg CreateMemberParams) (User, error)

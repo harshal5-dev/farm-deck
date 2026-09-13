@@ -12,6 +12,39 @@ import (
 	"github.com/google/uuid"
 )
 
+const countZonesByStatus = `-- name: CountZonesByStatus :one
+SELECT count(*) FILTER (WHERE is_active)                              AS active,
+       count(*) FILTER (WHERE NOT is_active)                          AS inactive,
+       count(*)                                                       AS total,
+       count(*) FILTER (WHERE zone_type_id = $2::uuid)                AS by_type  -- or GROUP BY for all chips
+FROM zones WHERE tenant_id = $1 AND ($3::uuid IS NULL OR farm_id = $3)
+`
+
+type CountZonesByStatusParams struct {
+	TenantID   uuid.UUID
+	ZoneTypeID *uuid.UUID
+	FarmID     *uuid.UUID
+}
+
+type CountZonesByStatusRow struct {
+	Active   int64
+	Inactive int64
+	Total    int64
+	ByType   int64
+}
+
+func (q *Queries) CountZonesByStatus(ctx context.Context, arg CountZonesByStatusParams) (CountZonesByStatusRow, error) {
+	row := q.db.QueryRow(ctx, countZonesByStatus, arg.TenantID, arg.ZoneTypeID, arg.FarmID)
+	var i CountZonesByStatusRow
+	err := row.Scan(
+		&i.Active,
+		&i.Inactive,
+		&i.Total,
+		&i.ByType,
+	)
+	return i, err
+}
+
 const createZone = `-- name: CreateZone :one
 INSERT INTO zones (farm_id, tenant_id, zone_type_id, name, area, area_unit, notes)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -57,45 +90,77 @@ func (q *Queries) CreateZone(ctx context.Context, arg CreateZoneParams) (Zone, e
 }
 
 const listZones = `-- name: ListZones :many
-SELECT z.id, z.farm_id, z.tenant_id, z.zone_type_id, z.name, z.area, z.area_unit, z.notes, z.is_active, z.created_at, z.updated_at, zt.display_name AS zone_type_name, zt.cultivation_mode, zt.description FROM zones z
+SELECT z.id, z.farm_id, z.tenant_id, z.zone_type_id, z.name, z.area, z.area_unit, z.notes, z.is_active, z.created_at, z.updated_at, zt.name AS zone_type_name, zt.cultivation_mode, zt.display_name AS zone_type_display_name,
+f.name AS farm_name,
+zsd.soil_type_id, st.display_name AS soil_type_display_name,
+st.water_retention AS soil_water_retention, st.drainage AS soil_drainage,
+zhd.hydro_system_type_id, hst.display_name AS hydro_system_type_display_name,
+zhd.grow_medium, zhd.reservoir_volume_liters, zhd.number_of_slots
+FROM zones z
 JOIN zone_types zt ON z.zone_type_id = zt.id
-WHERE tenant_id = $1
-AND is_active = $2
-ORDER BY created_at DESC
-LIMIT $3
-OFFSET $4
+JOIN farms f ON z.farm_id = f.id
+LEFT JOIN zone_soil_details zsd ON zsd.zone_id = z.id
+LEFT JOIN soil_types st ON st.id = zsd.soil_type_id
+LEFT JOIN zone_hydro_details zhd ON zhd.zone_id = z.id
+LEFT JOIN hydro_system_types hst ON hst.id = zhd.hydro_system_type_id
+WHERE z.tenant_id = $1
+  AND ($4::uuid IS NULL OR z.farm_id = $4)
+  AND ($5::uuid IS NULL OR z.zone_type_id = $5)
+  AND ($6::bool IS NULL OR z.is_active = $6)
+  AND ($7::text IS NULL
+       OR z.name ILIKE '%' || $7 || '%'
+       OR f.name ILIKE '%' || $7 || '%')
+ORDER BY z.updated_at DESC
+LIMIT $2
+OFFSET $3
 `
 
 type ListZonesParams struct {
-	TenantID uuid.UUID
-	IsActive bool
-	Limit    int32
-	Offset   int32
+	TenantID   uuid.UUID
+	Limit      int32
+	Offset     int32
+	FarmID     *uuid.UUID
+	ZoneTypeID *uuid.UUID
+	IsActive   *bool
+	Search     *string
 }
 
 type ListZonesRow struct {
-	ID              uuid.UUID
-	FarmID          uuid.UUID
-	TenantID        uuid.UUID
-	ZoneTypeID      uuid.UUID
-	Name            string
-	Area            *float64
-	AreaUnit        string
-	Notes           *string
-	IsActive        bool
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	ZoneTypeName    string
-	CultivationMode string
-	Description     *string
+	ID                         uuid.UUID
+	FarmID                     uuid.UUID
+	TenantID                   uuid.UUID
+	ZoneTypeID                 uuid.UUID
+	Name                       string
+	Area                       *float64
+	AreaUnit                   string
+	Notes                      *string
+	IsActive                   bool
+	CreatedAt                  time.Time
+	UpdatedAt                  time.Time
+	ZoneTypeName               string
+	CultivationMode            string
+	ZoneTypeDisplayName        string
+	FarmName                   string
+	SoilTypeID                 *uuid.UUID
+	SoilTypeDisplayName        *string
+	SoilWaterRetention         *string
+	SoilDrainage               *string
+	HydroSystemTypeID          *uuid.UUID
+	HydroSystemTypeDisplayName *string
+	GrowMedium                 *string
+	ReservoirVolumeLiters      *float64
+	NumberOfSlots              *int32
 }
 
 func (q *Queries) ListZones(ctx context.Context, arg ListZonesParams) ([]ListZonesRow, error) {
 	rows, err := q.db.Query(ctx, listZones,
 		arg.TenantID,
-		arg.IsActive,
 		arg.Limit,
 		arg.Offset,
+		arg.FarmID,
+		arg.ZoneTypeID,
+		arg.IsActive,
+		arg.Search,
 	)
 	if err != nil {
 		return nil, err
@@ -118,7 +183,17 @@ func (q *Queries) ListZones(ctx context.Context, arg ListZonesParams) ([]ListZon
 			&i.UpdatedAt,
 			&i.ZoneTypeName,
 			&i.CultivationMode,
-			&i.Description,
+			&i.ZoneTypeDisplayName,
+			&i.FarmName,
+			&i.SoilTypeID,
+			&i.SoilTypeDisplayName,
+			&i.SoilWaterRetention,
+			&i.SoilDrainage,
+			&i.HydroSystemTypeID,
+			&i.HydroSystemTypeDisplayName,
+			&i.GrowMedium,
+			&i.ReservoirVolumeLiters,
+			&i.NumberOfSlots,
 		); err != nil {
 			return nil, err
 		}

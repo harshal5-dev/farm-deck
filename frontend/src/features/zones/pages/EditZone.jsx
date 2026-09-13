@@ -18,9 +18,9 @@ import { clearSelectedZone, selectSelectedZone } from "../selectedZoneSlice";
  * arrive decorated from the list (zoneType lookup row included).
  */
 const toFormDefaults = (zone) => ({
-  farmId: zone.farmID || "",
+  farmId: zone.farmId || "",
   name: zone.name || "",
-  zoneTypeId: zone.zoneTypeID || "",
+  zoneTypeId: zone.zoneTypeId || "",
   soilTypeId: zone.soilTypeDetails?.soilTypeID || "",
   hydroSystemTypeId: zone.hydroSystemTypeDetails?.hydroSystemTypeID || "",
   growMedium: zone.hydroSystemTypeDetails?.growMedium || "",
@@ -88,7 +88,7 @@ const EditZone = () => {
   // Records reference the type by UUID; resolve its name for the header.
   const typeName =
     zone.zoneType?.name ||
-    zoneTypes.find((t) => t.id === zone.zoneTypeID)?.name;
+    zoneTypes.find((t) => t.id === zone.zoneTypeId)?.name;
   const t = getZoneType(typeName);
   const TypeIcon = t.icon;
 

@@ -3,6 +3,7 @@ import { Reveal } from "@/components/effects";
 import { cn } from "@/lib/utils";
 import {
   IconCalendarPlus,
+  IconChevronDown,
   IconCircleOff,
   IconHistory,
   IconNote,
@@ -20,46 +21,63 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getZoneType } from "../constants";
-import { formatAge, formatArea, formatDate, formatRelative, formatLiters } from "../lib/format";
+import { getZoneType, getZoneStatus } from "../constants";
+import {
+  formatAge,
+  formatArea,
+  formatDate,
+  formatLiters,
+  formatRelative,
+  humanizeToken,
+} from "../lib/format";
 import ZoneTypeArt from "./ZoneTypeArt";
-import { ZoneTypePill, ZoneStatusPill, ZoneActivePill } from "./pills";
 
 const iconAction =
   "inline-flex size-8 items-center justify-center rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
-/** One cell of the KPI strip: colored icon, bold value, tiny label. */
-const StatCell = ({ icon: Icon, value, label, tone }) => (
-  <div className="flex min-w-0 flex-col items-center gap-0 px-2 py-1.5 text-center">
-    <Icon className={cn("size-3.5 shrink-0", tone)} strokeWidth={1.85} />
-    <span className="w-full truncate text-xs font-bold tabular-nums">
-      {value}
+/** Compact glanceable stat — small tinted icon chip + bold value. */
+const StatTile = ({ chip, icon: Icon, value, label }) => (
+  <div className="flex min-w-0 items-center gap-2 rounded-xl border border-border/40 bg-muted/20 px-2 py-1.5 transition-colors duration-300 group-hover/zone:border-border/60">
+    <span
+      className={cn(
+        "flex size-7 shrink-0 items-center justify-center rounded-lg border",
+        chip
+      )}
+    >
+      <Icon className="size-3.5" strokeWidth={1.85} />
     </span>
-    <span className="text-[9px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-xs leading-tight font-bold tabular-nums">
+        {value}
+      </p>
+      <p className="truncate text-[9px] leading-tight font-semibold tracking-wider text-muted-foreground/70 uppercase">
+        {label}
+      </p>
+    </div>
+  </div>
+);
+
+/** One label → value line inside the cultivation panel. */
+const SpecRow = ({ label, value }) => (
+  <div className="flex items-baseline justify-between gap-3 text-[11px] leading-5">
+    <span className="shrink-0 font-medium text-muted-foreground/80">
       {label}
+    </span>
+    <span className="min-w-0 truncate text-right font-semibold text-foreground">
+      {value}
     </span>
   </div>
 );
 
-/** Tiny rounded chip for cultivation detail facts (retention, slots…). */
-const DetailChip = ({ children, tone }) => (
-  <span
-    className={cn(
-      "inline-flex max-w-full items-center gap-1 truncate rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-      tone || "border-border/50 bg-muted/35 text-muted-foreground"
-    )}
-  >
-    {children}
-  </span>
-);
-
 /**
- * ZoneCard — compact list card. A short illustrated ZoneTypeArt hero
- * (kept free of tags so the art breathes; only the active/inactive
- * pill sits on it), the identity tile overlapping it, then a single
- * pills row (type + container status + age), the KPI strip (area ·
- * cultivation detail · added), mode-specific detail chips and an
- * optional notes teaser above the footer action bar.
+ * ZoneCard — compact list card. A clean ZoneTypeArt banner, the type
+ * tile overlapping it with name + a live dot, the farm · status meta
+ * line, then a stat duo: Area plus either the cultivation accordion
+ * trigger (soil profile / hydro setup — the spec rows stay collapsed
+ * until the trigger is clicked) or, for types without a detail section
+ * yet, the added date. Optional notes teaser above the footer bar.
+ * Inactive zones get the muted dashed treatment so they read clearly
+ * as archived at a glance.
  */
 const ZoneCard = ({
   zone,
@@ -70,24 +88,47 @@ const ZoneCard = ({
   canManage = true,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const zoneType = zone.zoneType; // decorated lookup row from the list
   const t = getZoneType(zoneType?.name);
   const TypeIcon = t.icon;
   const isSoil = zoneType?.cultivationMode === "soil";
   const isHydro = zoneType?.cultivationMode === "hydro";
+  const live = zone.isActive;
+  const hasDetails = isSoil || isHydro;
 
-  const detailLabel = isSoil ? "Soil" : isHydro ? "System" : "Detail";
-  const detailValue = isSoil
-    ? zone.soilType?.displayName ?? "—"
-    : isHydro
-      ? zone.hydroSystemType?.displayName ?? "—"
-      : "—";
-  const detailTone = isSoil
-    ? "text-wheat-deep dark:text-wheat"
-    : "text-lagoon-deep dark:text-lagoon";
+  // zoneStatus is a mock-era field the API doesn't carry (yet) — hide the
+  // status segment entirely instead of defaulting every card to "Idle".
+  const statusMeta = zone.zoneStatus ? getZoneStatus(zone.zoneStatus) : null;
+  const statusAge = zone.statusChangedAt
+    ? formatAge(zone.statusChangedAt)
+    : null;
 
-  const statusAge = zone.statusChangedAt ? formatAge(zone.statusChangedAt) : null;
+  const panelTitle = isSoil ? "Soil profile" : "Hydro setup";
+
+  // Spec rows revealed by the accordion — soil behaviour / hydro rig.
+  // Tokens (retention, drainage, media) are humanized for display.
+  const specRows = [];
+  if (isSoil) {
+    specRows.push(["Soil", zone.soilType?.displayName ?? "Not set"]);
+    if (zone.soilType?.waterRetention)
+      specRows.push([
+        "Retention",
+        humanizeToken(zone.soilType.waterRetention),
+      ]);
+    if (zone.soilType?.drainage)
+      specRows.push(["Drainage", humanizeToken(zone.soilType.drainage)]);
+  } else if (isHydro) {
+    const d = zone.hydroSystemTypeDetails;
+    specRows.push(["System", zone.hydroSystemType?.displayName ?? "Not set"]);
+    if (d?.growMedium) specRows.push(["Medium", humanizeToken(d.growMedium)]);
+    if (d?.reservoirVolumeLiters != null)
+      specRows.push(["Reservoir", formatLiters(d.reservoirVolumeLiters)]);
+    if (d?.numberOfSlots != null)
+      specRows.push(["Slots", String(d.numberOfSlots)]);
+  }
+  const hasExtras = specRows.length > 1;
 
   return (
     <Reveal
@@ -95,143 +136,214 @@ const ZoneCard = ({
       duration={400}
       changeKey={zone.id}
     >
-      <div className="group/zone glass-card texture-paper highlight-edge relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-lagoon/15">
-        {/* Subtle type-tinted wash */}
+      <div
+        className={cn(
+          "group/zone relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-300",
+          live
+            ? cn(
+                "glass-card texture-paper highlight-edge hover:-translate-y-1 hover:shadow-xl",
+                t.glow
+              )
+            : "border border-dashed border-border/70 bg-muted/25 backdrop-blur-sm hover:border-border hover:shadow-md"
+        )}
+      >
+        {/* Subtle type-tinted wash — inactive cards keep a trace of it */}
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 bg-linear-to-br opacity-[0.04] transition-opacity duration-300 group-hover/zone:opacity-[0.08]",
-            t.gradient
+            "pointer-events-none absolute inset-0 bg-linear-to-br transition-opacity duration-300",
+            live
+              ? cn("opacity-[0.04] group-hover/zone:opacity-[0.08]", t.gradient)
+              : cn("opacity-[0.015] grayscale", t.gradient)
           )}
         />
 
-        {/* Hero band — per-type ZoneTypeArt scene, kept clean of tags
-            (the type lives in the pills row below) so the illustration
-            breathes. Active/inactive stays top-right as the one
-            glanceable state on the art. */}
+        {/* Hero band — a clean per-type scene; the gradient tile below
+            carries the type, so the art stays free of any chips. */}
         <div className="relative h-16 shrink-0 overflow-hidden">
           <ZoneTypeArt
             variant={t.art}
             className={cn(
-              "size-full transition-transform duration-700 group-hover/zone:scale-105",
-              !zone.isActive && "opacity-60 saturate-50"
+              "size-full transition-transform duration-700",
+              live ? "group-hover/zone:scale-105" : "opacity-40 grayscale"
             )}
           />
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
           <div className="absolute inset-x-0 top-0 h-1 overflow-hidden">
-            <div className={cn("absolute inset-0 bg-linear-to-r", t.gradient)} />
-          </div>
-          {/* Status pill in the top-right */}
-          <div className="absolute top-2.5 right-3">
-            <ZoneActivePill active={zone.isActive} />
+            <div
+              className={cn(
+                "absolute inset-0 bg-linear-to-r",
+                live
+                  ? t.gradient
+                  : "from-muted-foreground/40 to-muted-foreground/20"
+              )}
+            />
           </div>
         </div>
 
         {/* Body */}
-        <div className="relative flex flex-1 flex-col px-4 pb-2.5">
-          {/* Identity — gradient type tile overlapping the hero */}
+        <div className="relative flex flex-1 flex-col px-3.5 pb-2.5">
+          {/* Identity — gradient type tile overlapping the hero, with a
+              live dot beside the name as the only state marker. */}
           <div className="flex items-end gap-2.5">
             <div
               className={cn(
-                "relative -mt-5 flex size-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white shadow-lg ring-[3px] ring-card",
-                t.gradient
+                "relative -mt-4 flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg ring-[3px] ring-card",
+                live
+                  ? cn("bg-linear-to-br", t.gradient)
+                  : "bg-linear-to-br from-muted-foreground/55 to-muted-foreground/35 shadow-none"
               )}
             >
               <TypeIcon className="size-5" strokeWidth={1.85} />
             </div>
             <div className="min-w-0 flex-1 pb-0.5">
-              <h3 className="min-w-0 truncate font-heading text-base font-bold tracking-tight">
-                {zone.name}
+              <h3
+                className={cn(
+                  "flex min-w-0 items-center gap-1.5 font-heading text-base font-bold tracking-tight",
+                  !live && "text-muted-foreground"
+                )}
+              >
+                <span className="truncate">{zone.name}</span>
+                {live && (
+                  <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                )}
               </h3>
               <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
-                <IconTractor className="size-3.5 shrink-0" strokeWidth={1.85} />
+                <IconTractor
+                  className="size-3.5 shrink-0" strokeWidth={1.85}
+                />
                 <span className="truncate">
                   {zone.farmName || "Unknown farm"}
                 </span>
+                {statusMeta && (
+                  <>
+                    <span className="shrink-0 text-muted-foreground/40">·</span>
+                    <span className="inline-flex shrink-0 items-center gap-1">
+                      <span
+                        className={cn("size-1.5 rounded-full", statusMeta.dot)}
+                      />
+                      {statusMeta.label}
+                      {statusAge && (
+                        <span className="text-muted-foreground/70">
+                          {statusAge}
+                        </span>
+                      )}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>
 
-          {/* Type + container status + age — one compact pills row */}
-          <div className="mt-2 flex min-h-5 flex-wrap items-center gap-1.5">
-            <ZoneTypePill typeName={zoneType?.name} size="xs" />
-            <ZoneStatusPill status={zone.zoneStatus} />
-            {statusAge && (
-              <span className="truncate text-[10px] font-medium text-muted-foreground/80">
-                for {statusAge}
-              </span>
-            )}
-          </div>
-
-          {/* KPI strip — area · cultivation detail · added */}
-          <div className="mt-2 grid grid-cols-3 divide-x divide-border/40 rounded-xl border border-border/30 bg-muted/25">
-            <StatCell
+          {/* Stat duo — area · accordion trigger (or added date) */}
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
+            <StatTile
+              chip="border-leaf/25 bg-leaf/10 text-leaf"
               icon={IconRuler2}
               value={formatArea(zone.area, zone.areaUnit)}
               label="Area"
-              tone="text-leaf"
             />
-            <StatCell
-              icon={TypeIcon}
-              value={detailValue}
-              label={detailLabel}
-              tone={detailTone}
-            />
-            <StatCell
-              icon={IconCalendarPlus}
-              value={formatDate(zone.createdAt)}
-              label="Added"
-              tone="text-wheat-deep dark:text-wheat"
-            />
+            {hasDetails ? (
+              <button
+                type="button"
+                onClick={() => setDetailsOpen((o) => !o)}
+                aria-expanded={detailsOpen}
+                title={`${detailsOpen ? "Hide" : "Show"} ${panelTitle.toLowerCase()} details`}
+                className={cn(
+                  "flex min-w-0 items-center gap-2 rounded-xl border px-2 py-1.5 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                  detailsOpen
+                    ? cn(t.border, t.bgSoft)
+                    : "border-border/40 bg-muted/20 hover:border-border/60 group-hover/zone:border-border/60"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-lg border",
+                    isSoil
+                      ? "border-wheat/30 bg-wheat/10 text-wheat-deep dark:text-wheat"
+                      : "border-lagoon/30 bg-lagoon/10 text-lagoon-deep dark:text-lagoon"
+                  )}
+                >
+                  <TypeIcon className="size-3.5" strokeWidth={1.85} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs leading-tight font-bold">
+                    {panelTitle}
+                  </span>
+                  <span className="block truncate text-[9px] leading-tight font-semibold tracking-wider text-muted-foreground/70 uppercase">
+                    {detailsOpen ? "Hide" : "Details"}
+                  </span>
+                </span>
+                <IconChevronDown
+                  className={cn(
+                    "size-3.5 shrink-0 text-muted-foreground transition-transform duration-300",
+                    detailsOpen && "rotate-180"
+                  )}
+                  strokeWidth={1.85}
+                />
+              </button>
+            ) : (
+              <StatTile
+                chip="border-wheat/30 bg-wheat/10 text-wheat-deep dark:text-wheat"
+                icon={IconCalendarPlus}
+                value={formatDate(zone.createdAt)}
+                label="Added"
+              />
+            )}
           </div>
 
-          {/* Cultivation detail chips — soil behaviour / hydro rig */}
-          <div className="mt-2 flex min-h-5 flex-wrap items-center gap-1.5">
-            {isSoil && zone.soilType && (
-              <>
-                <DetailChip tone="border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-400">
-                  {zone.soilType.waterRetention} retention
-                </DetailChip>
-                <DetailChip tone="border-wheat/30 bg-wheat/10 text-wheat-deep dark:text-wheat">
-                  {zone.soilType.drainage} drainage
-                </DetailChip>
-              </>
-            )}
-            {isHydro && (
-              <>
-                {zone.hydroSystemTypeDetails?.growMedium && (
-                  <DetailChip tone="border-lagoon/30 bg-lagoon/10 text-lagoon-deep dark:text-lagoon">
-                    {zone.hydroSystemTypeDetails.growMedium}
-                  </DetailChip>
-                )}
-                {zone.hydroSystemTypeDetails?.reservoirVolumeLiters != null && (
-                  <DetailChip>
-                    {formatLiters(zone.hydroSystemTypeDetails.reservoirVolumeLiters)}
-                  </DetailChip>
-                )}
-                {zone.hydroSystemTypeDetails?.numberOfSlots != null && (
-                  <DetailChip>
-                    {zone.hydroSystemTypeDetails.numberOfSlots} slots
-                  </DetailChip>
-                )}
-                {!zone.hydroSystemTypeDetails?.growMedium &&
-                  zone.hydroSystemTypeDetails?.reservoirVolumeLiters == null &&
-                  zone.hydroSystemTypeDetails?.numberOfSlots == null && (
-                    <DetailChip>No rig details yet</DetailChip>
+          {/* Cultivation details — collapsed until the trigger is
+              clicked; the grid-rows swap animates the height smoothly. */}
+          {hasDetails && (
+            <div
+              className={cn(
+                "grid transition-[grid-template-rows] duration-300 ease-out",
+                detailsOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              )}
+            >
+              <div className="overflow-hidden">
+                <div
+                  className={cn(
+                    "mt-2 space-y-0.5 rounded-xl border p-2",
+                    live
+                      ? cn(t.border, t.bgSoft)
+                      : "border-border/40 bg-muted/15"
                   )}
-              </>
-            )}
-            {!isSoil && !isHydro && (
-              <DetailChip>
-                Mode details coming soon
-              </DetailChip>
-            )}
-          </div>
+                >
+                  {specRows.map(([label, value]) => (
+                    <SpecRow key={label} label={label} value={value} />
+                  ))}
+                  {!hasExtras && (
+                    <p className="pt-0.5 text-[10px] text-muted-foreground/60 italic">
+                      No extra details yet
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Types without a detail section yet keep a quiet teaser */}
+          {!hasDetails && (
+            <p className="mt-2 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/70 italic">
+              <TypeIcon
+                className={cn(
+                  "size-3.5 shrink-0",
+                  live ? t.text : "text-muted-foreground/60"
+                )}
+                strokeWidth={1.85}
+              />
+              Mode-specific details coming soon
+            </p>
+          )}
 
           {/* Notes teaser */}
           {zone.notes && (
-            <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/80">
+            <p className="mt-2 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground/80">
               <IconNote
-                className={cn("size-3.5 shrink-0", t.text)}
+                className={cn(
+                  "size-3.5 shrink-0",
+                  live ? t.text : "text-muted-foreground/60"
+                )}
                 strokeWidth={1.85}
               />
               <span className="truncate">{zone.notes}</span>
