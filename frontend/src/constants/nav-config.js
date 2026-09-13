@@ -62,14 +62,14 @@ export const NAV_GROUPS = [
         href: "/app/crops",
         icon: IconPlant2,
         permission: PERMISSIONS.VIEW_CROPS,
-        disabled: true, // TODO: enable when the crops page is built
+        comingSoon: true, // TODO: enable when the crops page is built
       },
       {
         label: "Harvests",
         href: "/app/harvests",
         icon: IconBasket,
         permission: PERMISSIONS.VIEW_HARVESTS,
-        disabled: true, // TODO: enable when the harvests page is built
+        comingSoon: true, // TODO: enable when the harvests page is built
       },
     ],
   },
