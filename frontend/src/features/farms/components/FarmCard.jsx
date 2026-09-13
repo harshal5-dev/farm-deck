@@ -5,6 +5,7 @@ import {
   IconCalendarPlus,
   IconChartDots,
   IconCircleOff,
+  IconEye,
   IconHistory,
   IconMapPin,
   IconNote,
@@ -49,6 +50,7 @@ const StatCell = ({ icon: Icon, value, label, tone }) => (
 const FarmCard = ({
   farm,
   index,
+  onView,
   onDeactivate,
   onActivate,
   onEdit,
@@ -212,8 +214,22 @@ const FarmCard = ({
             </span>
           </span>
 
-          {canManage && (
+          {(onView || canManage) && (
             <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={onView}
+                aria-label={`View ${farm.name}`}
+                title="View farm details"
+                className={cn(
+                  iconAction,
+                  "cursor-pointer bg-leaf/12 text-leaf hover:bg-leaf/22 hover:-translate-y-px"
+                )}
+              >
+                <IconEye className="size-4" strokeWidth={1.85} />
+              </button>
+              {canManage && (
+                <>
               <button
                 type="button"
                 onClick={onEdit}
@@ -221,7 +237,7 @@ const FarmCard = ({
                 title="Edit farm"
                 className={cn(
                   iconAction,
-                  "bg-sky-warm/12 text-sky-warm hover:bg-sky-warm/22 hover:-translate-y-px"
+                  "cursor-pointer bg-sky-warm/12 text-sky-warm hover:bg-sky-warm/22 hover:-translate-y-px"
                 )}
               >
                 <IconPencil className="size-4" strokeWidth={1.85} />
@@ -247,11 +263,13 @@ const FarmCard = ({
                   title="Reactivate farm"
                   className={cn(
                     iconAction,
-                    "bg-leaf/12 text-leaf hover:bg-leaf/22 hover:-translate-y-px"
+                    "cursor-pointer bg-leaf/12 text-leaf hover:bg-leaf/22 hover:-translate-y-px"
                   )}
                 >
                   <IconRotate className="size-4" strokeWidth={1.85} />
                 </button>
+              )}
+                </>
               )}
             </div>
           )}

@@ -196,6 +196,10 @@ const EditZone = () => {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             submitting={submitting}
+            // Farm is identity — locked while editing (same treatment the
+            // setup wizard uses). The zone row carries its farm name.
+            lockFarmId={zone.farmId}
+            lockFarmName={zone.farmName}
           />
         </div>
       </Reveal>

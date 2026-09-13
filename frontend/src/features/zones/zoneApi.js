@@ -52,6 +52,17 @@ export const zoneApi = createApi({
       providesTags: ["Zone"],
     }),
 
+    /* Real server-side-filtered list for one farm — powers the farm
+       view page's fields grid (GET /zones?farmID=…). */
+    listZonesByFarm: builder.query({
+      query: (farmId) => ({
+        url: "/zones",
+        params: { farmID: farmId, pageSize: 100, sort: "name" },
+      }),
+      transformResponse: transformResult,
+      providesTags: ["Zone"],
+    }),
+
     createZone: builder.mutation({
       query: (zone) => ({
         url: "/zones",
@@ -124,6 +135,7 @@ export const zoneApi = createApi({
 
 export const {
   useListZonesQuery,
+  useListZonesByFarmQuery,
   useCreateZoneMutation,
   useUpdateZoneMutation,
   useInactivateZoneMutation,

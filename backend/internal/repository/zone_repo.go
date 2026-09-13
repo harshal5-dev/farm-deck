@@ -9,12 +9,10 @@ import (
 )
 
 type ZoneRepo interface {
-	CreateZone(ctx context.Context, params domain.CreateZoneTxParams) (db.CreateZoneTxResult, error)
-	UpdateZone(ctx context.Context, params db.UpdateZoneParams) (db.Zone, error)
+	CreateZone(ctx context.Context, params domain.ManageZoneTxParams) (db.CreateZoneTxResult, error)
+	UpdateZone(ctx context.Context, params domain.ManageZoneTxParams) (db.UpdateZoneTxResult, error)
 	ListZones(ctx context.Context, params db.ListZonesParams) ([]db.ListZonesRow, error)
 	ToggleZoneIsActive(ctx context.Context, zoneID uuid.UUID, isActive bool) (db.Zone, error)
-	UpdateZoneHydroDetails(ctx context.Context, params db.UpdateZoneHydroDetailsParams) (db.ZoneHydroDetail, error)
-	UpdateZoneSoilDetails(ctx context.Context, params db.UpdateZoneSoilDetailsParams) (db.ZoneSoilDetail, error)
 	CountZonesByStatus(ctx context.Context, params db.CountZonesByStatusParams) (db.CountZonesByStatusRow, error)
 }
 
@@ -26,12 +24,12 @@ func NewZoneRepo(store db.Store) ZoneRepo {
 	return &ZoneRepoImpl{store: store}
 }
 
-func (z *ZoneRepoImpl) CreateZone(ctx context.Context, arg domain.CreateZoneTxParams) (db.CreateZoneTxResult, error) {
+func (z *ZoneRepoImpl) CreateZone(ctx context.Context, arg domain.ManageZoneTxParams) (db.CreateZoneTxResult, error) {
 	return z.store.CreateZoneTx(ctx, arg)
 }
 
-func (z *ZoneRepoImpl) UpdateZone(ctx context.Context, params db.UpdateZoneParams) (db.Zone, error) {
-	return z.store.UpdateZone(ctx, params)
+func (z *ZoneRepoImpl) UpdateZone(ctx context.Context, params domain.ManageZoneTxParams) (db.UpdateZoneTxResult, error) {
+	return z.store.UpdateZoneTx(ctx, params)
 }
 
 func (z *ZoneRepoImpl) ListZones(ctx context.Context, params db.ListZonesParams) ([]db.ListZonesRow, error) {
@@ -43,14 +41,6 @@ func (z *ZoneRepoImpl) ToggleZoneIsActive(ctx context.Context, zoneID uuid.UUID,
 		ID:       zoneID,
 		IsActive: isActive,
 	})
-}
-
-func (z *ZoneRepoImpl) UpdateZoneHydroDetails(ctx context.Context, params db.UpdateZoneHydroDetailsParams) (db.ZoneHydroDetail, error) {
-	return z.store.UpdateZoneHydroDetails(ctx, params)
-}
-
-func (z *ZoneRepoImpl) UpdateZoneSoilDetails(ctx context.Context, params db.UpdateZoneSoilDetailsParams) (db.ZoneSoilDetail, error) {
-	return z.store.UpdateZoneSoilDetails(ctx, params)
 }
 
 func (z *ZoneRepoImpl) CountZonesByStatus(ctx context.Context, params db.CountZonesByStatusParams) (db.CountZonesByStatusRow, error) {

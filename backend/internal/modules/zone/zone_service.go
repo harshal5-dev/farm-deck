@@ -11,6 +11,7 @@ import (
 type ZoneService interface {
 	CreateZone(ctx context.Context, tenantID uuid.UUID, req CreateZoneRequest) error
 	ListZones(ctx context.Context, tenantID uuid.UUID, args ListZonesArgs) (ListZonesResponse, error)
+	UpdateZone(ctx context.Context, tenantID uuid.UUID, zoneID uuid.UUID, req UpdateZoneRequest) error
 }
 
 type ZoneServiceImpl struct {
@@ -27,6 +28,14 @@ func (s *ZoneServiceImpl) CreateZone(ctx context.Context, tenantID uuid.UUID, re
 	_, err := s.zoneRepo.CreateZone(ctx, toCreateZoneTxParams(tenantID, req))
 	if err != nil {
 		return fmt.Errorf("create zone: %w", err)
+	}
+	return nil
+}
+
+func (s *ZoneServiceImpl) UpdateZone(ctx context.Context, tenantID uuid.UUID, zoneID uuid.UUID, req UpdateZoneRequest) error {
+	_, err := s.zoneRepo.UpdateZone(ctx, toUpdateZoneTxParams(zoneID, req))
+	if err != nil {
+		return fmt.Errorf("update zone: %w", err)
 	}
 	return nil
 }

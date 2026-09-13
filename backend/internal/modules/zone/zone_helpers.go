@@ -11,8 +11,8 @@ const (
 	defaultZonesPageSize = 6 // match the frontend's PAGE_SIZE
 )
 
-func toCreateZoneTxParams(tenantID uuid.UUID, req CreateZoneRequest) domain.CreateZoneTxParams {
-	return domain.CreateZoneTxParams{
+func toCreateZoneTxParams(tenantID uuid.UUID, req CreateZoneRequest) domain.ManageZoneTxParams {
+	return domain.ManageZoneTxParams{
 		NumberOfSlots:         req.HydroSystemTypeDetails.NumberOfSlots,
 		Area:                  req.Area,
 		ReservoirVolumeLiters: req.HydroSystemTypeDetails.ReservoirVolumeLiters,
@@ -29,23 +29,18 @@ func toCreateZoneTxParams(tenantID uuid.UUID, req CreateZoneRequest) domain.Crea
 	}
 }
 
-func toUpdateZoneTxParams(id uuid.UUID, req UpdateZoneRequest) db.UpdateZoneParams {
-	return db.UpdateZoneParams{
-		ID:       id,
-		Name:     req.Name,
-		Area:     req.Area,
-		AreaUnit: req.AreaUnit,
-		Notes:    req.Notes,
-	}
-}
-
-func toUpdateZoneHydroDetailsParams(zoneID uuid.UUID, req HydroSystemTypeRequest) db.UpdateZoneHydroDetailsParams {
-	return db.UpdateZoneHydroDetailsParams{
-		ZoneID:                zoneID,
-		HydroSystemTypeID:     req.HydroSystemTypeID,
-		GrowMedium:            req.GrowMedium,
-		ReservoirVolumeLiters: req.ReservoirVolumeLiters,
-		NumberOfSlots:         req.NumberOfSlots,
+func toUpdateZoneTxParams(id uuid.UUID, req UpdateZoneRequest) domain.ManageZoneTxParams {
+	return domain.ManageZoneTxParams{
+		NumberOfSlots:         req.HydroSystemTypeDetails.NumberOfSlots,
+		Area:                  req.Area,
+		ReservoirVolumeLiters: req.HydroSystemTypeDetails.ReservoirVolumeLiters,
+		Name:                  req.Name,
+		AreaUnit:              req.AreaUnit,
+		Notes:                 req.Notes,
+		GrowMedium:            req.HydroSystemTypeDetails.GrowMedium,
+		SoilTypeID:            req.SoilTypeDetails.SoilTypeID,
+		HydroSystemTypeID:     req.HydroSystemTypeDetails.HydroSystemTypeID,
+		ID:                    id,
 	}
 }
 
@@ -67,8 +62,6 @@ func toListZonesInfo(zone db.ListZonesRow) ListZonesInfo {
 		FarmName:            zone.FarmName,
 	}
 
-	// The detail halves come back flattened from the LEFT JOINs; a non-nil
-	// FK means that half exists for this zone.
 	if zone.SoilTypeID != nil {
 		info.SoilTypeDetails = &ZoneSoilTypeDetails{
 			SoilTypeID:     *zone.SoilTypeID,

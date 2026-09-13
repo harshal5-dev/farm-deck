@@ -22,7 +22,12 @@ const ZoneTypeCard = ({ zoneType, selected, onSelect, disabled }) => {
         "group/type relative flex flex-col items-stretch overflow-hidden rounded-2xl border p-0 text-left transition-all duration-200",
         selected
           ? cn("border-transparent shadow-md ring-2", t.ring)
-          : "border-border/50 bg-card/40 hover:border-border hover:bg-card/70"
+          : cn(
+              "border-border/50 bg-card/40 hover:border-border hover:bg-card/70",
+              // Locked picker (edit mode): unselected options read as
+              // unavailable — faded, desaturated, no hover affordance.
+              disabled && "pointer-events-none opacity-40 grayscale"
+            )
       )}
     >
       {/* Top art band — illustrated per-type scene like FarmTypeCard */}

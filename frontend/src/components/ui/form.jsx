@@ -43,6 +43,9 @@ const useFormField = () => {
 
 const FormItemContext = React.createContext({});
 
+// auto-rows-min: when a multi-column form row stretches this item (a
+// sibling with an extra hint/error line), keep the label/control/message
+// rows content-sized instead of inflating the control to fill the column.
 function FormItem({ className, ...props }) {
   const id = React.useId();
 
@@ -50,7 +53,7 @@ function FormItem({ className, ...props }) {
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        className={cn("grid gap-2", className)}
+        className={cn("grid auto-rows-min gap-2", className)}
         {...props}
       />
     </FormItemContext.Provider>

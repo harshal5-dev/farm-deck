@@ -12,7 +12,7 @@ import {
 import { Dashboard } from "@/features/dashboard";
 import { Profile } from "@/features/profile";
 import { MembersList, AddMember, EditMember } from "@/features/members";
-import { FarmsList, AddFarm, EditFarm } from "@/features/farms";
+import { FarmsList, AddFarm, EditFarm, ViewFarm } from "@/features/farms";
 import { ZonesList, AddZone, EditZone } from "@/features/zones";
 import {
   CropsList,
@@ -61,6 +61,7 @@ const App = () => {
               <Route path="farms" element={<FarmsList />} />
               <Route path="farms/new" element={<AddFarm />} />
               <Route path="farms/edit" element={<EditFarm />} />
+              <Route path="farms/view" element={<ViewFarm />} />
               <Route path="fields" element={<ZonesList />} />
               <Route path="fields/new" element={<AddZone />} />
               <Route path="fields/edit" element={<EditZone />} />

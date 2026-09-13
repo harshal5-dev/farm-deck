@@ -8,6 +8,7 @@ import {
   IconGrain,
   IconLayoutGrid,
   IconLoader2,
+  IconLock,
   IconNotes,
   IconPlant2,
   IconRulerMeasure,
@@ -159,7 +160,15 @@ const ZoneForm = ({
     await onSubmit({
       area: toNumberOrNull(values.area),
       areaUnit: values.areaUnit || DEFAULT_AREA_UNIT,
-      farmID: values.farmId,
+      // Identity stays out of the edit payload — the API doesn't accept
+      // farm/type changes (deactivate + recreate is the modeled path).
+      ...(isEdit
+        ? {}
+        : {
+            farmID: values.farmId,
+            zoneTypeID: values.zoneTypeId,
+            zoneTypeName: zoneType?.name ?? null,
+          }),
       hydroSystemTypeDetails:
         m === "hydro" && values.hydroSystemTypeId
           ? {
@@ -180,8 +189,6 @@ const ZoneForm = ({
         m === "soil" && values.soilTypeId
           ? { soilTypeID: values.soilTypeId }
           : null,
-      zoneTypeID: values.zoneTypeId,
-      zoneTypeName: zoneType?.name ?? null,
     });
   };
 
@@ -231,10 +238,16 @@ const ZoneForm = ({
                 rules={{ required: "Pick the farm this field belongs to" }}
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
-                    {lockFarmId && lockFarmName ? (
-                      <FormLabel className={fieldLabel}>
+                    {(lockFarmId && lockFarmName) || isEdit ? (
+                      <FormLabel className={cn(fieldLabel, "gap-1")}>
                         Farm
                         <RequiredStar />
+                        {isEdit && (
+                          <IconLock
+                            className="size-3 text-muted-foreground/60"
+                            strokeWidth={2}
+                          />
+                        )}
                       </FormLabel>
                     ) : (
                       <span className={fieldLabel}>
@@ -243,10 +256,16 @@ const ZoneForm = ({
                       </span>
                     )}
                     <FormControl>
-                      {lockFarmId && lockFarmName ? (
-                        <FieldWrapper icon={IconTractor}>
+                      {(lockFarmId && lockFarmName) || isEdit ? (
+                        <FieldWrapper
+                          icon={isEdit ? IconLock : IconTractor}
+                        >
                           <Input
-                            value={lockFarmName}
+                            value={
+                              lockFarmName ??
+                              selectedFarm?.name ??
+                              "Current farm"
+                            }
                             readOnly
                             disabled
                             className="border-0 bg-transparent text-foreground shadow-none"
@@ -272,6 +291,11 @@ const ZoneForm = ({
                         />
                       )}
                     </FormControl>
+                    {isEdit && (
+                      <p className="text-[10px] text-muted-foreground/60">
+                        A field's farm is fixed after creation.
+                      </p>
+                    )}
                     <FormMessage className="text-[11px]" />
                   </FormItem>
                 )}
@@ -319,7 +343,12 @@ const ZoneForm = ({
               rules={{ required: "Pick a zone type" }}
               render={({ field }) => (
                 <div>
-                  {sectionTitle(IconPlant2, "Zone type", undefined, true)}
+                  {sectionTitle(
+                    IconPlant2,
+                    "Zone type",
+                    isEdit ? "locked while editing" : undefined,
+                    true
+                  )}
                   {typesLoading ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {Array.from({ length: 4 }).map((_, i) => (
@@ -334,10 +363,20 @@ const ZoneForm = ({
                           zoneType={t}
                           selected={field.value === t.id}
                           onSelect={field.onChange}
-                          disabled={submitting}
+                          disabled={submitting || isEdit}
                         />
                       ))}
                     </div>
+                  )}
+                  {isEdit && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
+                      <IconLock
+                        className="size-3 shrink-0"
+                        strokeWidth={2}
+                      />
+                      Type decides the detail section, so it can't change
+                      later — deactivate this field and add a new one instead.
+                    </p>
                   )}
                   {form.formState.errors?.zoneTypeId && (
                     <p className="mt-1.5 text-[11px] font-medium text-destructive">

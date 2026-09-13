@@ -8,25 +8,23 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type CreateZoneTxResult struct {
+type UpdateZoneTxResult struct {
 	Zone            Zone
 	ZoneSoilDetail  ZoneSoilDetail
 	ZoneHydroDetail ZoneHydroDetail
 }
 
-func (store *SQLStore) CreateZoneTx(ctx context.Context, arg domain.ManageZoneTxParams) (CreateZoneTxResult, error) {
-	var result CreateZoneTxResult
+func (store *SQLStore) UpdateZoneTx(ctx context.Context, arg domain.ManageZoneTxParams) (UpdateZoneTxResult, error) {
+	var result UpdateZoneTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
-		result.Zone, err = q.CreateZone(ctx, CreateZoneParams{
-			FarmID:     arg.FarmID,
-			TenantID:   arg.TenantID,
-			ZoneTypeID: arg.ZoneTypeID,
-			Name:       arg.Name,
-			Area:       arg.Area,
-			AreaUnit:   arg.AreaUnit,
-			Notes:      arg.Notes,
+		result.Zone, err = q.UpdateZone(ctx, UpdateZoneParams{
+			ID:       arg.ID,
+			Name:     arg.Name,
+			Area:     arg.Area,
+			AreaUnit: arg.AreaUnit,
+			Notes:    arg.Notes,
 		})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -37,7 +35,7 @@ func (store *SQLStore) CreateZoneTx(ctx context.Context, arg domain.ManageZoneTx
 
 		switch arg.ZoneTypeName {
 		case domain.ZoneTypeSoil:
-			result.ZoneSoilDetail, err = q.CreateZoneSoilDetails(ctx, CreateZoneSoilDetailsParams{
+			result.ZoneSoilDetail, err = q.UpdateZoneSoilDetails(ctx, UpdateZoneSoilDetailsParams{
 				ZoneID:     result.Zone.ID,
 				SoilTypeID: arg.SoilTypeID,
 			})
@@ -45,7 +43,7 @@ func (store *SQLStore) CreateZoneTx(ctx context.Context, arg domain.ManageZoneTx
 				return err
 			}
 		case domain.ZoneTypeHydro:
-			result.ZoneHydroDetail, err = q.CreateZoneHydroDetails(ctx, CreateZoneHydroDetailsParams{
+			result.ZoneHydroDetail, err = q.UpdateZoneHydroDetails(ctx, UpdateZoneHydroDetailsParams{
 				ZoneID:                result.Zone.ID,
 				HydroSystemTypeID:     arg.HydroSystemTypeID,
 				NumberOfSlots:         arg.NumberOfSlots,

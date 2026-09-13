@@ -11,6 +11,7 @@ import (
 type ZoneHandler interface {
 	CreateZone(ctx *gin.Context)
 	ListZone(ctx *gin.Context)
+	UpdateZone(ctx *gin.Context)
 }
 
 type ZoneHandlerImpl struct {
@@ -56,6 +57,33 @@ func (h *ZoneHandlerImpl) CreateZone(ctx *gin.Context) {
 	}
 
 	response.OK(ctx, "zone created successfully")
+}
+
+func (h *ZoneHandlerImpl) UpdateZone(ctx *gin.Context) {
+	tenantID, err := ctxutil.GetTenantID(ctx)
+	if err != nil {
+		response.Unauthorized(ctx, "authentication required")
+		return
+	}
+
+	zoneID, err := ctxutil.ParseParamID(ctx, "id")
+	if err != nil {
+		response.BadRequest(ctx, "invalid zone id")
+		return
+	}
+
+	var req UpdateZoneRequest
+	if !validate.Bind(ctx, &req) {
+		return
+	}
+
+	err = h.zoneService.UpdateZone(ctx, tenantID, zoneID, req)
+	if err != nil {
+		httperr.HandleError(ctx, err)
+		return
+	}
+
+	response.OK(ctx, "zone updated successfully")
 }
 
 // ListZones godoc

@@ -188,7 +188,7 @@ export const HYDRO_SYSTEM_TYPES = {
     tagline: "Flowing nutrient film",
     icon: IconDroplets,
     art: "nft",
-    gradient: "from-lagoon to-lagoon-deep",
+    gradient: "from-sky-warm to-lagoon",
   },
   dwc: {
     id: "dwc",
@@ -196,7 +196,7 @@ export const HYDRO_SYSTEM_TYPES = {
     tagline: "Deep aerated reservoir",
     icon: IconDroplet,
     art: "dwc",
-    gradient: "from-lagoon-deep to-lagoon",
+    gradient: "from-lagoon to-lagoon-deep",
   },
   ebb_flow: {
     id: "ebb_flow",
@@ -204,7 +204,7 @@ export const HYDRO_SYSTEM_TYPES = {
     tagline: "Flood & drain cycles",
     icon: IconRotate,
     art: "ebb_flow",
-    gradient: "from-sky-warm to-lagoon",
+    gradient: "from-sage to-lagoon-deep",
   },
   aeroponics: {
     id: "aeroponics",
@@ -212,7 +212,7 @@ export const HYDRO_SYSTEM_TYPES = {
     tagline: "Roots misted in air",
     icon: IconBolt,
     art: "aeroponics",
-    gradient: "from-sky-warm to-lagoon-deep",
+    gradient: "from-iris to-sky-warm",
   },
   drip: {
     id: "drip",
@@ -228,7 +228,7 @@ export const HYDRO_SYSTEM_TYPES = {
     tagline: "Passive, no pump",
     icon: IconDroplets,
     art: "kratky",
-    gradient: "from-lagoon to-sage-deep",
+    gradient: "from-wheat to-sage",
   },
 };
 

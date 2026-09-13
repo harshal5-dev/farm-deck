@@ -2,7 +2,7 @@ package domain
 
 import "github.com/google/uuid"
 
-type CreateZoneTxParams struct {
+type ManageZoneTxParams struct {
 	NumberOfSlots         *int32
 	Area                  *float64
 	ReservoirVolumeLiters *float64
@@ -16,4 +16,5 @@ type CreateZoneTxParams struct {
 	ZoneTypeID            uuid.UUID
 	SoilTypeID            uuid.UUID
 	HydroSystemTypeID     uuid.UUID
+	ID                    uuid.UUID
 }

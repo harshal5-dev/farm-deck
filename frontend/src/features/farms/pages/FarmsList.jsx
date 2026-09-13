@@ -127,6 +127,11 @@ const Farms = () => {
 
   const handleAdd = () => navigate("/app/farms/new");
 
+  const handleView = (f) => {
+    dispatch(setSelectedFarm(f));
+    navigate("/app/farms/view");
+  };
+
   const handleEdit = (f) => {
     dispatch(setSelectedFarm(f));
     navigate("/app/farms/edit");
@@ -359,6 +364,7 @@ const Farms = () => {
                   key={f.id}
                   farm={f}
                   index={i}
+                  onView={() => handleView(f)}
                   onDeactivate={() => handleDeactivate(f)}
                   onActivate={() => handleActivate(f)}
                   onEdit={() => handleEdit(f)}
