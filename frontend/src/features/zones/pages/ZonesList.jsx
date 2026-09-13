@@ -58,13 +58,6 @@ const STATUS_OPTIONS = [
   { id: "inactive", label: "Inactive" },
 ];
 
-const SORT_OPTIONS = [
-  { id: "recent", label: "Recently updated" },
-  { id: "name", label: "Name (A → Z)" },
-  { id: "size", label: "Largest area" },
-  { id: "newest", label: "Newest added" },
-];
-
 const ZonesList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -90,7 +83,6 @@ const ZonesList = () => {
   const [farmFilter, setFarmFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
 
   // Decorate each zone with its resolved lookup rows so cards never
@@ -134,7 +126,7 @@ const ZonesList = () => {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    let out = decorated.filter((z) => {
+    const out = decorated.filter((z) => {
       if (typeFilter !== "all" && z.zoneTypeId !== typeFilter) return false;
       if (farmFilter !== "all" && z.farmId !== farmFilter) return false;
       if (statusFilter === "active" && !z.isActive) return false;
@@ -146,14 +138,8 @@ const ZonesList = () => {
       return true;
     });
 
-    const sorter = {
-      recent: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
-      name: (a, b) => a.name.localeCompare(b.name),
-      newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-    }[sort];
-    if (sorter) out = [...out].sort(sorter);
     return out;
-  }, [decorated, typeFilter, farmFilter, statusFilter, search, sort]);
+  }, [decorated, typeFilter, farmFilter, statusFilter, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const activePage = Math.min(page, totalPages);
@@ -180,7 +166,6 @@ const ZonesList = () => {
   const onFarmFilterChange = resetPage(setFarmFilter);
   const onStatusFilterChange = resetPage(setStatusFilter);
   const onSearchChange = resetPage(setSearch);
-  const onSortChange = resetPage(setSort);
 
   const handleAdd = () => navigate("/app/fields/new");
 
@@ -282,7 +267,7 @@ const ZonesList = () => {
               </div>
             </div>
 
-            {/* Row 2 — search | status segmented | sort + farm */}
+            {/* Row 2 — search | status segmented */}
             <div className="flex flex-col gap-2.5 border-t border-border/30 pt-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="relative w-full lg:max-w-xs">
                 <IconSearch
@@ -337,31 +322,40 @@ const ZonesList = () => {
                         className="size-3.5 shrink-0 text-leaf"
                         strokeWidth={1.85}
                       />
-                      <SelectValue />
+                      <SelectValue className="min-w-0">
+                        {(v) => (
+                          <span className="min-w-0 flex-1 truncate">
+                            {v === "all"
+                              ? "All farms"
+                              : (farms.find((f) => f.id === v)?.name ??
+                                "All farms")}
+                          </span>
+                        )}
+                      </SelectValue>
                     </span>
                   </SelectTrigger>
-                  <SelectContent align="end">
-                    <SelectItem value="all">All farms</SelectItem>
+                  <SelectContent align="end" alignItemWithTrigger={false}>
+                    <SelectItem
+                      value="all"
+                      label="All farms"
+                      description={
+                        farms.length > 0
+                          ? `${farms.length} ${farms.length === 1 ? "farm" : "farms"}`
+                          : undefined
+                      }
+                    >
+                      <span>All farms</span>
+                    </SelectItem>
                     {farms.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={sort} onValueChange={onSortChange}>
-                  <SelectTrigger
-                    size="sm"
-                    aria-label="Sort fields"
-                    className="h-9 min-w-38"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="end">
-                    {SORT_OPTIONS.map((o) => (
-                      <SelectItem key={o.id} value={o.id}>
-                        {o.label}
+                      <SelectItem
+                        key={f.id}
+                        value={f.id}
+                        label={f.name}
+                        description={[f.farmTypeDisplayName, f.location]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      >
+                        <span>{f.name}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -440,7 +434,7 @@ const ZonesList = () => {
             </div>
           ) : (
             <div
-              key={`zones-${activePage}-${typeFilter}-${farmFilter}-${statusFilter}-${search}-${sort}`}
+              key={`zones-${activePage}-${typeFilter}-${farmFilter}-${statusFilter}-${search}`}
               className={cn(GRID_COLS, "mt-1")}
             >
               {pagedZones.map((z, i) => (
@@ -495,7 +489,7 @@ const ZonesList = () => {
                     aria-disabled={activePage === totalPages}
                     className={cn(
                       activePage === totalPages &&
-                        "pointer-events-none opacity-40"
+                      "pointer-events-none opacity-40"
                     )}
                   />
                 </PaginationItem>

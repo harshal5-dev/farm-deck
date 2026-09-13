@@ -61,6 +61,8 @@
     --color-lagoon-deep: var(--lagoon-deep);
     --color-iris: var(--iris);
     --color-iris-deep: var(--iris-deep);
+    --color-plum: var(--plum);
+    --color-plum-deep: var(--plum-deep);
 }
 
 :root {
@@ -112,6 +114,8 @@
     --lagoon-deep: oklch(0.46 0.09 195);
     --iris: oklch(0.58 0.13 300);
     --iris-deep: oklch(0.45 0.13 300);
+    --plum: oklch(0.58 0.11 340);
+    --plum-deep: oklch(0.46 0.11 340);
 }
 
 .dark {
@@ -161,6 +165,8 @@
     --lagoon-deep: oklch(0.6 0.1 195);
     --iris: oklch(0.7 0.12 300);
     --iris-deep: oklch(0.58 0.13 300);
+    --plum: oklch(0.7 0.11 340);
+    --plum-deep: oklch(0.58 0.11 340);
 }
 
 @layer base {

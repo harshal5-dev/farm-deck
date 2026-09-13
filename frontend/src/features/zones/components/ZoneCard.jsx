@@ -141,9 +141,9 @@ const ZoneCard = ({
           "group/zone relative flex h-full flex-col overflow-hidden rounded-3xl transition-all duration-300",
           live
             ? cn(
-                "glass-card texture-paper highlight-edge hover:-translate-y-1 hover:shadow-xl",
-                t.glow
-              )
+              "glass-card texture-paper highlight-edge hover:-translate-y-1 hover:shadow-xl",
+              t.glow
+            )
             : "border border-dashed border-border/70 bg-muted/25 backdrop-blur-sm hover:border-border hover:shadow-md"
         )}
       >
@@ -159,7 +159,7 @@ const ZoneCard = ({
 
         {/* Hero band — a clean per-type scene; the gradient tile below
             carries the type, so the art stays free of any chips. */}
-        <div className="relative h-16 shrink-0 overflow-hidden">
+        <div className="relative h-24 shrink-0 overflow-hidden">
           <ZoneTypeArt
             variant={t.art}
             className={cn(
