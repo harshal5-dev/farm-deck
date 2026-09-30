@@ -35,9 +35,6 @@ import { usePermissions } from "@/features/auth/usePermissions";
 import { ZONE_TYPE_ORDER } from "../constants";
 import {
   useListZonesQuery,
-  useListZoneTypesQuery,
-  useListSoilTypesQuery,
-  useListHydroSystemTypesQuery,
   useListFarmsForPickerQuery,
   useInactivateZoneMutation,
   useActivateZoneMutation,
@@ -48,6 +45,7 @@ import ZoneCard from "../components/ZoneCard";
 import ZoneCardSkeleton from "../components/ZoneCardSkeleton";
 import EmptyZones from "../components/EmptyZones";
 import ZoneTypeFilterChip from "../components/ZoneTypeFilterChip";
+import { useListHydroSystemTypesQuery, useListSoilTypesQuery, useListZoneTypesQuery } from "@/features/lookups";
 
 const PAGE_SIZE = 6;
 const GRID_COLS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
@@ -61,14 +59,22 @@ const STATUS_OPTIONS = [
 const ZonesList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [farmFilter, setFarmFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
   const {
     data,
     isLoading,
     isError,
     isFetching,
     refetch,
-  } = useListZonesQuery();
+  } = useListZonesQuery({ page, pageSize: PAGE_SIZE, status: statusFilter, farmID: farmFilter === "all" ? undefined : farmFilter, zoneTypeID: typeFilter, q: search || undefined });
   const { zones = [], active = 0, inactive = 0, total = 0 } = data ?? {};
+  console.log("zones", data);
   const [inactivateZone] = useInactivateZoneMutation();
   const [activateZone] = useActivateZoneMutation();
   const { canViewFields, canManageFields } = usePermissions();
@@ -78,12 +84,6 @@ const ZonesList = () => {
   const { data: soilTypes = [] } = useListSoilTypesQuery();
   const { data: hydroSystemTypes = [] } = useListHydroSystemTypesQuery();
   const { data: farms = [] } = useListFarmsForPickerQuery();
-
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [farmFilter, setFarmFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
 
   // Decorate each zone with its resolved lookup rows so cards never
   // re-derive them (same pattern as the farms list).

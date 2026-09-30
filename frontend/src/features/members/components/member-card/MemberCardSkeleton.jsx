@@ -50,7 +50,7 @@ const MemberCardSkeleton = () => {
 
         {/* Footer */}
         <div className="mt-auto flex items-center justify-end border-t border-border/30 pt-3">
-          <Skeleton className="h-8 w-[104px] rounded-xl" />
+          <Skeleton className="h-8 w-26 rounded-xl" />
         </div>
       </div>
     </div>

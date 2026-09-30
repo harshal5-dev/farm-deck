@@ -22,12 +22,10 @@ import { selectSelectedFarm, clearSelectedFarm } from "../selectedFarmSlice";
 import { useGetFarmDetailsQuery } from "../farmApi";
 import {
   useListZonesByFarmQuery,
-  useListZoneTypesQuery,
-  useListSoilTypesQuery,
-  useListHydroSystemTypesQuery,
 } from "@/features/zones/zoneApi";
 import ZoneCard from "@/features/zones/components/ZoneCard";
 import EmptyZones from "@/features/zones/components/EmptyZones";
+import { useListHydroSystemTypesQuery, useListSoilTypesQuery, useListZoneTypesQuery } from "@/features/lookups";
 
 /** Stat tile for the hero strip. */
 const StatTile = ({ icon: Icon, tone, value, label }) => (

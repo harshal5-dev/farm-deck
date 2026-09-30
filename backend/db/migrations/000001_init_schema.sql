@@ -1,3 +1,5 @@
+-- +goose Up
+
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE tenants (
@@ -162,3 +164,13 @@ CREATE TABLE zone_hydro_details (
     CONSTRAINT zhd_slots_chk     CHECK (number_of_slots IS NULL OR number_of_slots > 0)
 );
 CREATE INDEX idx_zhd_hydro_type ON zone_hydro_details(hydro_system_type_id);
+
+-- +goose Down
+
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS user_invitations;
+DROP TABLE IF EXISTS credentials;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS tenants;
+
+DROP EXTENSION IF EXISTS pgcrypto;

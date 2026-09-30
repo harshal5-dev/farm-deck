@@ -1,3 +1,5 @@
+-- +goose Up
+
 WITH new_tenants AS (
     INSERT INTO tenants (name, subdomain, description)
     VALUES
@@ -53,3 +55,8 @@ SELECT
     '$2y$10$2Avu25pJd/IUvYPLj8fJquGDt6.ChJAyXA0uIeb6lH/McB2O8Iati'
 FROM new_users
 WHERE status = 'active';
+
+-- +goose Down
+
+DELETE FROM tenants
+WHERE name IN ('Sunrise Farms', 'Green Valley Co.', 'Harvest Hub');

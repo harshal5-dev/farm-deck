@@ -50,10 +50,10 @@ drop-db: ## Drop the Postgres database (inside docker container)
 	docker exec -it postgres18 dropdb farm_deck_db
 
 migrate-create: ## Create a new migration: make migrate-create name=init_schema
-	migrate create -ext sql -dir db/migrations -seq $(name)
+	goose -s -dir db/migrations create $(name) sql
 
 migrate-up: ## Apply migrations
-	migrate -path db/migrations -database "$(DB_DSN)" -verbose up
+	goose -dir db/migrations postgres "$(DB_DSN)" up
 
 migrate-down: ## Roll back the last migration
-	migrate -path db/migrations -database "$(DB_DSN)" -verbose down
+	goose -dir db/migrations postgres "$(DB_DSN)" down

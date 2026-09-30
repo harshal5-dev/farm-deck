@@ -3,7 +3,7 @@ package domain
 import "time"
 
 const (
-	// --------- User Constants ---------
+	// UserStatusActive
 	UserStatusActive    = "active"
 	UserStatusPending   = "pending"
 	UserStatusSuspended = "suspended"

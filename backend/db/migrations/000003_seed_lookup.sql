@@ -1,3 +1,5 @@
+-- +goose Up
+
 -- Seed lookup data for farm types (growing environments)
 INSERT INTO farm_types (name, display_name, description, display_order) VALUES
     ('indoor',     'Indoor',     'Fully controlled environment inside a building — a grow room, warehouse, or vertical rack system where light, temperature, humidity, CO2, and nutrients are all managed artificially. Crops are usually grown soilless (hydroponics or aeroponics) under LED lighting, enabling year-round production regardless of outside weather. Best suited to leafy greens, herbs, and microgreens. Water use is minimal and pests are largely excluded, but energy for lighting and cooling is the main operating cost.', 2),
@@ -33,3 +35,17 @@ INSERT INTO hydro_system_types (name, display_name, description, display_order) 
     ('drip',        'Drip',         'Drip irrigation hydroponics: emitters deliver a slow, measured stream of nutrient solution to each plant in an inert substrate such as rockwool, coco, or perlite, with runoff returned to the reservoir (recirculating) or drained to waste (run-to-waste). Highly flexible for fruiting crops like tomatoes, peppers, and cucumbers, scales well, and is robust to outages. Needs regular emitter and filter cleaning to prevent salt build-up and blockages that can starve individual plants.', 5),
     ('kratky',      'Kratky',        'Kratky method: a passive, non-circulating DWC set-up — roots sit in a reservoir with no pump or airstone, and as the solution level drops, the upper roots grow into the humid air gap and self-aerate while the lower roots keep drinking. Extremely simple, low-cost, and power-free, perfect for home growers and leafy greens on a single crop cycle. Not suited to long-term or heavy-feeding fruiting crops, and yield is limited by the starting volume of nutrient solution.', 6)
 ON CONFLICT (name) DO NOTHING;
+
+-- +goose Down
+
+DELETE FROM farm_types
+WHERE name IN ('indoor', 'outdoor', 'greenhouse', 'mixed');
+
+DELETE FROM zone_types
+WHERE name IN ('soil', 'hydro', 'aquaponic', 'mushroom');
+
+DELETE FROM soil_types
+WHERE name IN ('loamy', 'sandy', 'clay', 'silt', 'sandy_loam', 'clay_loam');
+
+DELETE FROM hydro_system_types
+WHERE name IN ('nft', 'dwc', 'ebb_flow', 'aeroponics', 'drip', 'kratky');

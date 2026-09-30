@@ -1,23 +1,21 @@
 package db
 
 import (
+	"context"
 	"database/sql"
-	"errors"
 	"fmt"
+	"io/fs"
 
-	"github.com/golang-migrate/migrate/v4"
-	pgx5 "github.com/golang-migrate/migrate/v4/database/pgx/v5"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/jackc/pgx/v5/stdlib" // registers the "pgx/v5" database/sql driver
+	"github.com/pressly/goose/v3"
 
 	dbmigrations "github.com/harshal5-dev/farm-deck/backend/db"
 )
 
 // MigrateUp applies every pending migration embedded in the binary. It opens
 // its own short-lived connection via pgx's stdlib driver so it can run before
-// Init. The schema_migrations bookkeeping table is the same one the migrate
-// CLI writes, so CLI runs and server-startup runs stay interchangeable. A
-// dirty state from a previously failed migration surfaces as an error here,
-// refusing startup instead of running the app against a broken schema.
+// Init. The goose_db_version bookkeeping table is the same one the goose CLI
+// writes, so CLI runs and server-startup runs stay interchangeable.
 func MigrateUp(dbSource string) error {
 	sqlDB, err := sql.Open("pgx/v5", dbSource)
 	if err != nil {
@@ -25,33 +23,21 @@ func MigrateUp(dbSource string) error {
 	}
 	defer sqlDB.Close()
 
-	if err := sqlDB.Ping(); err != nil {
-		return fmt.Errorf("failed ping database: %w", err)
-	}
-
-	// The migration files contain multiple statements each; the pgx driver
-	// needs MultiStatementEnabled to split and exec them one by one.
-	// WithInstance does not default MultiStatementMaxSize, and a zero max
-	// makes every statement fail with "token too long".
-	driver, err := pgx5.WithInstance(sqlDB, &pgx5.Config{
-		MultiStatementEnabled: true,
-		MultiStatementMaxSize: pgx5.DefaultMultiStatementMaxSize,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to init migrate driver: %w", err)
-	}
-
-	source, err := iofs.New(dbmigrations.FS, "migrations")
+	migrations, err := fs.Sub(dbmigrations.FS, "migrations")
 	if err != nil {
 		return fmt.Errorf("failed to load embedded migrations: %w", err)
 	}
 
-	m, err := migrate.NewWithInstance("iofs", source, "pgx5", driver)
+	provider, err := goose.NewProvider(goose.DialectPostgres, sqlDB, migrations)
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}
 
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err := sqlDB.Ping(); err != nil {
+		return fmt.Errorf("failed ping database: %w", err)
+	}
+
+	if _, err := provider.Up(context.Background()); err != nil {
 		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
 	return nil

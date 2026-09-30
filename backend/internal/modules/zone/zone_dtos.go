@@ -85,7 +85,6 @@ type ListZonesArgs struct {
 	ZoneTypeID string `form:"zoneTypeID" json:"zoneTypeID" binding:"omitempty,uuid"`
 	Status     string `form:"status"     json:"status"     binding:"omitempty,oneof=all active inactive"`
 	Search     string `form:"q"          json:"q"          binding:"omitempty,max=100"`
-	Sort       string `form:"sort"       json:"sort"       binding:"omitempty,oneof=recent name newest size"`
 }
 
 // effectivePaging resolves the defaults once for both Normalize (offset math)

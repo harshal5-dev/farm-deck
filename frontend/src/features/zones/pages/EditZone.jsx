@@ -10,8 +10,9 @@ import { usePermissions } from "@/features/auth/usePermissions";
 import { DEFAULT_AREA_UNIT } from "@/constants/farms";
 import { getZoneType } from "../constants";
 import ZoneForm from "../components/zone-form/ZoneForm";
-import { useUpdateZoneMutation, useListZoneTypesQuery } from "../zoneApi";
+import { useUpdateZoneMutation } from "../zoneApi";
 import { clearSelectedZone, selectSelectedZone } from "../selectedZoneSlice";
+import { useListZoneTypesQuery } from "@/features/lookups";
 
 /**
  * Map a stored zone onto the form's flat field shape. Zone records

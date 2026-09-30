@@ -1,3 +1,5 @@
+-- +goose Up
+
 WITH sunrise AS (
     SELECT id FROM tenants WHERE subdomain = 'sunrise-farms' LIMIT 1
 ),
@@ -116,4 +118,17 @@ JOIN hydromap m ON m.farm_name = f.name AND m.zone_name = z.name
 JOIN hydro_system_types hst ON hst.name = m.hydro_system_type_name
 WHERE NOT EXISTS (
     SELECT 1 FROM zone_hydro_details d WHERE d.zone_id = z.id
+);
+
+-- +goose Down
+
+-- Zones cascade from farms (ON DELETE CASCADE), which in turn cascade
+-- to their zone_soil_details / zone_hydro_details rows — farms alone.
+DELETE FROM farms
+WHERE name IN (
+    'Skagit Valley Greenhouse',
+    'Yakima Apple Orchard',
+    'Willamette Berry Farm',
+    'Salinas Valley Mixed Crops',
+    'Imperial Valley Indoor Vertical'
 );

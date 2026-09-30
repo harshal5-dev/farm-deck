@@ -15,40 +15,18 @@ import * as zoneDb from "./mock/zoneDb";
  * page/pageSize/farmID/zoneTypeID/status/q/sort.
  */
 
-const ZONES_FETCH_PAGE_SIZE = 100; // must stay <= the backend's pageSize cap
-const ZONES_MAX_PAGES = 10; // safety ceiling: 1000 zones client-side
-
 export const zoneApi = createApi({
   reducerPath: "zoneApi",
   baseQuery,
   tagTypes: ["Zone", "FarmPicker"],
   endpoints: (builder) => ({
     listZones: builder.query({
-      // Fetch pages until the server-reported total is covered, then hand
-      // back the same envelope the page has always consumed.
-      queryFn: async (_arg, api) => {
-        const zones = [];
-        let last = null;
-        for (let page = 1; page <= ZONES_MAX_PAGES; page += 1) {
-          const res = await baseQuery(
-            { url: "/zones", params: { page, pageSize: ZONES_FETCH_PAGE_SIZE } },
-            api,
-            {}
-          );
-          if (res.error) return { error: res.error };
-          last = res.data?.data ?? {};
-          zones.push(...(last.zones ?? []));
-          if (zones.length >= (last.total ?? 0)) break;
-        }
-        return {
-          data: {
-            zones,
-            active: last?.active ?? 0,
-            inactive: last?.inactive ?? 0,
-            total: last?.total ?? zones.length,
-          },
-        };
-      },
+      query: (params) => ({
+        url: "/zones",
+        params,
+        method: "GET",
+      }),
+      transformResponse: transformResult,
       providesTags: ["Zone"],
     }),
 
@@ -105,23 +83,6 @@ export const zoneApi = createApi({
       invalidatesTags: ["Zone"],
     }),
 
-    /* --- lookups (backend: GET /lookups/*) --------------------------- */
-
-    listZoneTypes: builder.query({
-      query: () => ({ url: "/lookups/zone-types", method: "GET" }),
-      transformResponse: transformResult,
-    }),
-
-    listSoilTypes: builder.query({
-      query: () => ({ url: "/lookups/soil-types", method: "GET" }),
-      transformResponse: transformResult,
-    }),
-
-    listHydroSystemTypes: builder.query({
-      query: () => ({ url: "/lookups/hydro-system-types", method: "GET" }),
-      transformResponse: transformResult,
-    }),
-
     /* Active farms for pickers — same backend list as the farms module,
        narrowed to what a picker needs. */
     listFarmsForPicker: builder.query({
@@ -140,8 +101,5 @@ export const {
   useUpdateZoneMutation,
   useInactivateZoneMutation,
   useActivateZoneMutation,
-  useListZoneTypesQuery,
-  useListSoilTypesQuery,
-  useListHydroSystemTypesQuery,
   useListFarmsForPickerQuery,
 } = zoneApi;
