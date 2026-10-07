@@ -21,7 +21,12 @@ func MigrateUp(dbSource string) error {
 	if err != nil {
 		return fmt.Errorf("failed connect to database: %w", err)
 	}
-	defer sqlDB.Close()
+	defer func(sqlDB *sql.DB) {
+		err := sqlDB.Close()
+		if err != nil {
+			fmt.Printf("failed close database connection: %v\n", err)
+		}
+	}(sqlDB)
 
 	migrations, err := fs.Sub(dbmigrations.FS, "migrations")
 	if err != nil {

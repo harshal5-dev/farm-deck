@@ -72,7 +72,7 @@ const ZonesList = () => {
     isError,
     isFetching,
     refetch,
-  } = useListZonesQuery({ page, pageSize: PAGE_SIZE, status: statusFilter, farmID: farmFilter === "all" ? undefined : farmFilter, zoneTypeID: typeFilter, q: search || undefined });
+  } = useListZonesQuery({ page, pageSize: PAGE_SIZE, status: statusFilter, farmID: farmFilter === "all" ? undefined : farmFilter, zoneTypeID: typeFilter === "all" ? undefined : typeFilter, q: search || undefined });
   const { zones = [], active = 0, inactive = 0, total = 0 } = data ?? {};
   console.log("zones", data);
   const [inactivateZone] = useInactivateZoneMutation();

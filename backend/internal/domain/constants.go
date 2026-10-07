@@ -1,9 +1,6 @@
 package domain
 
-import "time"
-
 const (
-	// UserStatusActive
 	UserStatusActive    = "active"
 	UserStatusPending   = "pending"
 	UserStatusSuspended = "suspended"
@@ -13,10 +10,6 @@ const (
 	UserRoleManager = "manager"
 	UserRoleGrower  = "grower"
 	UserRoleViewer  = "viewer"
-
-	SlugDomain = "farmdeck.app"
-
-	DefaultInvitationTokenDuration = 7 * 24 * time.Hour
 
 	ZoneTypeSoil  = "soil"
 	ZoneTypeHydro = "hydro"

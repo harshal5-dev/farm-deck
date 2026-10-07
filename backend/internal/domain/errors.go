@@ -23,24 +23,24 @@ var (
 	ErrRefreshTokenInvalid = errors.New("refresh token is invalid")
 	ErrRefreshTokenExpired = errors.New("refresh token has expired")
 
-	// Role Access errors
+	// ErrRoleAccessDenied Role Access errors
 	ErrRoleAccessDenied = errors.New("role access denied")
 
-	// Invitation errors
+	// ErrInvitationInvalid Invitation errors
 	ErrInvitationInvalid  = errors.New("invitation is invalid")
 	ErrInvitationExpired  = errors.New("invitation has expired")
 	ErrInvitationRevoked  = errors.New("invitation has been revoked")
 	ErrInvitationAccepted = errors.New("invitation already accepted")
 
-	// Permission errors
+	// ErrForbidden Permission errors
 	ErrForbidden = errors.New("forbidden")
 
-	// farm errors
+	// ErrDuplicateFarmName farm errors
 	ErrDuplicateFarmName = errors.New("farm name already exists")
 
-	// Zone errors
+	// ErrDuplicateZoneName Zone errors
 	ErrDuplicateZoneName = errors.New("zone name already exists")
 
-	// Farm errors
+	// ErrFarmNotFound Farm errors
 	ErrFarmNotFound = errors.New("farm not found")
 )
