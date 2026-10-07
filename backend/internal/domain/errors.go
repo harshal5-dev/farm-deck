@@ -6,6 +6,7 @@ var (
 	// ErrInvalidCredentials ---- auth errors ---------
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrUnauthorized       = errors.New("authentication required")
+	ErrInvalidToken       = errors.New("invalid or expired token")
 
 	// ErrCredentialNotFound ---- credential errors ---------
 	ErrCredentialNotFound = errors.New("credential not found")

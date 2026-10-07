@@ -1404,6 +1404,76 @@
                     }
                 }
             }
+        },
+        "/zones/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Updates the field (zone) with the given id, scoped to the caller's tenant. Soil zones carry soil type details, hydro zones carry hydroponic system details. Authorization is gated by the fields.manage permission at the route level.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Update a zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Zone update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "zone updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid zone id or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "401": {
+                        "description": "authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/APIError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2045,6 +2115,41 @@
                 },
                 "profilePicture": {
                     "type": "string"
+                }
+            }
+        },
+        "UpdateZoneRequest": {
+            "type": "object",
+            "required": [
+                "areaUnit",
+                "name"
+            ],
+            "properties": {
+                "area": {
+                    "type": "number",
+                    "example": 12.5
+                },
+                "areaUnit": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2,
+                    "example": "acres"
+                },
+                "hydroSystemTypeDetails": {
+                    "$ref": "#/definitions/HydroSystemTypeRequest"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 2,
+                    "example": "Greenfield Orchard"
+                },
+                "notes": {
+                    "type": "string",
+                    "example": "North-facing slope, drip irrigation installed"
+                },
+                "soilTypeDetails": {
+                    "$ref": "#/definitions/SoilTypeRequest"
                 }
             }
         },

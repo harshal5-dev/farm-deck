@@ -446,6 +446,32 @@ definitions:
     required:
     - fullName
     type: object
+  UpdateZoneRequest:
+    properties:
+      area:
+        example: 12.5
+        type: number
+      areaUnit:
+        example: acres
+        maxLength: 50
+        minLength: 2
+        type: string
+      hydroSystemTypeDetails:
+        $ref: '#/definitions/HydroSystemTypeRequest'
+      name:
+        example: Greenfield Orchard
+        maxLength: 255
+        minLength: 2
+        type: string
+      notes:
+        example: North-facing slope, drip irrigation installed
+        type: string
+      soilTypeDetails:
+        $ref: '#/definitions/SoilTypeRequest'
+    required:
+    - areaUnit
+    - name
+    type: object
   UserProfileResponse:
     properties:
       createdAt:
@@ -1430,6 +1456,54 @@ paths:
       security:
       - CookieAuth: []
       summary: Create a new zone
+      tags:
+      - zone
+  /zones/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates the field (zone) with the given id, scoped to the caller's
+        tenant. Soil zones carry soil type details, hydro zones carry hydroponic system
+        details. Authorization is gated by the fields.manage permission at the route
+        level.
+      parameters:
+      - description: Zone ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Zone update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: zone updated successfully
+          schema:
+            $ref: '#/definitions/APIResponse'
+        "400":
+          description: invalid zone id or validation error
+          schema:
+            $ref: '#/definitions/APIError'
+        "401":
+          description: authentication required
+          schema:
+            $ref: '#/definitions/APIError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/APIError'
+        "500":
+          description: internal server error
+          schema:
+            $ref: '#/definitions/APIError'
+      security:
+      - CookieAuth: []
+      summary: Update a zone
       tags:
       - zone
 schemes:

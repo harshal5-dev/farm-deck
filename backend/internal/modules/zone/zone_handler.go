@@ -59,6 +59,21 @@ func (h *ZoneHandlerImpl) CreateZone(ctx *gin.Context) {
 	response.OK(ctx, "zone created successfully")
 }
 
+// UpdateZone godoc
+// @Summary      Update a zone
+// @Description  Updates the field (zone) with the given id, scoped to the caller's tenant. Soil zones carry soil type details, hydro zones carry hydroponic system details. Authorization is gated by the fields.manage permission at the route level.
+// @Tags         zone
+// @Accept       json
+// @Produce      json
+// @Security     CookieAuth
+// @Param        id path string true "Zone ID"
+// @Param        request body UpdateZoneRequest true "Zone update payload"
+// @Success      200 {object} response.APIResponse "zone updated successfully"
+// @Failure      400 {object} response.APIError "invalid zone id or validation error"
+// @Failure      401 {object} response.APIError "authentication required"
+// @Failure      403 {object} response.APIError "insufficient permissions"
+// @Failure      500 {object} response.APIError "internal server error"
+// @Router       /zones/{id} [put]
 func (h *ZoneHandlerImpl) UpdateZone(ctx *gin.Context) {
 	tenantID, err := ctxutil.GetTenantID(ctx)
 	if err != nil {
@@ -86,7 +101,7 @@ func (h *ZoneHandlerImpl) UpdateZone(ctx *gin.Context) {
 	response.OK(ctx, "zone updated successfully")
 }
 
-// ListZones godoc
+// ListZone godoc
 // @Summary      List tenant fields
 // @Description  Returns the caller's fields with pagination, optional filters and
 // @Description  status counts. Omitted params fall back to defaults; filters are

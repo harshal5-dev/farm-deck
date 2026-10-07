@@ -25,7 +25,8 @@ func HandleError(ctx *gin.Context, err error) {
 
 	case errors.Is(err, domain.ErrInvalidCredentials),
 		errors.Is(err, domain.ErrCredentialNotFound),
-		errors.Is(err, domain.ErrUnauthorized):
+		errors.Is(err, domain.ErrUnauthorized),
+		errors.Is(err, domain.ErrInvalidToken):
 		response.Unauthorized(ctx, messageOf(err))
 
 	case errors.Is(err, domain.ErrRefreshTokenInvalid),
@@ -62,6 +63,7 @@ func messageOf(err error) string {
 		domain.ErrForbidden,
 		domain.ErrUnauthorized,
 		domain.ErrInvalidCredentials,
+		domain.ErrInvalidToken,
 		domain.ErrDuplicateFarmName,
 		domain.ErrDuplicateZoneName,
 	} {

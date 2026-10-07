@@ -99,6 +99,10 @@ func Forbidden(ctx *gin.Context, message string) {
 	Error(ctx, http.StatusForbidden, "FORBIDDEN", message)
 }
 
+func ForbiddenWithDetails(ctx *gin.Context, message string, details any) {
+	ErrorWithDetails(ctx, http.StatusForbidden, "FORBIDDEN", message, details)
+}
+
 func NotFound(ctx *gin.Context, message string) {
 	Error(ctx, http.StatusNotFound, "NOT_FOUND", message)
 }

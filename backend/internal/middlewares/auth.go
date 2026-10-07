@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/harshal5-dev/farm-deck/backend/internal/domain"
 	"github.com/harshal5-dev/farm-deck/backend/internal/httperr"
+	"github.com/harshal5-dev/farm-deck/backend/internal/response"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/ctxutil"
 	"github.com/harshal5-dev/farm-deck/backend/pkg/jwt"
 )
@@ -19,7 +20,7 @@ func AuthMiddleware(cookieTokenName, jwtSecret string) gin.HandlerFunc {
 
 		claims, err := jwt.VerifyToken(tokenString, jwtSecret)
 		if err != nil {
-			httperr.HandleError(ctx, domain.ErrUnauthorized)
+			httperr.HandleError(ctx, domain.ErrInvalidToken)
 			ctx.Abort()
 			return
 		}
@@ -41,7 +42,10 @@ func RequirePermission(perm domain.Permission) gin.HandlerFunc {
 			return
 		}
 		if !domain.HasPermission(role, perm) {
-			httperr.HandleError(ctx, domain.ErrForbidden)
+			response.ForbiddenWithDetails(ctx, domain.ErrForbidden.Error(), gin.H{
+				"required": perm,
+				"role":     role,
+			})
 			ctx.Abort()
 			return
 		}

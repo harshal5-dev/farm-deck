@@ -301,8 +301,8 @@ func TestRequirePermission_ForbiddenBodyIncludesRequiredAndRole(t *testing.T) {
 	if body.Error.Code != "FORBIDDEN" {
 		t.Errorf("code: got %q want FORBIDDEN", body.Error.Code)
 	}
-	if got, ok := body.Error.Details["required"].(string); !ok || got != "billing.manage" {
-		t.Errorf("details.required: got %v want billing.manage", body.Error.Details["required"])
+	if got, ok := body.Error.Details["required"].(string); !ok || got != string(domain.PermManageWorkspace) {
+		t.Errorf("details.required: got %v want %s", body.Error.Details["required"], domain.PermManageWorkspace)
 	}
 	if got, ok := body.Error.Details["role"].(string); !ok || got != "grower" {
 		t.Errorf("details.role: got %v want grower", body.Error.Details["role"])
