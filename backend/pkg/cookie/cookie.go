@@ -39,7 +39,6 @@ func setCookie(ctx *gin.Context, name, value string, ttl time.Duration, cfg Conf
 }
 
 func clearCookie(ctx *gin.Context, name string, cfg Config) {
-	// SetSameSite must run before SetCookie (see setCookie for details).
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie(name, "", -1, "/", cfg.CookieDomain, cfg.CookieSecure, cfg.CookieHttpOnly)
 }
